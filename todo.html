@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+h2 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font-size: 26px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 32px; } h3 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px; } p { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px; } blockquote { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font-size: 21px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 30px; } pre { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5714px; } ul { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5714px; } input { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5714px; } div { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font-size: 13px; font-style: normal; font-variant: normal; line-height: 18.5714px; }
+
+body {
+  margin: 0;
+  min-width: 250px;
+}
+
+/* Include the padding and border in an element's total width and height */
+* {
+  box-sizing: border-box;
+}
+
+/* Remove margins and padding from the list */
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li, p {
+  line-height: 1.75;
+}
+
+/* Style the list items */
+ul li {
+  cursor: pointer;
+  position: relative;
+  padding: 12px 8px 12px 40px;
+  list-style-type: none;
+  background: #eee;
+  font-size: 22px;
+  color: #bbb;
+  transition: 0.2s;
+
+  /* make the list items unselectable */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Set all odd list items to a different color (zebra-stripes) */
+ul li:nth-child(odd) {
+  background: #f9f9f9;
+}
+
+/* Darker background-color on hover */
+ul li:hover {
+  background: #ddd;
+}
+
+/* When clicked on, add a background color and strike out text */
+ul li.checked {
+  color: #111;
+  text-decoration: line-through;
+}
+
+/* Add a "checked" mark when clicked on */
+ul li.checked::before {
+  content: '';
+  position: absolute;
+  border-color: #8b8;
+  border-style: solid;
+  border-width: 0 2px 2px 0;
+  top: 10px;
+  left: 16px;
+  transform: rotate(45deg);
+  height: 25px;
+  width: 10px;
+}
+
+/* Style the close button */
+.close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 12px 16px 12px 16px;
+}
+
+.close:hover {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Style the header */
+.header {
+  background-color: #3498DB;
+  padding: 20px 20px;
+  color: white;
+  text-align: center;
+}
+
+/* Clear floats after the header */
+.header:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Style the footer */
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #3498DB;
+  padding: 32px 20px;
+  color: white;
+  text-align: center;
+}
+
+/* Style the input */
+input {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  width: 100%;
+  padding: 12px;
+  float: left;
+  font-size: 20px;
+}
+
+/* Style the "Add" button */
+.addBtn {
+  padding: 10px;
+  width: 50%;
+  background: #D5D8DC;
+  color: #000;
+  float: center;
+  text-align: center;
+  font-size: 24px;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 3px;
+
+  /* make the button unselectable */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.addBtn:hover {
+  background-color: #1ABC9C;
+}
+</style>
+</head>
+<body>
+
+<div id="myDIV1" class="header">
+  <h2 style="margin:3px">To Do Picker</h2>
+  <input type="text" id="myInput">
+</div>
+
+<ul id="myUL">
+</ul>
+
+<div id="myDIV2" class="footer">
+  <span onclick="pickRandom()" class="addBtn">&nbsp;Random&nbsp;</span>
+</div>
+
+<script>
+
+// Get the input field
+var input = document.getElementById("myInput");
+
+// Execute a function when the user releases a key on the keyboard
+input.addEventListener("keyup", function(event) {
+  // Number 13 is the "Enter" key on the keyboard
+  if (event.keyCode === 13) {
+    // Cancel the default action, if needed
+    event.preventDefault();
+    // Trigger the button element with a click
+    newElement();
+  }
+});
+
+// Create a "close" button and append it to each list item
+var myNodelist = document.getElementsByTagName("LI");
+var i;
+for (i = 0; i < myNodelist.length; i++) {
+  var span = document.createElement("SPAN");
+  var txt = document.createTextNode("\u00D7");
+  span.className = "close";
+  span.appendChild(txt);
+  myNodelist[i].appendChild(span);
+}
+
+// Click on a close button to hide the current list item
+var close = document.getElementsByClassName("close");
+var i;
+for (i = 0; i < close.length; i++) {
+  close[i].onclick = function() {
+    var div = this.parentElement;
+    div.style.display = "none";
+  }
+}
+
+// Add a "checked" symbol when clicking on a list item
+var list = document.querySelector('ul');
+list.addEventListener('click', function(ev) {
+  if (ev.target.tagName === 'LI') {
+    ev.target.classList.toggle('checked');
+    ev.target.style.color = "#bbb";
+    ev.target.style.fontWeight = "normal";
+  }
+}, false);
+
+// Create a new list item when clicking on the "Add" button
+function newElement() {
+  var li = document.createElement("li");
+  var inputValue = document.getElementById("myInput").value;
+  var t = document.createTextNode(inputValue);
+  li.appendChild(t);
+  if (inputValue === '') {
+    alert("You must write something!");
+  } else {
+    document.getElementById("myUL").appendChild(li);
+  }
+  document.getElementById("myInput").value = "";
+
+  var span = document.createElement("SPAN");
+  var txt = document.createTextNode("\u00D7");
+  span.className = "close";
+  span.appendChild(txt);
+  li.appendChild(span);
+
+  for (i = 0; i < close.length; i++) {
+    close[i].onclick = function() {
+      var div = this.parentElement;
+      div.style.display = "none";
+    }
+  }
+}
+
+function getRndInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
+function pickRandom() {
+  var ul = document.getElementById("myUL");
+  var items = ul.getElementsByTagName("li");
+  var r;
+  var success=0;
+  while (!success) {
+    r = getRndInteger(0, items.length-1);
+    for (var i = 0; i < items.length; ++i) {
+      var legit = (items[i].classList.item(0) !== "checked") && 
+                  (items[i].style.display !== "none");
+	    if (i === r && legit) {
+	      items[i].style.color = "#000";
+	      items[i].style.fontWeight = "bold";
+	      success=1;
+	    } else if (legit) {
+		    items[i].style.color = "#bbb";
+		    items[i].style.fontWeight = "normal";
+	    }
+    }
+  }
+}
+
+</script>
+
+</body>
+</html>
