@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* =====================
+       FONT & BASIC STYLES
+       ===================== */
+    h1, h2, h3, p, blockquote, pre, ul, input, div, textarea {
+      font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+      font-style: normal;
+      font-variant: normal;
+      font-weight: 400;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 32px;
+    }
+    h2 {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 32px;
+    }
+    h3 {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 15.4px;
+    }
+    p {
+      font-size: 14px;
+      line-height: 20px;
+    }
+    ul {
+      font-size: 13px;
+      line-height: 18.5714px;
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    li {
+      line-height: 1.75;
+    }
+    pre {
+      font-size: 13px;
+      line-height: 18.5714px;
+    }
+    input, textarea {
+      font-size: 16px;
+      line-height: 24px;
+      border: none;
+      border-radius: 0;
+    }
+
+    /* Body & universal box-sizing */
+    body {
+      margin: 0;
+      min-width: 250px;
+      box-sizing: border-box;
+      background: #f9f9f9;
+      font-size: 18px; /* Larger base font */
+    }
+    * {
+      box-sizing: inherit;
+    }
+
+    /* =====================
+       HEADER STYLES
+       ===================== */
+    .header {
+      background-color: #3498DB;
+      padding: 20px;
+      color: white;
+      text-align: center;
+    }
+
+    /* =====================
+       FOOTER STYLES
+       ===================== */
+    .footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: #3498DB;
+      padding: 32px 20px;
+      color: white;
+      text-align: center;
+    }
+
+    /* =====================
+       BUTTON STYLES
+       ===================== */
+    button, .addBtn {
+      padding: 16px;
+      background: #D5D8DC;
+      color: #000;
+      text-align: center;
+      font-size: 22px; /* Larger font for easy clicking */
+      cursor: pointer;
+      transition: 0.3s;
+      border-radius: 3px;
+      border: none;
+      font-weight: 600;
+      margin: 10px 0;
+    }
+    button:hover, .addBtn:hover {
+      background-color: #1ABC9C;
+      color: #fff;
+    }
+
+    /* =====================
+       CUSTOM CONTAINERS
+       ===================== */
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .input-section {
+      margin-bottom: 20px;
+    }
+
+    /* Style the textarea for item input (4x larger) */
+    textarea {
+      width: 100%;
+      height: 400px; /* Increased from 100px to 400px */
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 16px;
+    }
+
+    /* Pair ranking area */
+    #pairSection {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    /* Progress bar styling */
+    #progressBar {
+      width: 100%;
+      height: 25px; /* Slightly taller bar */
+      margin: 10px 0 20px 0;
+    }
+
+    #option1Button, #option2Button {
+      margin: 15px;
+      font-size: 22px;
+      min-width: 120px;
+    }
+
+    /* Results area */
+    #resultsList {
+      margin-top: 10px;
+      list-style: none;
+      padding-left: 0;
+    }
+    #resultsList li {
+      background: #eee;
+      padding: 8px 10px;
+      margin: 5px 0;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+    }
+    #resultsList li:nth-child(odd) {
+      background: #f2f2f2;
+    }
+    .score {
+      font-weight: bold;
+      color: #333;
+      margin-left: auto; /* push score to the right */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Only One Picker</h1>
+  </div>
+
+  <!-- Main container -->
+  <div class="container">
+    <!-- 1) Input section for items -->
+    <div id="inputSection" class="input-section">
+      <h3>Enter items (one per line):</h3>
+      <!-- No placeholder text -->
+      <textarea id="itemsTextarea"></textarea>
+      <button id="startButton" class="addBtn">Start Ranking</button>
+    </div>
+
+    <!-- 2) Pair comparison section -->
+    <div id="pairSection" style="display:none;">
+      <!-- Progress bar instead of "Pair X of Y" -->
+      <progress id="progressBar" value="0" max="1"></progress>
+      
+      <!-- Buttons for pair choice -->
+      <button id="option1Button"></button>
+      <button id="option2Button"></button>
+    </div>
+
+    <!-- 3) Results section -->
+    <div id="resultsSection" style="display:none;">
+      <h2>Results</h2>
+      <ul id="resultsList"></ul>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>Powered by AI</p>
+  </div>
+
+  <script>
+    // ============ Global Variables ============
+    let items = [];
+    let pairs = [];
+    let currentPairIndex = 0;
+    let scores = {}; // { item: numberOfWins }
+
+    // Get HTML elements
+    const itemsTextarea = document.getElementById('itemsTextarea');
+    const startButton = document.getElementById('startButton');
+    const pairSection = document.getElementById('pairSection');
+    const option1Button = document.getElementById('option1Button');
+    const option2Button = document.getElementById('option2Button');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsList = document.getElementById('resultsList');
+    const inputSection = document.getElementById('inputSection');
+    const progressBar = document.getElementById('progressBar');
+
+    // ============ Helper Functions ============
+    // Generate all unique pairs
+    function generatePairs(array) {
+      const result = [];
+      for (let i = 0; i < array.length; i++) {
+        for (let j = i + 1; j < array.length; j++) {
+          result.push([array[i], array[j]]);
+        }
+      }
+      return result;
+    }
+
+    // Shuffle an array in-place (Fisher–Yates)
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Display the next pair or show results if done
+    function showNextPair() {
+      // Update progress bar
+      progressBar.value = currentPairIndex; 
+      
+      // If we've ranked all pairs, show results
+      if (currentPairIndex >= pairs.length) {
+        showResults();
+        return;
+      }
+      // Display next pair
+      const [itemA, itemB] = pairs[currentPairIndex];
+      option1Button.textContent = itemA;
+      option2Button.textContent = itemB;
+    }
+
+    // Handle choice and move to next pair
+    function handleChoice(chosenItem) {
+      scores[chosenItem]++;
+      currentPairIndex++;
+      showNextPair();
+    }
+
+    // Display final results
+    function showResults() {
+      pairSection.style.display = 'none';
+      resultsSection.style.display = 'block';
+
+      // Sort by descending score
+      const sortedItems = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+      
+      // Build result list with numbering
+      resultsList.innerHTML = '';
+      sortedItems.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${item}`;
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.classList.add('score');
+        scoreSpan.textContent = `Score: ${scores[item]}`;
+        
+        li.appendChild(scoreSpan);
+        resultsList.appendChild(li);
+      });
+    }
+
+    // ============ Event Listeners ============
+
+    // Start Ranking button
+    startButton.addEventListener('click', () => {
+      // Get items from textarea
+      items = itemsTextarea.value
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line);
+
+      if (items.length < 2) {
+        alert('Please enter at least 2 items.');
+        return;
+      }
+
+      // Initialize scores
+      scores = {};
+      items.forEach(item => {
+        scores[item] = 0;
+      });
+
+      // Generate and shuffle pairs
+      pairs = generatePairs(items);
+      shuffle(pairs);
+
+      // Reset progress
+      currentPairIndex = 0;
+      progressBar.max = pairs.length;
+      progressBar.value = 0;
+
+      // Hide input section, show pair section
+      inputSection.style.display = 'none';
+      pairSection.style.display = 'block';
+
+      // Display the first pair
+      showNextPair();
+    });
+
+    // Option button handlers
+    option1Button.addEventListener('click', () => {
+      const [itemA] = pairs[currentPairIndex];
+      handleChoice(itemA);
+    });
+    option2Button.addEventListener('click', () => {
+      const [, itemB] = pairs[currentPairIndex];
+      handleChoice(itemB);
+    });
+  </script>
+</body>
+</html>
