@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="refresh" content="60">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Tangerine">
+
+<style>
+
+div {
+  margin-left: 80px;
+  margin-right: 80px;
+  margin-top: 80px;
+  font-size: 105px;
+}
+
+
+@keyframes bgcolor {
+/* GLVis pastel colormap
+   cat ~/tmp/zzz99.txt | awk 'BEGIN {j=0} { print 100*1.0/255*j++,"%",$2,$3,$4,int(255*$5),$6,int(255*$7),$8,int(255*$9),$10,$11}' > ~/tmp/zzz98.txt */
+0% { background-color: rgb( 254 , 190 , 190 ); }
+0.392157% { background-color: rgb( 254 , 191 , 190 ); }
+0.784314% { background-color: rgb( 254 , 193 , 190 ); }
+1.17647% { background-color: rgb( 254 , 194 , 190 ); }
+1.56863% { background-color: rgb( 254 , 196 , 190 ); }
+1.96078% { background-color: rgb( 254 , 197 , 190 ); }
+2.35294% { background-color: rgb( 254 , 199 , 190 ); }
+2.7451% { background-color: rgb( 254 , 200 , 190 ); }
+3.13725% { background-color: rgb( 254 , 202 , 190 ); }
+3.52941% { background-color: rgb( 254 , 203 , 190 ); }
+3.92157% { background-color: rgb( 254 , 205 , 190 ); }
+4.31373% { background-color: rgb( 254 , 206 , 190 ); }
+4.70588% { background-color: rgb( 254 , 208 , 190 ); }
+5.09804% { background-color: rgb( 254 , 209 , 190 ); }
+5.4902% { background-color: rgb( 254 , 211 , 190 ); }
+5.88235% { background-color: rgb( 254 , 212 , 190 ); }
+6.27451% { background-color: rgb( 254 , 214 , 190 ); }
+6.66667% { background-color: rgb( 254 , 215 , 190 ); }
+7.05882% { background-color: rgb( 254 , 217 , 190 ); }
+7.45098% { background-color: rgb( 254 , 218 , 190 ); }
+7.84314% { background-color: rgb( 254 , 220 , 190 ); }
+8.23529% { background-color: rgb( 254 , 221 , 190 ); }
+8.62745% { background-color: rgb( 254 , 223 , 190 ); }
+9.01961% { background-color: rgb( 254 , 224 , 190 ); }
+9.41176% { background-color: rgb( 254 , 226 , 190 ); }
+9.80392% { background-color: rgb( 254 , 227 , 190 ); }
+10.1961% { background-color: rgb( 254 , 229 , 190 ); }
+10.5882% { background-color: rgb( 254 , 230 , 190 ); }
+10.9804% { background-color: rgb( 254 , 232 , 190 ); }
+11.3725% { background-color: rgb( 254 , 233 , 190 ); }
+11.7647% { background-color: rgb( 254 , 235 , 190 ); }
+12.1569% { background-color: rgb( 254 , 236 , 190 ); }
+12.549% { background-color: rgb( 254 , 238 , 190 ); }
+12.9412% { background-color: rgb( 254 , 239 , 190 ); }
+13.3333% { background-color: rgb( 254 , 241 , 190 ); }
+13.7255% { background-color: rgb( 254 , 242 , 190 ); }
+14.1176% { background-color: rgb( 254 , 244 , 190 ); }
+14.5098% { background-color: rgb( 254 , 245 , 190 ); }
+14.902% { background-color: rgb( 254 , 247 , 190 ); }
+15.2941% { background-color: rgb( 254 , 248 , 190 ); }
+15.6863% { background-color: rgb( 254 , 250 , 190 ); }
+16.0784% { background-color: rgb( 254 , 251 , 190 ); }
+16.4706% { background-color: rgb( 254 , 253 , 190 ); }
+16.8627% { background-color: rgb( 253 , 254 , 190 ); }
+17.2549% { background-color: rgb( 251 , 254 , 190 ); }
+17.6471% { background-color: rgb( 250 , 254 , 190 ); }
+18.0392% { background-color: rgb( 248 , 254 , 190 ); }
+18.4314% { background-color: rgb( 247 , 254 , 190 ); }
+18.8235% { background-color: rgb( 245 , 254 , 190 ); }
+19.2157% { background-color: rgb( 244 , 254 , 190 ); }
+19.6078% { background-color: rgb( 242 , 254 , 190 ); }
+20% { background-color: rgb( 241 , 254 , 190 ); }
+20.3922% { background-color: rgb( 239 , 254 , 190 ); }
+20.7843% { background-color: rgb( 238 , 254 , 190 ); }
+21.1765% { background-color: rgb( 236 , 254 , 190 ); }
+21.5686% { background-color: rgb( 235 , 254 , 190 ); }
+21.9608% { background-color: rgb( 233 , 254 , 190 ); }
+22.3529% { background-color: rgb( 232 , 254 , 190 ); }
+22.7451% { background-color: rgb( 230 , 254 , 190 ); }
+23.1373% { background-color: rgb( 229 , 254 , 190 ); }
+23.5294% { background-color: rgb( 227 , 254 , 190 ); }
+23.9216% { background-color: rgb( 226 , 254 , 190 ); }
+24.3137% { background-color: rgb( 224 , 254 , 190 ); }
+24.7059% { background-color: rgb( 223 , 254 , 190 ); }
+25.098% { background-color: rgb( 221 , 254 , 190 ); }
+25.4902% { background-color: rgb( 220 , 254 , 190 ); }
+25.8824% { background-color: rgb( 218 , 254 , 190 ); }
+26.2745% { background-color: rgb( 217 , 254 , 190 ); }
+26.6667% { background-color: rgb( 215 , 254 , 190 ); }
+27.0588% { background-color: rgb( 214 , 254 , 190 ); }
+27.451% { background-color: rgb( 212 , 254 , 190 ); }
+27.8431% { background-color: rgb( 211 , 254 , 190 ); }
+28.2353% { background-color: rgb( 209 , 254 , 190 ); }
+28.6275% { background-color: rgb( 208 , 254 , 190 ); }
+29.0196% { background-color: rgb( 206 , 254 , 190 ); }
+29.4118% { background-color: rgb( 205 , 254 , 190 ); }
+29.8039% { background-color: rgb( 203 , 254 , 190 ); }
+30.1961% { background-color: rgb( 202 , 254 , 190 ); }
+30.5882% { background-color: rgb( 200 , 254 , 190 ); }
+30.9804% { background-color: rgb( 199 , 254 , 190 ); }
+31.3725% { background-color: rgb( 197 , 254 , 190 ); }
+31.7647% { background-color: rgb( 196 , 254 , 190 ); }
+32.1569% { background-color: rgb( 194 , 254 , 190 ); }
+32.549% { background-color: rgb( 193 , 254 , 190 ); }
+32.9412% { background-color: rgb( 191 , 254 , 190 ); }
+33.3333% { background-color: rgb( 190 , 254 , 190 ); }
+33.7255% { background-color: rgb( 190 , 254 , 191 ); }
+34.1176% { background-color: rgb( 190 , 254 , 193 ); }
+34.5098% { background-color: rgb( 190 , 254 , 194 ); }
+34.902% { background-color: rgb( 190 , 254 , 196 ); }
+35.2941% { background-color: rgb( 190 , 254 , 197 ); }
+35.6863% { background-color: rgb( 190 , 254 , 199 ); }
+36.0784% { background-color: rgb( 190 , 254 , 200 ); }
+36.4706% { background-color: rgb( 190 , 254 , 202 ); }
+36.8627% { background-color: rgb( 190 , 254 , 203 ); }
+37.2549% { background-color: rgb( 190 , 254 , 205 ); }
+37.6471% { background-color: rgb( 190 , 254 , 206 ); }
+38.0392% { background-color: rgb( 190 , 254 , 208 ); }
+38.4314% { background-color: rgb( 190 , 254 , 209 ); }
+38.8235% { background-color: rgb( 190 , 254 , 211 ); }
+39.2157% { background-color: rgb( 190 , 254 , 212 ); }
+39.6078% { background-color: rgb( 190 , 254 , 214 ); }
+40% { background-color: rgb( 190 , 254 , 215 ); }
+40.3922% { background-color: rgb( 190 , 254 , 217 ); }
+40.7843% { background-color: rgb( 190 , 254 , 218 ); }
+41.1765% { background-color: rgb( 190 , 254 , 220 ); }
+41.5686% { background-color: rgb( 190 , 254 , 221 ); }
+41.9608% { background-color: rgb( 190 , 254 , 223 ); }
+42.3529% { background-color: rgb( 190 , 254 , 224 ); }
+42.7451% { background-color: rgb( 190 , 254 , 226 ); }
+43.1373% { background-color: rgb( 190 , 254 , 227 ); }
+43.5294% { background-color: rgb( 190 , 254 , 229 ); }
+43.9216% { background-color: rgb( 190 , 254 , 230 ); }
+44.3137% { background-color: rgb( 190 , 254 , 232 ); }
+44.7059% { background-color: rgb( 190 , 254 , 233 ); }
+45.098% { background-color: rgb( 190 , 254 , 235 ); }
+45.4902% { background-color: rgb( 190 , 254 , 236 ); }
+45.8824% { background-color: rgb( 190 , 254 , 238 ); }
+46.2745% { background-color: rgb( 190 , 254 , 239 ); }
+46.6667% { background-color: rgb( 190 , 254 , 241 ); }
+47.0588% { background-color: rgb( 190 , 254 , 242 ); }
+47.451% { background-color: rgb( 190 , 254 , 244 ); }
+47.8431% { background-color: rgb( 190 , 254 , 245 ); }
+48.2353% { background-color: rgb( 190 , 254 , 247 ); }
+48.6275% { background-color: rgb( 190 , 254 , 248 ); }
+49.0196% { background-color: rgb( 190 , 254 , 250 ); }
+49.4118% { background-color: rgb( 190 , 254 , 251 ); }
+49.8039% { background-color: rgb( 190 , 254 , 253 ); }
+50.1961% { background-color: rgb( 190 , 253 , 254 ); }
+50.5882% { background-color: rgb( 190 , 251 , 254 ); }
+50.9804% { background-color: rgb( 190 , 250 , 254 ); }
+51.3725% { background-color: rgb( 190 , 248 , 254 ); }
+51.7647% { background-color: rgb( 190 , 247 , 254 ); }
+52.1569% { background-color: rgb( 190 , 245 , 254 ); }
+52.549% { background-color: rgb( 190 , 244 , 254 ); }
+52.9412% { background-color: rgb( 190 , 242 , 254 ); }
+53.3333% { background-color: rgb( 190 , 241 , 254 ); }
+53.7255% { background-color: rgb( 190 , 239 , 254 ); }
+54.1176% { background-color: rgb( 190 , 238 , 254 ); }
+54.5098% { background-color: rgb( 190 , 236 , 254 ); }
+54.902% { background-color: rgb( 190 , 235 , 254 ); }
+55.2941% { background-color: rgb( 190 , 233 , 254 ); }
+55.6863% { background-color: rgb( 190 , 232 , 254 ); }
+56.0784% { background-color: rgb( 190 , 230 , 254 ); }
+56.4706% { background-color: rgb( 190 , 229 , 254 ); }
+56.8627% { background-color: rgb( 190 , 227 , 254 ); }
+57.2549% { background-color: rgb( 190 , 226 , 254 ); }
+57.6471% { background-color: rgb( 190 , 224 , 254 ); }
+58.0392% { background-color: rgb( 190 , 223 , 254 ); }
+58.4314% { background-color: rgb( 190 , 221 , 254 ); }
+58.8235% { background-color: rgb( 190 , 220 , 254 ); }
+59.2157% { background-color: rgb( 190 , 218 , 254 ); }
+59.6078% { background-color: rgb( 190 , 217 , 254 ); }
+60% { background-color: rgb( 190 , 215 , 254 ); }
+60.3922% { background-color: rgb( 190 , 214 , 254 ); }
+60.7843% { background-color: rgb( 190 , 212 , 254 ); }
+61.1765% { background-color: rgb( 190 , 211 , 254 ); }
+61.5686% { background-color: rgb( 190 , 209 , 254 ); }
+61.9608% { background-color: rgb( 190 , 208 , 254 ); }
+62.3529% { background-color: rgb( 190 , 206 , 254 ); }
+62.7451% { background-color: rgb( 190 , 205 , 254 ); }
+63.1373% { background-color: rgb( 190 , 203 , 254 ); }
+63.5294% { background-color: rgb( 190 , 202 , 254 ); }
+63.9216% { background-color: rgb( 190 , 200 , 254 ); }
+64.3137% { background-color: rgb( 190 , 199 , 254 ); }
+64.7059% { background-color: rgb( 190 , 197 , 254 ); }
+65.098% { background-color: rgb( 190 , 196 , 254 ); }
+65.4902% { background-color: rgb( 190 , 194 , 254 ); }
+65.8824% { background-color: rgb( 190 , 193 , 254 ); }
+66.2745% { background-color: rgb( 190 , 191 , 254 ); }
+66.6667% { background-color: rgb( 190 , 190 , 254 ); }
+67.0588% { background-color: rgb( 191 , 190 , 254 ); }
+67.451% { background-color: rgb( 193 , 190 , 254 ); }
+67.8431% { background-color: rgb( 194 , 190 , 254 ); }
+68.2353% { background-color: rgb( 196 , 190 , 254 ); }
+68.6275% { background-color: rgb( 197 , 190 , 254 ); }
+69.0196% { background-color: rgb( 199 , 190 , 254 ); }
+69.4118% { background-color: rgb( 200 , 190 , 254 ); }
+69.8039% { background-color: rgb( 202 , 190 , 254 ); }
+70.1961% { background-color: rgb( 203 , 190 , 254 ); }
+70.5882% { background-color: rgb( 205 , 190 , 254 ); }
+70.9804% { background-color: rgb( 206 , 190 , 254 ); }
+71.3725% { background-color: rgb( 208 , 190 , 254 ); }
+71.7647% { background-color: rgb( 209 , 190 , 254 ); }
+72.1569% { background-color: rgb( 211 , 190 , 254 ); }
+72.549% { background-color: rgb( 212 , 190 , 254 ); }
+72.9412% { background-color: rgb( 214 , 190 , 254 ); }
+73.3333% { background-color: rgb( 215 , 190 , 254 ); }
+73.7255% { background-color: rgb( 217 , 190 , 254 ); }
+74.1176% { background-color: rgb( 218 , 190 , 254 ); }
+74.5098% { background-color: rgb( 220 , 190 , 254 ); }
+74.902% { background-color: rgb( 221 , 190 , 254 ); }
+75.2941% { background-color: rgb( 223 , 190 , 254 ); }
+75.6863% { background-color: rgb( 224 , 190 , 254 ); }
+76.0784% { background-color: rgb( 226 , 190 , 254 ); }
+76.4706% { background-color: rgb( 227 , 190 , 254 ); }
+76.8627% { background-color: rgb( 229 , 190 , 254 ); }
+77.2549% { background-color: rgb( 230 , 190 , 254 ); }
+77.6471% { background-color: rgb( 232 , 190 , 254 ); }
+78.0392% { background-color: rgb( 233 , 190 , 254 ); }
+78.4314% { background-color: rgb( 235 , 190 , 254 ); }
+78.8235% { background-color: rgb( 236 , 190 , 254 ); }
+79.2157% { background-color: rgb( 238 , 190 , 254 ); }
+79.6078% { background-color: rgb( 239 , 190 , 254 ); }
+80% { background-color: rgb( 241 , 190 , 254 ); }
+80.3922% { background-color: rgb( 242 , 190 , 254 ); }
+80.7843% { background-color: rgb( 244 , 190 , 254 ); }
+81.1765% { background-color: rgb( 245 , 190 , 254 ); }
+81.5686% { background-color: rgb( 247 , 190 , 254 ); }
+81.9608% { background-color: rgb( 248 , 190 , 254 ); }
+82.3529% { background-color: rgb( 250 , 190 , 254 ); }
+82.7451% { background-color: rgb( 251 , 190 , 254 ); }
+83.1373% { background-color: rgb( 253 , 190 , 254 ); }
+83.5294% { background-color: rgb( 254 , 190 , 253 ); }
+83.9216% { background-color: rgb( 254 , 190 , 251 ); }
+84.3137% { background-color: rgb( 254 , 190 , 250 ); }
+84.7059% { background-color: rgb( 254 , 190 , 248 ); }
+85.098% { background-color: rgb( 254 , 190 , 247 ); }
+85.4902% { background-color: rgb( 254 , 190 , 245 ); }
+85.8824% { background-color: rgb( 254 , 190 , 244 ); }
+86.2745% { background-color: rgb( 254 , 190 , 242 ); }
+86.6667% { background-color: rgb( 254 , 190 , 241 ); }
+87.0588% { background-color: rgb( 254 , 190 , 239 ); }
+87.451% { background-color: rgb( 254 , 190 , 238 ); }
+87.8431% { background-color: rgb( 254 , 190 , 236 ); }
+88.2353% { background-color: rgb( 254 , 190 , 235 ); }
+88.6275% { background-color: rgb( 254 , 190 , 233 ); }
+89.0196% { background-color: rgb( 254 , 190 , 232 ); }
+89.4118% { background-color: rgb( 254 , 190 , 230 ); }
+89.8039% { background-color: rgb( 254 , 190 , 229 ); }
+90.1961% { background-color: rgb( 254 , 190 , 227 ); }
+90.5882% { background-color: rgb( 254 , 190 , 226 ); }
+90.9804% { background-color: rgb( 254 , 190 , 224 ); }
+91.3725% { background-color: rgb( 254 , 190 , 223 ); }
+91.7647% { background-color: rgb( 254 , 190 , 221 ); }
+92.1569% { background-color: rgb( 254 , 190 , 220 ); }
+92.549% { background-color: rgb( 254 , 190 , 218 ); }
+92.9412% { background-color: rgb( 254 , 190 , 217 ); }
+93.3333% { background-color: rgb( 254 , 190 , 215 ); }
+93.7255% { background-color: rgb( 254 , 190 , 214 ); }
+94.1176% { background-color: rgb( 254 , 190 , 212 ); }
+94.5098% { background-color: rgb( 254 , 190 , 211 ); }
+94.902% { background-color: rgb( 254 , 190 , 209 ); }
+95.2941% { background-color: rgb( 254 , 190 , 208 ); }
+95.6863% { background-color: rgb( 254 , 190 , 206 ); }
+96.0784% { background-color: rgb( 254 , 190 , 205 ); }
+96.4706% { background-color: rgb( 254 , 190 , 203 ); }
+96.8627% { background-color: rgb( 254 , 190 , 202 ); }
+97.2549% { background-color: rgb( 254 , 190 , 200 ); }
+97.6471% { background-color: rgb( 254 , 190 , 199 ); }
+98.0392% { background-color: rgb( 254 , 190 , 197 ); }
+98.4314% { background-color: rgb( 254 , 190 , 196 ); }
+98.8235% { background-color: rgb( 254 , 190 , 194 ); }
+99.2157% { background-color: rgb( 254 , 190 , 193 ); }
+99.6078% { background-color: rgb( 254 , 190 , 191 ); }
+100% { background-color: rgb( 254 , 190 , 190 ); }
+
+     /*
+      0% { background-color: #ADBFFF }
+     20% { background-color: #BEBDF0 }
+     40% { background-color: #ACF7FE }
+     80% { background-color: #BEF3FD }
+    100% { background-color: #A0DEFD }
+    */
+}
+
+body {
+    -webkit-animation: bgcolor 40s infinite;
+    animation: bgcolor 20s infinite;
+    -webkit-animation-direction: alternate;
+    animation-direction: alternate;
+}
+
+.bottomright {
+  position: absolute;
+  bottom: 0px;
+  right:  -75px;
+  font-size: 18px;
+}
+
+</style>
+
+</head>
+<body>
+
+<center>
+<div id="quoteDisplay" style="font:105px Asar,serif;">
+<!-- The quote is displayed here -->
+</div>
+</center>
+
+<div id="fontName" class="bottomright">Bottom Right</div>
+
+<script>
+
+var quotes = [
+  'When negotiating, don\'t aim for a bigger piece of the pie; aim to create a bigger pie <br><br>Kevin Kelly',
+  'Pay attention to what you pay attention to <br><br>Kevin Kelly',
+  'To get your message across, follow this formula used by ad writers everywhere: simplify, simplify, simplify, then exaggerate <br><br>Kevin Kelly',
+  'Worry is ineffective. It is certain that 99% of the stuff you are anxious about won\ happen <br><br>Kevin Kelly',
+  'Trust is earned in drops and lost in buckets <br><br>Kevin Kelly',
+  'Speak confidently as if you are right, but listen carefully as if you are wrong <br><br>Kevin Kelly',
+  'The consistency of your endeavors is much more important than the quantity. Nothing beats small things done every day. <br><br>Kevin Kelly',
+  'Forgiveness is accepting the apology you will never get <br><br>Kevin Kelly',
+  'When crises strike, don\'t waste them. No problems, no progress <br><br>Kevin Kelly',
+  'Separate the processes of creating from improving. You can\'t write and edit at the same time. If you do, the editor stops the creator. While you invent, don\'t select. While you write the first draft, don\'t reflect. At the start, the creator mind must be unleashed from judgment. <br><br>Kevin Kelly',
+  'You don\'t have to attend every argument you are invited to <br><br>Kevin Kelly',
+  'Don\'t measure your life with someone else\'s ruler <br><br>Kevin Kelly',
+  'We are the US Olympic team in finite elements <br><br>Tzanio',
+  'I\'m picking up what you are putting down / I\'m feeling what you\'re dealing / I\'m smelling what you\'re stepping in <br><br>NotebookLM',
+  'It is appropriate for the KING of the MFEM empire to have a beard. <br><br>Misha Shashkov',
+  'People want more and more. <br><br>Freed from desire song',
+  'Adding manpower to a late software project makes it later. <br><br>Mythical Man-Month',
+  'Software tasks schedule: 1/3 planning + 1/6 coding + 1/2 testing. <br><br>Mythical Man-Month',
+  'Without such elements baked in, self-fooling becomes imminent. <br><br>Bedros Afeyan',
+  'Rigid systems break. If you want to be strong, you need to be flexible. <br><br>Anonymous',
+  'Approach the world with curiosity instead of judgement. <br><br>Jeff Hittinger',
+  'Be like a clear mountain string, when others through dirt at you, just wash it away and stay clear. <br><br>Marcus Aurelius',
+  'We love ourselves more than other people, but care more about their opinions than our own. <br><br>Marcus Aurelius',
+  'When you get too comfortable, move on. <br><br>Jay Leno',
+  'Don\'t be a victim. The moment you place blame somewhere, you undermine your resolve to change anything. <br><br>Joseph Broosky',
+  'Choose glory over fame. Do things you will want to brag about. <br><br>Rachel Maddow',
+  'It\'s okay to make plans for the future but do it in pencil. <br><br>Bon Jovi',
+  'Per aspera ad astra (through adversity to the stars). <br><br>old Latin phrase',
+  'The best way to predict the future is to create it. <br><br>Kim Budil',
+  'Ex unitate vires (syedinenieto pravi silata). <br><br>National moto of Bulgaria',
+  'You are not smart if you don\'t work with people smarter than you. <br><br>Tzanio',
+  'Generate your own momentum. <br><br>Tzanio',
+  'Intelligent people are full of doubts, while the stupid ones are full of confidence. <br><br>Charles Bukowski',
+  'People run from rain but sit in bathtubs full of water. <br><br>Charles Bukowski',
+  'An intellectual says a simple thing in a hard way. An artist says a hard thing in a simple way. <br><br>Charles Bukowski',
+  'Life is suffering, so choose something worth suffering for. <br><br>Graham Weaver',
+  'People are like magnets: they either attract, or repulse other people. <br><br>Tzanio',
+  'Understand, don\'t memorize. <br><br>Richard Feynman',
+  'Hardware is getting FLOPpier and FLOPpier. <br><br>Jeremy',
+  'I am not going to work, but I am going to work. <br><br>Tzanio',
+  'Here is how to have a good day: do good things. <br><br>Daily Stoic',
+  'Confidence without attitude. <br><br>Haas Building, UC Berkeley',
+  'You got to lose to know how to win. <br><br>Aerosmith (Dream On)',
+  'Projects grow at about 1 person per year. <br><br>Daniel Utt (from IPAM workshop)',
+  'Take it Easy, I\'ll take it any way I can get it. <br><br>random Blackhawk guy',
+  'Be a warrior, not a worrier. <br><br>back of a truck',
+  'You cannot get smart people to work extremely hard just for money. <br><br>Kevin Kelly',
+  'Don\'t ever work for someone you don\'t want to become. <br><br>Kevin Kelly',
+  'We tend to overestimate what we can do in a day, and underestimate what we can achieve in a decade. <br><br>Kevin Kelly',
+  'Whenever there is an argument between two sides, find the third side. <br><br>Kevin Kelly',
+  'Don\'t believe everything you think you believe. <br><br>Kevin Kelly',
+  'Predicting the future is easy… getting it right is the hard part. <br><br>Unknown',
+  'Your allegiance should be first to people, second to projects, third to organizations and institutions. <br><br>Doug Kothe',
+  'And the turtles, of course... all the turtles are free, as turtles and, maybe, all creatures should be. <br><br>Dr. Seuss',
+  'For it is in giving that we receive. <br><br>St. Francis',
+  'I just built the car, I don\'t drive it on the wrong side of the highway. <br><br>Autotune creator',
+  'There are about 15 bugs in 1000 lines of code. 75% of a developer\'s time is spent on debugging. <br><br>Code Complete book',
+  'The creation and suppression of strategic surprise. <br><br>DARPA mission',
+  'Don\'t wrap up too much of your identity in your work. <br><br>R. Rieben',
+  'And what should I do now? You will have to figure it out and find your way like the rest of us. That\'s what it means to be free. <br><br>I Robot',
+  'By necessity a theory is incomplete, it oversimplifies. But in doing so it helps us understand. <br><br>Angela Duckworth',
+  'In most communications it is more important to be clear than precise. <br><br>Tzanio',
+  'This is not immensely pleasant. <br><br>Andreas Kloeckner',
+  'Locally correct, but globally wrong (as M.C. Escher). <br><br>Tzanio',
+  'Do not worry what may happen, just focus on what needs to be done. <br><br>The Village',
+  'Crisis = Danger + Opportunity. <br><br>Chinese word for "crisis"',
+  'Just like with weight loss, do not worry about losing in the present, focus instead on the work + habits that will deliver a win for the long-term future. <br><br>Tzanio',
+  'Everybody wants to rule the world. <br><br>Tears for Fears',
+  'Don\'t outsmart yourself. <br><br>Anonymous',
+  'Courage is the absence of paralysis in the presence of fear. <br><br>Moriba Jah',
+  'Don\'t rush to act when something bad happens: if you get mud on your clothes, you don\'t smear it, you wait and let it dry before cleaning it. <br><br>Boardwalk Empire',
+  'Do what you do best and delegate the rest. <br><br>Michael Franzese',
+  'Find something amazing to work on, clear everything else and focus on it! <br><br>Leo Babuta',
+  'Do whatever you do intensely. <br><br>Robert Henry',
+  'Ask  yourself at every moment: Is this necessary? <br><br>Marcus Aurelius',
+  'A person can expect to experience events with odds of one in a million (a \"miracle\") at the rate of about one per month. <br><br>John Littlewood',
+  'Traveling alone you can go faster, but when you travel in a group, you will go further. <br><br>Breyten Breytenbach',
+  'Human forgiveness is not having something but discovering something --- that I am more like those who have hurt me than different from them. I am able to forgive when I discover that I am in no position to forgive. <br><br>John Patton',
+  'We forgive when we give up attachment to our wounds. <br><br>Lewis Hyde',
+  'In the name of God, stop a moment, cease your work, look around you. <br><br>Lev Tolstoy',
+  'You can\'t force luck, but you can increase your serendipity surface area. <br><br>Ali Abdaal',
+  'Show & Tell attitude: You can\'t control what other people expect, just present what you think is exciting and cool. <br><br>Tzanio',
+  'Don\'t get upset by the opinions of people you don\'t respect. <br><br>Tzanio',
+  'Don\'t punish yourself for other people\'s mistakes. <br><br>found on a bus in Sofia',
+  'People are free to be different, and free to become more different still. <br><br>Robert Bringhurst',
+  'Strong opinions, loosely held. <br><br>Marc Andreessen',
+  'Bad leaders care about who\'s right. Good leaders care about what\'s right. <br><br>Simon Sinek',
+  'Just ignore everything they say, and only pay attention to what they do. <br><br>Randy Pausch',
+  'Being enthusiastic is worth 25 IQ points. <br><br>Kevin Kelly',
+  'Always demand a deadline. A deadline weeds out the extraneous and the ordinary. It prevents you from trying to make it perfect, so you have to make it different. Different is better. <br><br>Kevin Kelly',
+  'Don\'t be the best. Be the only. <br><br>Kevin Kelly',
+  'Experience is overrated. Most really amazing or great things are done by people doing them for the first time. <br><br>Kevin Kelly',
+  'All wisdom is plagiarism; only stupidity is original. <br><br>Hugh Kerr',
+  'Unawareness is the root of all evil. <br><br>Anonymous Egyptian Monk',
+  'Don\'t waste time thinking about what thinking can\'t change. <br><br>Evagrius',
+  'Brother, be on your guard: pay attention to yourself! <br><br>Abba Ammonas',
+  'MFEM = new ideas project. <br><br>after LLNL\'s origin',
+  'Less but better. <br><br>Diedrich Rams',
+  'As long as the rate of increase is exponential, no linear solution to fight it will work. <br><br>COVID-19 comment',
+  'Dilbers spaces. <br><br>Paul Fischer',
+  'Everyone is working on artificial intelligence; I\'m interested in real intelligence. <br><br>Keith Bradley',
+  'PDE\'s are made by God, the boundary conditions by the Devil! <br><br>Alan Turing',
+  'Deliver the familiar, improve the existing, enable the new. <br><br>CRAY',
+  'Life is one thing after another, if you don\'t believe me, just ask your mother. <br><br>Garrison Keillor',
+  'What is wisdom? It is simple to express: Err, and err, and err again, but less, and less, and less. <br><br>Piet Hein',
+  'Art is solving problems that cannot be formulated before they have been solved. The shaping of the question is part of the answer. <br><br>Piet Hein',
+  'Problems worthy of attack prove their worth by fighting back. <br><br>Piet Hein',
+  'It makes it for a clearer record when only one person speaks at a time. <br><br>judge Lauren Thomasson',
+  'If judges are addressed as "your honor" should PhDs be addressed as "your smartness"? <br><br>Tzanio',
+  'If you get tired, learn to rest, not to quit. <br><br>Banksy',
+  'Intelligence is the ability to adapt to change. <br><br>Stephen Hawking',
+  'Acting in this like the skillful archer, who seeing that the object he would hit is distant, and knowing the range of his bow, takes aim much above the destined mark; not designing that his arrow should strike so high, but that flying high it may alight at the point intended. <br><br>Niccolo Machiavelli',
+  'The things you don\'t understand, are the things that you\'re afraid of. But you are no longer afraid, ones you find out what they\'re made of. <br><br>Concord Park song ',
+  'Flow recipe: 1. Set (attainable) goals; 2. Immerse yourself; 3. Pay attention; 4. Measure progress; 5. Enjoy the immediate experience. <br><br>Mihaly Csikszentmihalyi',
+  'Activities with high flow potential: reading, chess, climbing, surgery, painting, being with others. <br><br>Mihaly Csikszentmihalyi',
+  'Transform adversity into an enjoyable challenge. <br><br>Mihaly Csikszentmihalyi ',
+  'Humans can process only 126 bits/second (understanding speech takes 40). Learn to control where you spent these 126 bits, and you will be in control of your experience. <br><br>Mihaly Csikszentmihalyi ',
+  'The "battle" is not really against the self, but against the entropy that brings disorder to consciousness, it is a struggle for establishing control over attention. <br><br>Mihaly Csikszentmihalyi ',
+  'The best moments in life usually occur when a person\'s body or mind is stretched to its limits in a voluntary effort to accomplish something difficult and worthwhile <br><br>Mihaly Csikszentmihalyi',
+  'The meaning of life is to create a meaningful life. <br><br>Mihaly Csikszentmihalyi ',
+  'A lion chasing a pack of gazelles can only catch them one at a time. <br><br>Mihaly Csikszentmihalyi ',
+  'What\'s the benefit if you gain the entire world but lose yourself? <br><br>Mihaly Csikszentmihalyi ',
+  'Unselfconscious self-assurance: as pilots do, trust yourself, your environment, and your place in it. <br><br>Mihaly Csikszentmihalyi ',
+  'Capture chaos and shape it into a more complex order. <br><br>Mihaly Csikszentmihalyi ',
+  'Complexity requires both differentiation and integration. (like a complex song harmoniously integrates distinct melodies). <br><br>Mihaly Csikszentmihalyi ',
+  'Control of consciousness determines the quality of life. <br><br>Mihaly Csikszentmihalyi',
+  'The universe was not designed with the comfort of human beings in mind. <br><br>Mihaly Csikszentmihalyi',
+  'The chicken is just the egg\'s way of producing another egg.',
+  'Leadership is the ability to get someone to follow you even if only out of curiosity. <br><br>Ben Horowitz',
+  'Early in my career as an engineer, I learned that all decisions are objective until the first line of code was written. After that, all decisions are emotional. <br><br>Ben Horowitz',
+  'Sometimes an organization doesn\'t need a solution; it just needs clarity. <br><br>Ben Horowitz',
+  'Life is struggle. I believe that within that quote lies the most important lesson in entrepreneurship: Embrace the struggle. <br><br>Ben Horowitz',
+  'Note to self: It\'s a good idea to ask, \'what am I not doing?\'. <br><br>Ben Horowitz',
+  'In any human interaction, the required amount of communication is inversely proportional to the level of trust. <br><br>Ben Horowitz',
+  'In the immortal words of that great philosopher Han Solo, \'Never tell me the odds!\'. <br><br>Gary Kasparov',
+  'Make simple things simple and hard things possible. <br><br>Lee Busby',
+  'Reviewer #2 is a man who, when he smells flowers, looks around for a coffin. <br><br>H. L. Mencken',
+  'Single-tasking in a digital world is a superpower.',
+  'You can do everything, just not at the same time.',
+  'Live today, as if there will be no coffee tomorrow. <br><br>Danish proverb',
+  'The whiteboard is not blank; it is full of opportunity. <br><br>Anonymous',
+  'At LLNL you have the opportunity to serve your nation, and not just innovate, but invent. <br><br>Mike McCoy',
+  'The white board is empty, go write your message on it. <br><br>Mike McCoy',
+  'You can\'t yield the rain, but you can certainly see the clouds. <br><br>Mike McCoy',
+  'Every paper is just a progress report. <br><br>George Thompson',
+  'I like to find (a) simple solutions (b) to overlooked problems (c) that actually need to be solved, and (d) deliver them as informally as possible, (e) starting with a very rude version 1, then (f) iterating rapidly. <br><br>Paul Graham',
+  'We do these things, not because they are easy, but because they are hard. <br><br>JFK',
+  'The future is the only thing we can do anything about. <br><br>Danny Hillis',
+  'I\'m very optimistic about the future. I\'m not optimistic because our problems are small ... I\'m optimistic because our capacity to deal with problems is great. <br><br>Danny Hillis',
+  'What focus means is not saying \'no\' to things you don\'t want to do, but saying \'no\' to something that with every bone in your body you think is a phenomenal idea, and you wake up thinking about it, but you end up saying no to it because you\'re focusing on something else. The thing with focus is, it\'s not this thing you aspire to, or you decide on Monday, \'You know, I\'m going to be focused.\' It is a every minute, \'Why are we talking about this? This is what we\'re working on.\' You can achieve so much when you are truly focused. <br><br>Jony Ive/Steve Jobs',
+  'Here\'s a really fresh result... I can still smell the floating points on it. <br><br>Andreas Kloeckner',
+  'Heavy lies the crown... is a misquote of Uneasy lies the head that wears a crown. <br><br>Shakespeare, Henry IV, Part 2',
+  'Work and play are words used to describe the same thing under different conditions. <br><br>Mark Twain',
+  'You earn the right to criticize by suggesting solutions.',
+  'No complaining without helping. <br><br>Tzanio',
+  'It\'s a competitive world, everything counts in large amounts. <br><br>Depeche Mode',
+  'Don\'t cling to a mistake just because you spent a lot of time making it. <br><br>Unknown',
+  'Science is a delicate balance between being skeptical that your results are right, while believing that you can make them right. <br><br>Tzanio',
+  'Debugging is like being the detective in a crime movie where you are also the murderer. <br><br>Unknown',
+  'A man\'s reach should exceed his grasp. <br><br>Robert Browning',
+  'Finding the bug on this particular line was easy. It was not finding it on all of the other lines that was hard. <br><br>Tim Sweeneey',
+  'Code is like humor. When you have to explain it, it\'s bad. <br><br>Cory House',
+  'God complex = using PDEs instead of `trial-and-error` like in ML. <br><br>Unknown',
+  'Making a lot of mistakes is not bad, as long as they are in a \'good\' direction.',
+  'Airplanes take off against the wind. <br><br>Unknown',
+  'Let\'s discuss IPOs over IPAs. <br><br>SF billboard',
+  'The policy of giving exceptions to our policies, won\'t scale. <br><br>@SC17',
+  'Another flaw in human character is that everybody wants to build, and nobody wants to do maintenance. <br><br>Kurt Vonnegut',
+  '// When I wrote this, only God and I understood what I was doing. Now, God only knows.',
+  '// Sometimes I believe compiler ignores all my comments.',
+  '// This routine is intentionally poorly documented for security purposes.',
+  'Project Manager is a person who thinks nine women can deliver a baby in ONE month. <br><br>Unknown',
+  'Models are opinions embedded in mathematics. <br><br>AMS Notices',
+  'Very NIF-ty. <br><br>Catrina',
+  'Leadership is not just about giving energy. It\'s about unleashing other people\'s energy. <br><br>Paul Polman',
+  'Leadership is about making others better as a result of your presence and making sure that impact lasts in your absence. <br><br>Sheryl Sandberg',
+  'Being great is what we do. <br><br>Ninjago Movie',
+  'Never attribute to malevolence what is merely due to incompetence <br><br>Arthur C. Clark',
+  'Any fool can know. The point is to understand. <br><br>Albert Einstein',
+  'The greatest enemy of knowledge is not ignorance. It is the illusion of knowledge. <br><br>Daniel J. Boorstin',
+  'Originality is the fine art of remembering what you hear but forgetting where you heard it. <br><br>Laurence Peter',
+  'Don\'t confuse activity with achievement. <br><br>John Wooden',
+  'The world is real and not ideal. <br><br>Paul Woodward',
+  'Don\'t raise your voice, improve your argument.',
+  'If there is a problem you cannot solve, there is a simpler problem you cannot solver, and you first task is to find it. <br><br>Poyla',
+  'It is not enough to be industrious; so are the ants. What are you industrious about? <br><br>Henry David Thoreau',
+  'Confidence pays off! <br><br>Neely',
+  'Management is doing things right; leadership is doing the right things. <br><br>Peter Drucker',
+  'Heroes have scars (like Seb and Alek)',
+  'Revolutionaries have beards (like Botev)',
+  'Crystals are like people: it\'s the defects in them that make them interesting. <br><br>F.C. Frank',
+  'Funny game, the only way to win is not to play. <br><br>Joshua',
+  'Art (Simulation) is the lie that helps us see the truth. <br><br>Picasso',
+  'Complexity comes from the tendency to overanalyze things and delay decision making.',
+  'It\'s more important to fail at something that matters than to succeed at something that doesn\'t.',
+  'One of the many spokes in the big wheel of...',
+  'All power corrupts, but we need the electricity. <br><br>Unknown',
+  'I like pigs. Dogs look up to us. Cats look down on us. Pigs treat us as equals. <br><br>Sir Winston Churchill',
+  'If knowledge can create problems, it is not through ignorance that we can solve them. <br><br>Asimov',
+  'The second half of a man\'s life is made up of nothing but the habits he has acquired during the first half. <br><br>Dostoevsky',
+  'Life is short: \'make -j\'. <br><br>Tzanio',
+  'Luck Is What Happens When Preparation Meets Opportunity. <br><br>Seneca',
+  'Hype cycle: Technology Trigger -> Peak of Inflated Expectations -> Trough of Disillusionment -> Slope of Enlightenment -> Plateau of Productivity',
+  'I have noticed that the people who are late are often so much jollier than the people who have to wait for them. <br><br>E. V. Lucas',
+  'It is not the strongest of the species that survives, nor the most intelligent that survives. It is the one that is most adaptable to change. <br><br>Charles Darwin',
+  'Don\'t bother just to be better than your contemporaries or predecessors. Try to be better than yourself. <br><br>William Faulkner',
+  'Leadership is the art of getting someone else to do something that you want done, because he wants to do it. <br><br>Dwight Eisenhower',
+  'Don\'t climb the hill backwards.',
+  'Let\'s make sure that we can walk before we try to run.',
+  'After all is said and done, a lot more will be said than done. <br><br>Unknown',
+  'Rudeness is the weak man\'s imitation of strength. <br><br>Eric Hoffer',
+  'Don\'t get even, get odd. <br><br>Unknown',
+  'Everything will be okay in the end. If it is not okay, it\'s not the end. <br><br>Unknown',
+  'A manager should be like the sweeper in curling: The sweeper runs ahead of the stone and sweeps away debris from the path of the stone so that the progress of the stone will be smooth and undisturbed. <br><br>Richard Gabriel',
+  'The perfect is the enemy of the good. <br><br>Voltaire',
+  'I have discovered that all human evil comes from this: man\'s being unable to sit still in a room. <br><br>Blaise Pascal',
+  'Asking questions is embarrassing for a moment, but not asking is embarrassing for a lifetime. <br><br>Haruki Murakami',
+  'Always forgive your enemies; nothing annoys them so much. <br><br>Oscar Wilde',
+  'One attracts more flies with honey, than with vinegar. <br><br>Rob\'s dad'
+];
+
+var fontType = [
+  '105px Alcuin Becker Light, serif',
+  '92px  American Typewriter, serif',
+  '92px  Arrus, serif',
+  '105px Asar,serif',
+  '92px  Avenir Next, sans-serif',
+  '105px Brioso Pro, serif',
+//'105px Calibri, sans-serif',
+//'105px Cambria, serif',
+//'105px Corbel, sans-serif',
+  '105px Cormorant, serif',
+//'105px Constantia, serif',
+  '105px Duc De Berry, serif',
+  '105px Ex Ponto Pro, serif',
+//'105px Frutiger, serif',
+  '105px Garamond, serif',
+  '105px Goudy Text MT, serif',
+  '105px Goudy Thirty, serif',
+  '92px  Herculanum, serif',
+//'92px Iosevka, fixed',
+  '105px Karma, serif',
+  '105px Kefa, serif',
+//'105px Kinesis Std, serif',
+//'105px Kreon, serif',
+  '105px Legende, serif',
+  '105px Silentium Pro, serif',
+  '105px Linux Biolinum, sans-serif',
+  '105px Luminari, serif',
+  '105px Optima, sans-serif',
+  '92px  Papyrus, serif',
+//'105px Palatino, serif',
+  '105px Rajdhani, sans-serif',
+  '105px Snell Roundhand, serif',
+//'105px Spectral, serif',
+];
+
+var sessionQuotes = [];
+var sessionFonts = [];
+var currentIndex = -1;
+
+document.onload = newQuote();
+
+document.addEventListener('keyup', function(e) {
+  // Right or Up arrow
+  if (e.keyCode == 39 || e.keyCode == 38) {
+    nextQuote();
+  }
+
+  // Left or Down arrow
+  if (e.keyCode == 37 || e.keyCode == 40) {
+    prevQuote();
+  }
+})
+
+function setQuote(quote, font) {
+  var Quote = quotes[quote];
+  var Font = fontType[font];
+
+  obj = document.getElementById('quoteDisplay');
+  obj.innerHTML = Quote;
+  obj.style.font = Font;
+
+  obj = document.getElementById('fontName');
+  obj.innerHTML = Font;
+  obj.style.font = '12px Consolas, serif';
+  obj.style.color = '#666666';
+}
+
+function newQuote() {
+  quote = Math.floor(Math.random() * quotes.length);
+  font = Math.floor(Math.random() * fontType.length);
+  setQuote(quote, font);
+  currentIndex++;
+  sessionQuotes[currentIndex] = quote;
+  sessionFonts[currentIndex] = font;
+}
+
+function nextQuote() {
+  if (currentIndex == sessionQuotes.length-1) {
+    newQuote();
+  } else {
+    currentIndex++;
+    setQuote(sessionQuotes[currentIndex], sessionFonts[currentIndex]);
+  }
+}
+
+function prevQuote() {
+  if (currentIndex != 0) {
+    currentIndex--;
+    setQuote(sessionQuotes[currentIndex], sessionFonts[currentIndex]);
+  }
+}
+
+
+</script>
+
+</body>
+</html>
