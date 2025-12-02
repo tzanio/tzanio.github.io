@@ -169,6 +169,53 @@ input {
 // Get the input field
 var input = document.getElementById("myInput");
 
+// Save list state to localStorage
+function saveList() {
+  var ul = document.getElementById("myUL");
+  var items = ul.getElementsByTagName("li");
+  var data = [];
+  for (var i = 0; i < items.length; i++) {
+    data.push({
+      text: items[i].textContent.replace("\u00D7", ""), // remove the close '×'
+      checked: items[i].classList.contains("checked"),
+      display: items[i].style.display || ""
+    });
+  }
+  try {
+    localStorage.setItem("todoPickerList", JSON.stringify(data));
+  } catch (e) {
+    console.log("Could not save list:", e);
+  }
+}
+
+// Load list state from localStorage
+function loadList() {
+  var saved = localStorage.getItem("todoPickerList");
+  if (!saved) return;
+  try {
+    var items = JSON.parse(saved);
+    var ul = document.getElementById("myUL");
+    for (var i = 0; i < items.length; i++) {
+      var li = document.createElement("li");
+      li.textContent = items[i].text;
+      if (items[i].checked) {
+        li.classList.add("checked");
+        li.style.color = "#bbb";
+        li.style.fontWeight = "normal";
+      }
+      if (items[i].display === "none") {
+        li.style.display = "none";
+      }
+      ul.appendChild(li);
+    }
+  } catch (e) {
+    console.log("Could not load list:", e);
+  }
+}
+
+// Load existing items on startup
+loadList();
+
 // Execute a function when the user releases a key on the keyboard
 input.addEventListener("keyup", function(event) {
   // Number 13 is the "Enter" key on the keyboard
@@ -198,6 +245,7 @@ for (i = 0; i < close.length; i++) {
   close[i].onclick = function() {
     var div = this.parentElement;
     div.style.display = "none";
+    saveList();
   }
 }
 
@@ -208,6 +256,7 @@ list.addEventListener('click', function(ev) {
     ev.target.classList.toggle('checked');
     ev.target.style.color = "#bbb";
     ev.target.style.fontWeight = "normal";
+    saveList();
   }
 }, false);
 
@@ -234,8 +283,11 @@ function newElement() {
     close[i].onclick = function() {
       var div = this.parentElement;
       div.style.display = "none";
+      saveList();
     }
   }
+
+  saveList();
 }
 
 function getRndInteger(min, max) {
@@ -247,19 +299,19 @@ function pickRandom() {
   var items = ul.getElementsByTagName("li");
   var r;
   var success=0;
-  while (!success) {
+  while (!success && items.length > 0) {
     r = getRndInteger(0, items.length-1);
     for (var i = 0; i < items.length; ++i) {
       var legit = (items[i].classList.item(0) !== "checked") && 
                   (items[i].style.display !== "none");
-	    if (i === r && legit) {
-	      items[i].style.color = "#000";
-	      items[i].style.fontWeight = "bold";
-	      success=1;
-	    } else if (legit) {
-		    items[i].style.color = "#bbb";
-		    items[i].style.fontWeight = "normal";
-	    }
+      if (i === r && legit) {
+        items[i].style.color = "#000";
+        items[i].style.fontWeight = "bold";
+        success=1;
+      } else if (legit) {
+        items[i].style.color = "#bbb";
+        items[i].style.fontWeight = "normal";
+      }
     }
   }
 }
