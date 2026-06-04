@@ -110,9 +110,14 @@
       max-width: 880px;
       font-size: 15px;
     }
+    .data-range {
+      margin: 8px 0 0;
+      color: var(--ink);
+      font-size: 14px;
+    }
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 12px;
       padding: 18px 0;
     }
@@ -137,23 +142,32 @@
       display: flex;
       gap: 8px;
       margin: 0 0 16px;
-      border-bottom: 1px solid var(--line);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 6px;
     }
     .tab-button {
       appearance: none;
       border: 1px solid var(--line);
-      border-bottom: 0;
-      border-radius: 8px 8px 0 0;
+      border-radius: 6px;
       background: var(--tab);
-      color: var(--muted);
+      color: var(--ink);
       cursor: pointer;
       font: inherit;
       font-weight: 600;
       padding: 9px 14px;
     }
+    .tab-button:hover {
+      border-color: var(--hover-line);
+      background: var(--button-hover);
+    }
     .tab-button.active {
-      background: var(--panel);
+      background: var(--accent-soft);
+      border-color: var(--accent);
       color: var(--ink);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
     }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
@@ -455,44 +469,120 @@
       background: var(--code-bg);
     }
     body.compact .hero {
-      padding: 14px 0 12px;
+      padding: 8px 0;
+    }
+    body.compact .hero-heading {
+      margin-bottom: 0;
+    }
+    body.compact h1 {
+      font-size: 22px;
     }
     body.compact .subhead,
+    body.compact .data-range,
     body.compact footer {
       display: none;
     }
     body.compact main {
-      padding: 10px 0 18px;
+      padding: 6px 0 12px;
     }
     body.compact .stats {
-      gap: 8px;
-      padding: 10px 0;
+      gap: 6px;
+      padding: 6px 0;
     }
     body.compact .stat {
-      padding: 8px 10px;
+      padding: 5px 8px;
     }
     body.compact .stat strong {
-      font-size: 18px;
+      font-size: 16px;
+    }
+    body.compact .stat span {
+      font-size: 11px;
+      line-height: 1.15;
     }
     body.compact .tabs {
-      margin-bottom: 10px;
+      gap: 4px;
+      margin-bottom: 8px;
+      padding: 4px;
     }
-    body.compact .reviewer {
+    body.compact .tab-button {
+      padding: 5px 8px;
+      font-size: 12px;
+    }
+    body.compact .tab-tools {
+      font-size: 12px;
+      gap: 6px;
       margin-bottom: 8px;
     }
+    body.compact .filter-control,
+    body.compact .tab-tool-actions {
+      gap: 5px;
+    }
+    body.compact .filter-control input {
+      width: 56px;
+      padding: 4px 6px;
+    }
+    body.compact .tab-tools select,
+    body.compact .tool-button {
+      padding: 4px 7px;
+      font-size: 12px;
+    }
+    body.compact .leaderboard-tools {
+      font-size: 12px;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    body.compact .period-radios label {
+      padding: 4px 7px;
+    }
+    body.compact .leader-cards {
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    body.compact .leader-card {
+      padding: 7px 9px;
+    }
+    body.compact .leader-rank {
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+    body.compact .leader-card h3 {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    body.compact .leader-card dl {
+      gap: 4px;
+    }
+    body.compact .leader-card dt {
+      font-size: 10px;
+    }
+    body.compact .leader-card dd {
+      font-size: 12px;
+    }
+    body.compact .reviewer {
+      margin-bottom: 6px;
+    }
     body.compact .reviewer-header {
-      padding: 8px 10px;
+      padding: 5px 8px;
     }
     body.compact .reviewer h2 {
-      font-size: 15px;
+      font-size: 13px;
+    }
+    body.compact .count {
+      font-size: 12px;
     }
     body.compact th,
     body.compact td {
-      padding: 6px 8px;
-      font-size: 12px;
+      padding: 3px 6px;
+      font-size: 11px;
+      line-height: 1.2;
     }
     body.compact .pr-meta {
-      padding: 6px 10px;
+      gap: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+    body.compact .pill {
+      padding: 1px 5px;
     }
     @media (max-width: 760px) {
       .wrap { width: min(100% - 20px, 1180px); }
@@ -544,66 +634,46 @@
           <button id="theme-toggle" class="tool-button theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">☾</button>
         </div>
       </div>
+      <p class="data-range">Based on data from 2025-12-04 to 2026-06-04</p>
     </div>
   </header>
 
   <main class="wrap">
     <section class="stats" aria-label="Summary">
-      <div class="stat"><strong>27</strong><span>reviewers with late items</span></div>
-      <div class="stat"><strong>60</strong><span>unique PRs represented</span></div>
-      <div class="stat"><strong>129</strong><span>late review assignments</span></div>
+      <div class="stat"><strong>27</strong><span>late reviewers</span></div>
+      <div class="stat"><strong>60</strong><span>late PRs</span></div>
+      <div class="stat"><strong>209</strong><span>reviews completed</span></div>
+      <div class="stat"><strong>39%</strong><span>on-time rate</span></div>
+      <div class="stat"><strong>67</strong><span>PRs fully reviewed</span></div>
     </section>
-    <div id="stale-warning" class="stale-warning" data-generated-at="2026-06-04T02:43:21Z" hidden></div>
+    <div id="stale-warning" class="stale-warning" data-generated-at="2026-06-04T15:54:49Z" hidden></div>
 
     <div class="tabs" role="tablist" aria-label="Grouping">
-      <button class="tab-button active" type="button" data-tab="leaders">Leaderboard</button>
-      <button class="tab-button" type="button" data-tab="people">Late Reviewers</button>
-      <button class="tab-button" type="button" data-tab="prs">Late PRs</button>
+      <button class="tab-button" type="button" data-tab="leaders">🏆 Leaderboard</button>
+      <button class="tab-button active" type="button" data-tab="people">👥 Late Reviewers</button>
+      <button class="tab-button" type="button" data-tab="prs">📄 Late PRs</button>
     </div>
 
-    <section id="tab-people" class="tab-panel">
+    <section id="tab-people" class="tab-panel active">
       <div class="tab-tools">
         <label class="filter-control">
           <span>Show overdue between</span>
           <input class="overdue-min" type="number" min="0" step="1" value="0" aria-label="Minimum overdue days">
           <span>and</span>
-          <input class="overdue-max" type="number" min="0" step="1" value="1545" aria-label="Maximum overdue days">
+          <input class="overdue-max" type="number" min="0" step="1" value="1546" aria-label="Maximum overdue days">
           <span>days</span>
         </label>
         <div class="tab-tool-actions">
           <label for="reviewer-sort">Order by</label>
           <select id="reviewer-sort">
-            <option value="name">Reviewer name</option>
-            <option value="count" selected>Number of late PRs</option>
+            <option value="name" selected>Reviewer name</option>
+            <option value="count">Number of late PRs</option>
           </select>
           <button class="tool-button collapse-toggle" type="button" data-target="people-list" data-collapsed="false" aria-label="Collapse all reviewer panels">⊟ Collapse all</button>
           <label class="checkbox-control"><input class="dynamic-severity" type="checkbox">Update colors</label>
         </div>
       </div>
       <div id="people-list">
-<section id="reviewer-SchmidtMat" class="reviewer load-medium" data-reviewer="schmidtmat" data-count="2" data-visible-count="2">
-  <div class="reviewer-header"><h2><span class="status-icon">🟡</span> SchmidtMat</h2><span class="count">2 PRs</span></div>
-  <div class="panel-body">
-  <table>
-    <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
-    <tbody>
-      <tr class="age-critical" data-overdue="606"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4485">#4485</a></td><td>Dual Weighted Residual AMR example</td><td class="date">2024-10-05</td><td class="overdue"><span class="pill">606d</span></td><td class="date">2026-05-11</td></tr>
-      <tr class="age-high" data-overdue="147"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5000">#5000</a></td><td>Improve AD version pow stability, add min/max, and fix initialization</td><td class="date">2026-01-07</td><td class="overdue"><span class="pill">147d</span></td><td class="date">2026-05-25</td></tr>
-    </tbody>
-  </table>
-  </div>
-</section>
-<section id="reviewer-YohannDudouit" class="reviewer load-low" data-reviewer="yohanndudouit" data-count="1" data-visible-count="1">
-  <div class="reviewer-header"><h2><span class="status-icon">🟢</span> YohannDudouit</h2><span class="count">1 PR</span></div>
-  <div class="panel-body">
-  <table>
-    <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
-    <tbody>
-      <tr class="age-critical" data-overdue="1302"><td class="pr"><a href="https://github.com/mfem/mfem/pull/3215">#3215</a></td><td>DG Stokes example</td><td class="date">2022-11-10</td><td class="overdue"><span class="pill">1302d</span></td><td class="date">2026-05-11</td></tr>
-    </tbody>
-  </table>
-  </div>
-</section>
 <section id="reviewer-acfisher" class="reviewer load-low" data-reviewer="acfisher" data-count="1" data-visible-count="1">
   <div class="reviewer-header"><h2><span class="status-icon">🟢</span> acfisher</h2><span class="count">1 PR</span></div>
   <div class="panel-body">
@@ -621,7 +691,7 @@
   <table>
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
-      <tr class="age-critical" data-overdue="843"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4065">#4065</a></td><td>Arena-type allocator for workspace/temporary vectors</td><td class="date">2024-02-11</td><td class="overdue"><span class="pill">843d</span></td><td class="date">2026-05-11</td></tr>
+      <tr class="age-critical" data-overdue="844"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4065">#4065</a></td><td>Arena-type allocator for workspace/temporary vectors</td><td class="date">2024-02-11</td><td class="overdue"><span class="pill">844d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-medium" data-overdue="50"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5082">#5082</a></td><td>Add PartialQuadratureSpace and PartialQuadratureFunction impl</td><td class="date">2026-04-14</td><td class="overdue"><span class="pill">50d</span></td><td class="date">2026-05-11</td></tr>
     </tbody>
   </table>
@@ -651,7 +721,7 @@
   <table>
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
-      <tr class="age-high" data-overdue="103"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5223">#5223</a></td><td>Partial assembly algorithms for Bernstein basis on simplicial meshes [pa-simplices-dev]</td><td class="date">2026-02-20</td><td class="overdue"><span class="pill">103d</span></td><td class="date">2026-06-02</td></tr>
+      <tr class="age-high" data-overdue="104"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5223">#5223</a></td><td>Partial assembly algorithms for Bernstein basis on simplicial meshes [pa-simplices-dev]</td><td class="date">2026-02-20</td><td class="overdue"><span class="pill">104d</span></td><td class="date">2026-06-02</td></tr>
       <tr class="age-low" data-overdue="29"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5302">#5302</a></td><td>ReorderElements: sort boundary elements by face index after reordering</td><td class="date">2026-05-05</td><td class="overdue"><span class="pill">29d</span></td><td class="date">2026-06-01</td></tr>
       <tr class="age-low" data-overdue="18"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5230">#5230</a></td><td>Lorentz with particles on device</td><td class="date">2026-05-16</td><td class="overdue"><span class="pill">18d</span></td><td class="date">2026-05-26</td></tr>
     </tbody>
@@ -665,7 +735,7 @@
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
       <tr class="age-critical" data-overdue="1012"><td class="pr"><a href="https://github.com/mfem/mfem/pull/3690">#3690</a></td><td>Sundials IDA solver integration [ida-dev]</td><td class="date">2023-08-26</td><td class="overdue"><span class="pill">1012d</span></td><td class="date">2026-05-11</td></tr>
-      <tr class="age-new" data-overdue="5"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4244">#4244</a></td><td>Implementation of ParMesh::GenerateBoundaryElements()</td><td class="date">2026-05-29</td><td class="overdue"><span class="pill">5d</span></td><td class="date">2026-06-03</td></tr>
+      <tr class="age-new" data-overdue="6"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4244">#4244</a></td><td>Implementation of ParMesh::GenerateBoundaryElements()</td><td class="date">2026-05-29</td><td class="overdue"><span class="pill">6d</span></td><td class="date">2026-06-03</td></tr>
     </tbody>
   </table>
   </div>
@@ -679,7 +749,7 @@
       <tr class="age-critical" data-overdue="533"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4601">#4601</a></td><td>Add new method: `ParFiniteElementSpace::GetTrueUpdateOperator`</td><td class="date">2024-12-18</td><td class="overdue"><span class="pill">533d</span></td><td class="date">2026-05-14</td></tr>
       <tr class="age-high" data-overdue="155"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5143">#5143</a></td><td>Add parallel H(curl) NURBS support for IGA electromagnetic problem and nurbs_ex25p</td><td class="date">2025-12-30</td><td class="overdue"><span class="pill">155d</span></td><td class="date">2026-01-08</td></tr>
       <tr class="age-high" data-overdue="147"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5116">#5116</a></td><td>Pyramid ncmesh dev</td><td class="date">2026-01-07</td><td class="overdue"><span class="pill">147d</span></td><td class="date">2026-01-13</td></tr>
-      <tr class="age-high" data-overdue="114"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5193">#5193</a></td><td>Eigen solver interface</td><td class="date">2026-02-09</td><td class="overdue"><span class="pill">114d</span></td><td class="date">2026-02-10</td></tr>
+      <tr class="age-high" data-overdue="115"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5193">#5193</a></td><td>Eigen solver interface</td><td class="date">2026-02-09</td><td class="overdue"><span class="pill">115d</span></td><td class="date">2026-02-10</td></tr>
     </tbody>
   </table>
   </div>
@@ -693,7 +763,7 @@
       <tr class="age-high" data-overdue="220"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5054">#5054</a></td><td>Add gradients to Vector FE v2</td><td class="date">2025-10-27</td><td class="overdue"><span class="pill">220d</span></td><td class="date">2026-05-12</td></tr>
       <tr class="age-high" data-overdue="155"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5126">#5126</a></td><td>Support shared MFEM build when fetching TPLs</td><td class="date">2025-12-30</td><td class="overdue"><span class="pill">155d</span></td><td class="date">2026-03-22</td></tr>
       <tr class="age-high" data-overdue="92"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5205">#5205</a></td><td>PRefinementTransferOperator for trace spaces</td><td class="date">2026-03-03</td><td class="overdue"><span class="pill">92d</span></td><td class="date">2026-04-16</td></tr>
-      <tr class="age-medium" data-overdue="33"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5309">#5309</a></td><td>Fix hipsparse in ROCm 7</td><td class="date">2026-05-01</td><td class="overdue"><span class="pill">33d</span></td><td class="date">2026-06-01</td></tr>
+      <tr class="age-medium" data-overdue="34"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5309">#5309</a></td><td>Fix hipsparse in ROCm 7</td><td class="date">2026-05-01</td><td class="overdue"><span class="pill">34d</span></td><td class="date">2026-06-01</td></tr>
     </tbody>
   </table>
   </div>
@@ -715,12 +785,12 @@
   <table>
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
-      <tr class="age-critical" data-overdue="1545"><td class="pr"><a href="https://github.com/mfem/mfem/pull/2849">#2849</a></td><td>Partial Essential Boundary Conditions in NonlinearForm</td><td class="date">2022-03-11</td><td class="overdue"><span class="pill">1545d</span></td><td class="date">2026-04-27</td></tr>
+      <tr class="age-critical" data-overdue="1546"><td class="pr"><a href="https://github.com/mfem/mfem/pull/2849">#2849</a></td><td>Partial Essential Boundary Conditions in NonlinearForm</td><td class="date">2022-03-11</td><td class="overdue"><span class="pill">1546d</span></td><td class="date">2026-04-27</td></tr>
       <tr class="age-critical" data-overdue="1302"><td class="pr"><a href="https://github.com/mfem/mfem/pull/3215">#3215</a></td><td>DG Stokes example</td><td class="date">2022-11-10</td><td class="overdue"><span class="pill">1302d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-critical" data-overdue="708"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4256">#4256</a></td><td>Autodiff function for coefficient [add-ad-coeff]</td><td class="date">2024-06-25</td><td class="overdue"><span class="pill">708d</span></td><td class="date">2026-01-06</td></tr>
       <tr class="age-critical" data-overdue="614"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4502">#4502</a></td><td>CUDA buildsystem fix</td><td class="date">2024-09-27</td><td class="overdue"><span class="pill">614d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-high" data-overdue="346"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4873">#4873</a></td><td>Add no-penetration BC functionality to Navier miniapp</td><td class="date">2025-06-22</td><td class="overdue"><span class="pill">346d</span></td><td class="date">2026-04-05</td></tr>
-      <tr class="age-high" data-overdue="235"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5045">#5045</a></td><td>PETSc: Remove ad-hoc code to support PETSc without hypre</td><td class="date">2025-10-11</td><td class="overdue"><span class="pill">235d</span></td><td class="date">2026-06-03</td></tr>
+      <tr class="age-high" data-overdue="235"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5045">#5045</a></td><td>PETSc: Remove ad-hoc code to support PETSc without hypre</td><td class="date">2025-10-11</td><td class="overdue"><span class="pill">235d</span></td><td class="date">2026-06-04</td></tr>
       <tr class="age-high" data-overdue="230"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5052">#5052</a></td><td>Ensure ParaViewDataCollection has minimum order 1</td><td class="date">2025-10-16</td><td class="overdue"><span class="pill">230d</span></td><td class="date">2026-05-12</td></tr>
       <tr class="age-high" data-overdue="155"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5126">#5126</a></td><td>Support shared MFEM build when fetching TPLs</td><td class="date">2025-12-30</td><td class="overdue"><span class="pill">155d</span></td><td class="date">2026-03-22</td></tr>
       <tr class="age-high" data-overdue="147"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5000">#5000</a></td><td>Improve AD version pow stability, add min/max, and fix initialization</td><td class="date">2026-01-07</td><td class="overdue"><span class="pill">147d</span></td><td class="date">2026-05-25</td></tr>
@@ -788,14 +858,14 @@
       <tr class="age-high" data-overdue="200"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5023">#5023</a></td><td>Clamped Biharmonic Example w/ C^0 Interior Penalty Method</td><td class="date">2025-11-15</td><td class="overdue"><span class="pill">200d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-high" data-overdue="155"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5143">#5143</a></td><td>Add parallel H(curl) NURBS support for IGA electromagnetic problem and nurbs_ex25p</td><td class="date">2025-12-30</td><td class="overdue"><span class="pill">155d</span></td><td class="date">2026-01-08</td></tr>
       <tr class="age-high" data-overdue="147"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5116">#5116</a></td><td>Pyramid ncmesh dev</td><td class="date">2026-01-07</td><td class="overdue"><span class="pill">147d</span></td><td class="date">2026-01-13</td></tr>
-      <tr class="age-high" data-overdue="114"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5193">#5193</a></td><td>Eigen solver interface</td><td class="date">2026-02-09</td><td class="overdue"><span class="pill">114d</span></td><td class="date">2026-02-10</td></tr>
+      <tr class="age-high" data-overdue="115"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5193">#5193</a></td><td>Eigen solver interface</td><td class="date">2026-02-09</td><td class="overdue"><span class="pill">115d</span></td><td class="date">2026-02-10</td></tr>
       <tr class="age-high" data-overdue="98"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5221">#5221</a></td><td>Complex mumps solver</td><td class="date">2026-02-25</td><td class="overdue"><span class="pill">98d</span></td><td class="date">2026-06-03</td></tr>
       <tr class="age-high" data-overdue="92"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5205">#5205</a></td><td>PRefinementTransferOperator for trace spaces</td><td class="date">2026-03-03</td><td class="overdue"><span class="pill">92d</span></td><td class="date">2026-04-16</td></tr>
-      <tr class="age-medium" data-overdue="55"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5274">#5274</a></td><td>ComplexGridFunction Lp error implementation</td><td class="date">2026-04-09</td><td class="overdue"><span class="pill">55d</span></td><td class="date">2026-05-12</td></tr>
+      <tr class="age-medium" data-overdue="56"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5274">#5274</a></td><td>ComplexGridFunction Lp error implementation</td><td class="date">2026-04-09</td><td class="overdue"><span class="pill">56d</span></td><td class="date">2026-05-12</td></tr>
       <tr class="age-medium" data-overdue="53"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5280">#5280</a></td><td>Fix face DOF orientation in ProjectBdrCoefficientTangent for parallel ND p &gt; 1</td><td class="date">2026-04-11</td><td class="overdue"><span class="pill">53d</span></td><td class="date">2026-03-28</td></tr>
       <tr class="age-medium" data-overdue="40"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5251">#5251</a></td><td>Mixed Sesquilinear Forms</td><td class="date">2026-04-24</td><td class="overdue"><span class="pill">40d</span></td><td class="date">2026-05-22</td></tr>
-      <tr class="age-new" data-overdue="5"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4244">#4244</a></td><td>Implementation of ParMesh::GenerateBoundaryElements()</td><td class="date">2026-05-29</td><td class="overdue"><span class="pill">5d</span></td><td class="date">2026-06-03</td></tr>
-      <tr class="age-new" data-overdue="5"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5330">#5330</a></td><td>Add device assembly support for H(curl) VectorFEDomainLFIntegrator</td><td class="date">2026-05-29</td><td class="overdue"><span class="pill">5d</span></td><td class="date">2026-05-15</td></tr>
+      <tr class="age-new" data-overdue="6"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4244">#4244</a></td><td>Implementation of ParMesh::GenerateBoundaryElements()</td><td class="date">2026-05-29</td><td class="overdue"><span class="pill">6d</span></td><td class="date">2026-06-03</td></tr>
+      <tr class="age-new" data-overdue="6"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5330">#5330</a></td><td>Add device assembly support for H(curl) VectorFEDomainLFIntegrator</td><td class="date">2026-05-29</td><td class="overdue"><span class="pill">6d</span></td><td class="date">2026-05-15</td></tr>
     </tbody>
   </table>
   </div>
@@ -806,7 +876,7 @@
   <table>
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
-      <tr class="age-high" data-overdue="337"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4817">#4817</a></td><td>Generalizing R2D bases for embedding in 3D</td><td class="date">2025-07-01</td><td class="overdue"><span class="pill">337d</span></td><td class="date">2026-04-28</td></tr>
+      <tr class="age-high" data-overdue="338"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4817">#4817</a></td><td>Generalizing R2D bases for embedding in 3D</td><td class="date">2025-07-01</td><td class="overdue"><span class="pill">338d</span></td><td class="date">2026-04-28</td></tr>
       <tr class="age-high" data-overdue="112"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4939">#4939</a></td><td>Stix 1D Miniapp</td><td class="date">2026-02-11</td><td class="overdue"><span class="pill">112d</span></td><td class="date">2026-06-03</td></tr>
       <tr class="age-medium" data-overdue="56"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5265">#5265</a></td><td>Umansky anisotropic diffusion miniapps [umansky-dev]</td><td class="date">2026-04-09</td><td class="overdue"><span class="pill">56d</span></td><td class="date">2026-06-03</td></tr>
       <tr class="age-medium" data-overdue="53"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5280">#5280</a></td><td>Fix face DOF orientation in ProjectBdrCoefficientTangent for parallel ND p &gt; 1</td><td class="date">2026-04-11</td><td class="overdue"><span class="pill">53d</span></td><td class="date">2026-03-28</td></tr>
@@ -842,7 +912,7 @@
   <table>
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
-      <tr class="age-high" data-overdue="337"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4817">#4817</a></td><td>Generalizing R2D bases for embedding in 3D</td><td class="date">2025-07-01</td><td class="overdue"><span class="pill">337d</span></td><td class="date">2026-04-28</td></tr>
+      <tr class="age-high" data-overdue="338"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4817">#4817</a></td><td>Generalizing R2D bases for embedding in 3D</td><td class="date">2025-07-01</td><td class="overdue"><span class="pill">338d</span></td><td class="date">2026-04-28</td></tr>
       <tr class="age-high" data-overdue="155"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5143">#5143</a></td><td>Add parallel H(curl) NURBS support for IGA electromagnetic problem and nurbs_ex25p</td><td class="date">2025-12-30</td><td class="overdue"><span class="pill">155d</span></td><td class="date">2026-01-08</td></tr>
       <tr class="age-high" data-overdue="147"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5131">#5131</a></td><td>Example 43</td><td class="date">2026-01-07</td><td class="overdue"><span class="pill">147d</span></td><td class="date">2026-05-29</td></tr>
       <tr class="age-high" data-overdue="112"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4939">#4939</a></td><td>Stix 1D Miniapp</td><td class="date">2026-02-11</td><td class="overdue"><span class="pill">112d</span></td><td class="date">2026-06-03</td></tr>
@@ -864,13 +934,25 @@
   </table>
   </div>
 </section>
+<section id="reviewer-SchmidtMat" class="reviewer load-medium" data-reviewer="schmidtmat" data-count="2" data-visible-count="2">
+  <div class="reviewer-header"><h2><span class="status-icon">🟡</span> SchmidtMat</h2><span class="count">2 PRs</span></div>
+  <div class="panel-body">
+  <table>
+    <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
+    <tbody>
+      <tr class="age-critical" data-overdue="606"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4485">#4485</a></td><td>Dual Weighted Residual AMR example</td><td class="date">2024-10-05</td><td class="overdue"><span class="pill">606d</span></td><td class="date">2026-05-11</td></tr>
+      <tr class="age-high" data-overdue="147"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5000">#5000</a></td><td>Improve AD version pow stability, add min/max, and fix initialization</td><td class="date">2026-01-07</td><td class="overdue"><span class="pill">147d</span></td><td class="date">2026-05-25</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
 <section id="reviewer-sebastiangrimberg" class="reviewer load-low" data-reviewer="sebastiangrimberg" data-count="1" data-visible-count="1">
   <div class="reviewer-header"><h2><span class="status-icon">🟢</span> sebastiangrimberg</h2><span class="count">1 PR</span></div>
   <div class="panel-body">
   <table>
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
-      <tr class="age-critical" data-overdue="843"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4065">#4065</a></td><td>Arena-type allocator for workspace/temporary vectors</td><td class="date">2024-02-11</td><td class="overdue"><span class="pill">843d</span></td><td class="date">2026-05-11</td></tr>
+      <tr class="age-critical" data-overdue="844"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4065">#4065</a></td><td>Arena-type allocator for workspace/temporary vectors</td><td class="date">2024-02-11</td><td class="overdue"><span class="pill">844d</span></td><td class="date">2026-05-11</td></tr>
     </tbody>
   </table>
   </div>
@@ -919,12 +1001,12 @@
   <table>
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
-      <tr class="age-critical" data-overdue="843"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4065">#4065</a></td><td>Arena-type allocator for workspace/temporary vectors</td><td class="date">2024-02-11</td><td class="overdue"><span class="pill">843d</span></td><td class="date">2026-05-11</td></tr>
+      <tr class="age-critical" data-overdue="844"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4065">#4065</a></td><td>Arena-type allocator for workspace/temporary vectors</td><td class="date">2024-02-11</td><td class="overdue"><span class="pill">844d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-critical" data-overdue="556"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4505">#4505</a></td><td>Addition of Stabilized H1 to ex9 and ex9p</td><td class="date">2024-11-24</td><td class="overdue"><span class="pill">556d</span></td><td class="date">2026-05-22</td></tr>
       <tr class="age-critical" data-overdue="367"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4289">#4289</a></td><td>Ex. 41: DG advection with bounds-preserving limiters. </td><td class="date">2025-06-01</td><td class="overdue"><span class="pill">367d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-high" data-overdue="256"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5010">#5010</a></td><td>Support non-tensor-product meshes in QuadratureFunction::Integrate on faces</td><td class="date">2025-09-20</td><td class="overdue"><span class="pill">256d</span></td><td class="date">2026-03-22</td></tr>
       <tr class="age-high" data-overdue="155"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5140">#5140</a></td><td>Add bubble elements with application to obstacle problem</td><td class="date">2025-12-30</td><td class="overdue"><span class="pill">155d</span></td><td class="date">2026-04-17</td></tr>
-      <tr class="age-high" data-overdue="114"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5193">#5193</a></td><td>Eigen solver interface</td><td class="date">2026-02-09</td><td class="overdue"><span class="pill">114d</span></td><td class="date">2026-02-10</td></tr>
+      <tr class="age-high" data-overdue="115"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5193">#5193</a></td><td>Eigen solver interface</td><td class="date">2026-02-09</td><td class="overdue"><span class="pill">115d</span></td><td class="date">2026-02-10</td></tr>
       <tr class="age-high" data-overdue="92"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5174">#5174</a></td><td>Ensuring mesh validity during mesh optimization using bounds on Jacobian determinant</td><td class="date">2026-03-03</td><td class="overdue"><span class="pill">92d</span></td><td class="date">2026-06-04</td></tr>
       <tr class="age-new" data-overdue="1"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5259">#5259</a></td><td>Option to specify increase in axis-aligned bounding box size for surface meshes with FindPointsGSLIB </td><td class="date">2026-06-03</td><td class="overdue"><span class="pill">1d</span></td><td class="date">2026-06-02</td></tr>
     </tbody>
@@ -941,7 +1023,7 @@
       <tr class="age-critical" data-overdue="1012"><td class="pr"><a href="https://github.com/mfem/mfem/pull/3690">#3690</a></td><td>Sundials IDA solver integration [ida-dev]</td><td class="date">2023-08-26</td><td class="overdue"><span class="pill">1012d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-critical" data-overdue="895"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4000">#4000</a></td><td>Use std::string in more places in the code</td><td class="date">2023-12-21</td><td class="overdue"><span class="pill">895d</span></td><td class="date">2026-03-11</td></tr>
       <tr class="age-critical" data-overdue="892"><td class="pr"><a href="https://github.com/mfem/mfem/pull/3847">#3847</a></td><td>Consistent edge ordering for `MarkTetMeshForRefinement` for tetrahedral meshes</td><td class="date">2023-12-24</td><td class="overdue"><span class="pill">892d</span></td><td class="date">2026-05-11</td></tr>
-      <tr class="age-critical" data-overdue="843"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4065">#4065</a></td><td>Arena-type allocator for workspace/temporary vectors</td><td class="date">2024-02-11</td><td class="overdue"><span class="pill">843d</span></td><td class="date">2026-05-11</td></tr>
+      <tr class="age-critical" data-overdue="844"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4065">#4065</a></td><td>Arena-type allocator for workspace/temporary vectors</td><td class="date">2024-02-11</td><td class="overdue"><span class="pill">844d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-critical" data-overdue="614"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4502">#4502</a></td><td>CUDA buildsystem fix</td><td class="date">2024-09-27</td><td class="overdue"><span class="pill">614d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-critical" data-overdue="606"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4485">#4485</a></td><td>Dual Weighted Residual AMR example</td><td class="date">2024-10-05</td><td class="overdue"><span class="pill">606d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-critical" data-overdue="556"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4505">#4505</a></td><td>Addition of Stabilized H1 to ex9 and ex9p</td><td class="date">2024-11-24</td><td class="overdue"><span class="pill">556d</span></td><td class="date">2026-05-22</td></tr>
@@ -952,10 +1034,10 @@
       <tr class="age-high" data-overdue="155"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5093">#5093</a></td><td>Add generic transfer</td><td class="date">2025-12-30</td><td class="overdue"><span class="pill">155d</span></td><td class="date">2026-03-25</td></tr>
       <tr class="age-high" data-overdue="119"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5202">#5202</a></td><td>Default to host-std when using umpire</td><td class="date">2026-02-04</td><td class="overdue"><span class="pill">119d</span></td><td class="date">2026-05-20</td></tr>
       <tr class="age-high" data-overdue="116"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4965">#4965</a></td><td>Implemented move operators for GridFunction and ParGridFunction</td><td class="date">2026-02-07</td><td class="overdue"><span class="pill">116d</span></td><td class="date">2026-01-26</td></tr>
-      <tr class="age-high" data-overdue="103"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5223">#5223</a></td><td>Partial assembly algorithms for Bernstein basis on simplicial meshes [pa-simplices-dev]</td><td class="date">2026-02-20</td><td class="overdue"><span class="pill">103d</span></td><td class="date">2026-06-02</td></tr>
+      <tr class="age-high" data-overdue="104"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5223">#5223</a></td><td>Partial assembly algorithms for Bernstein basis on simplicial meshes [pa-simplices-dev]</td><td class="date">2026-02-20</td><td class="overdue"><span class="pill">104d</span></td><td class="date">2026-06-02</td></tr>
       <tr class="age-medium" data-overdue="52"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5286">#5286</a></td><td>Enzyme-differentiable univariate solver [differentiable_univariate_solver-dev]</td><td class="date">2026-04-12</td><td class="overdue"><span class="pill">52d</span></td><td class="date">2026-03-30</td></tr>
       <tr class="age-medium" data-overdue="50"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5082">#5082</a></td><td>Add PartialQuadratureSpace and PartialQuadratureFunction impl</td><td class="date">2026-04-14</td><td class="overdue"><span class="pill">50d</span></td><td class="date">2026-05-11</td></tr>
-      <tr class="age-medium" data-overdue="33"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5309">#5309</a></td><td>Fix hipsparse in ROCm 7</td><td class="date">2026-05-01</td><td class="overdue"><span class="pill">33d</span></td><td class="date">2026-06-01</td></tr>
+      <tr class="age-medium" data-overdue="34"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5309">#5309</a></td><td>Fix hipsparse in ROCm 7</td><td class="date">2026-05-01</td><td class="overdue"><span class="pill">34d</span></td><td class="date">2026-06-01</td></tr>
       <tr class="age-low" data-overdue="29"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5297">#5297</a></td><td>General NC mesh spacing in parallel</td><td class="date">2026-05-05</td><td class="overdue"><span class="pill">29d</span></td><td class="date">2026-06-01</td></tr>
       <tr class="age-low" data-overdue="29"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5303">#5303</a></td><td>Removes SidreDataCollection from MFEM</td><td class="date">2026-05-05</td><td class="overdue"><span class="pill">29d</span></td><td class="date">2026-04-28</td></tr>
       <tr class="age-new" data-overdue="1"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5337">#5337</a></td><td>Add explicit move and copy operators to DenseTensor</td><td class="date">2026-06-02</td><td class="overdue"><span class="pill">1d</span></td><td class="date">2026-05-20</td></tr>
@@ -970,12 +1052,23 @@
   <table>
     <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
     <tbody>
-      <tr class="age-critical" data-overdue="1545"><td class="pr"><a href="https://github.com/mfem/mfem/pull/2849">#2849</a></td><td>Partial Essential Boundary Conditions in NonlinearForm</td><td class="date">2022-03-11</td><td class="overdue"><span class="pill">1545d</span></td><td class="date">2026-04-27</td></tr>
+      <tr class="age-critical" data-overdue="1546"><td class="pr"><a href="https://github.com/mfem/mfem/pull/2849">#2849</a></td><td>Partial Essential Boundary Conditions in NonlinearForm</td><td class="date">2022-03-11</td><td class="overdue"><span class="pill">1546d</span></td><td class="date">2026-04-27</td></tr>
       <tr class="age-critical" data-overdue="556"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4505">#4505</a></td><td>Addition of Stabilized H1 to ex9 and ex9p</td><td class="date">2024-11-24</td><td class="overdue"><span class="pill">556d</span></td><td class="date">2026-05-22</td></tr>
       <tr class="age-critical" data-overdue="367"><td class="pr"><a href="https://github.com/mfem/mfem/pull/4289">#4289</a></td><td>Ex. 41: DG advection with bounds-preserving limiters. </td><td class="date">2025-06-01</td><td class="overdue"><span class="pill">367d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-high" data-overdue="92"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5174">#5174</a></td><td>Ensuring mesh validity during mesh optimization using bounds on Jacobian determinant</td><td class="date">2026-03-03</td><td class="overdue"><span class="pill">92d</span></td><td class="date">2026-06-04</td></tr>
       <tr class="age-medium" data-overdue="50"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5082">#5082</a></td><td>Add PartialQuadratureSpace and PartialQuadratureFunction impl</td><td class="date">2026-04-14</td><td class="overdue"><span class="pill">50d</span></td><td class="date">2026-05-11</td></tr>
       <tr class="age-new" data-overdue="1"><td class="pr"><a href="https://github.com/mfem/mfem/pull/5259">#5259</a></td><td>Option to specify increase in axis-aligned bounding box size for surface meshes with FindPointsGSLIB </td><td class="date">2026-06-03</td><td class="overdue"><span class="pill">1d</span></td><td class="date">2026-06-02</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+<section id="reviewer-YohannDudouit" class="reviewer load-low" data-reviewer="yohanndudouit" data-count="1" data-visible-count="1">
+  <div class="reviewer-header"><h2><span class="status-icon">🟢</span> YohannDudouit</h2><span class="count">1 PR</span></div>
+  <div class="panel-body">
+  <table>
+    <thead><tr><th>PR</th><th>Title</th><th>Due</th><th>Overdue</th><th>Updated</th></tr></thead>
+    <tbody>
+      <tr class="age-critical" data-overdue="1302"><td class="pr"><a href="https://github.com/mfem/mfem/pull/3215">#3215</a></td><td>DG Stokes example</td><td class="date">2022-11-10</td><td class="overdue"><span class="pill">1302d</span></td><td class="date">2026-05-11</td></tr>
     </tbody>
   </table>
   </div>
@@ -989,30 +1082,30 @@
           <span>Show overdue between</span>
           <input class="overdue-min" type="number" min="0" step="1" value="0" aria-label="Minimum overdue days">
           <span>and</span>
-          <input class="overdue-max" type="number" min="0" step="1" value="1545" aria-label="Maximum overdue days">
+          <input class="overdue-max" type="number" min="0" step="1" value="1546" aria-label="Maximum overdue days">
           <span>days</span>
-          <label class="checkbox-control"><input class="dynamic-severity" type="checkbox">Update colors</label>
         </label>
         <div class="tab-tool-actions">
           <label for="pr-sort">Order by</label>
           <select id="pr-sort">
             <option value="overdue">How late</option>
-            <option value="number">PR number</option>
+            <option value="number" selected>PR number</option>
             <option value="updated">Most recently updated</option>
           </select>
           <button class="tool-button collapse-toggle" type="button" data-target="pr-list" data-collapsed="false" aria-label="Collapse all PR panels">⊟ Collapse all</button>
+          <label class="checkbox-control"><input class="dynamic-severity" type="checkbox">Update colors</label>
         </div>
       </div>
       <div id="pr-list">
-<section class="reviewer age-critical" data-number="2849" data-overdue="1545" data-updated="2026-04-27" data-count="2" data-visible-count="2">
+<section class="reviewer age-critical" data-number="2849" data-overdue="1546" data-updated="2026-04-27" data-count="2" data-visible-count="2">
   <div class="reviewer-header"><h2><span class="status-icon">🔥</span> <a href="https://github.com/mfem/mfem/pull/2849">#2849</a> Partial Essential Boundary Conditions in NonlinearForm</h2><span class="count">2 reviewers</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2022-03-11</strong></span><span>Overdue: <strong>1545d</strong></span><span>Updated: <strong>2026-04-27</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2022-03-11</strong></span><span>Overdue: <strong>1546d</strong></span><span>Updated: <strong>2026-04-27</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-critical" data-overdue="1545" data-reviewer="jandrej"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-jandrej">jandrej</a></td></tr>
-      <tr class="age-critical" data-overdue="1545" data-reviewer="vladotomov"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-vladotomov">vladotomov</a></td></tr>
+      <tr class="age-critical" data-overdue="1546" data-reviewer="jandrej"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-jandrej">jandrej</a></td></tr>
+      <tr class="age-critical" data-overdue="1546" data-reviewer="vladotomov"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-vladotomov">vladotomov</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1024,9 +1117,9 @@
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-critical" data-overdue="1302" data-reviewer="YohannDudouit"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-YohannDudouit">YohannDudouit</a></td></tr>
       <tr class="age-critical" data-overdue="1302" data-reviewer="jandrej"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-jandrej">jandrej</a></td></tr>
       <tr class="age-critical" data-overdue="1302" data-reviewer="pazner"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-pazner">pazner</a></td></tr>
+      <tr class="age-critical" data-overdue="1302" data-reviewer="YohannDudouit"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-YohannDudouit">YohannDudouit</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1094,17 +1187,17 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-critical" data-number="4065" data-overdue="843" data-updated="2026-05-11" data-count="4" data-visible-count="4">
+<section class="reviewer age-critical" data-number="4065" data-overdue="844" data-updated="2026-05-11" data-count="4" data-visible-count="4">
   <div class="reviewer-header"><h2><span class="status-icon">🔥</span> <a href="https://github.com/mfem/mfem/pull/4065">#4065</a> Arena-type allocator for workspace/temporary vectors</h2><span class="count">4 reviewers</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2024-02-11</strong></span><span>Overdue: <strong>843d</strong></span><span>Updated: <strong>2026-05-11</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2024-02-11</strong></span><span>Overdue: <strong>844d</strong></span><span>Updated: <strong>2026-05-11</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-critical" data-overdue="843" data-reviewer="artv3"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-artv3">artv3</a></td></tr>
-      <tr class="age-critical" data-overdue="843" data-reviewer="sebastiangrimberg"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-sebastiangrimberg">sebastiangrimberg</a></td></tr>
-      <tr class="age-critical" data-overdue="843" data-reviewer="tzanio"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-tzanio">tzanio</a></td></tr>
-      <tr class="age-critical" data-overdue="843" data-reviewer="v-dobrev"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-v-dobrev">v-dobrev</a></td></tr>
+      <tr class="age-critical" data-overdue="844" data-reviewer="artv3"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-artv3">artv3</a></td></tr>
+      <tr class="age-critical" data-overdue="844" data-reviewer="sebastiangrimberg"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-sebastiangrimberg">sebastiangrimberg</a></td></tr>
+      <tr class="age-critical" data-overdue="844" data-reviewer="tzanio"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-tzanio">tzanio</a></td></tr>
+      <tr class="age-critical" data-overdue="844" data-reviewer="v-dobrev"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-v-dobrev">v-dobrev</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1122,15 +1215,15 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-new" data-number="4244" data-overdue="5" data-updated="2026-06-03" data-count="2" data-visible-count="2">
+<section class="reviewer age-new" data-number="4244" data-overdue="6" data-updated="2026-06-03" data-count="2" data-visible-count="2">
   <div class="reviewer-header"><h2><span class="status-icon">🟢</span> <a href="https://github.com/mfem/mfem/pull/4244">#4244</a> Implementation of ParMesh::GenerateBoundaryElements()</h2><span class="count">2 reviewers</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2026-05-29</strong></span><span>Overdue: <strong>5d</strong></span><span>Updated: <strong>2026-06-03</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2026-05-29</strong></span><span>Overdue: <strong>6d</strong></span><span>Updated: <strong>2026-06-03</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-new" data-overdue="5" data-reviewer="cjvogl"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-cjvogl">cjvogl</a></td></tr>
-      <tr class="age-new" data-overdue="5" data-reviewer="mlstowell"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-mlstowell">mlstowell</a></td></tr>
+      <tr class="age-new" data-overdue="6" data-reviewer="cjvogl"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-cjvogl">cjvogl</a></td></tr>
+      <tr class="age-new" data-overdue="6" data-reviewer="mlstowell"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-mlstowell">mlstowell</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1230,15 +1323,15 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-high" data-number="4817" data-overdue="337" data-updated="2026-04-28" data-count="2" data-visible-count="2">
+<section class="reviewer age-high" data-number="4817" data-overdue="338" data-updated="2026-04-28" data-count="2" data-visible-count="2">
   <div class="reviewer-header"><h2><span class="status-icon">⚠️</span> <a href="https://github.com/mfem/mfem/pull/4817">#4817</a> Generalizing R2D bases for embedding in 3D</h2><span class="count">2 reviewers</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2025-07-01</strong></span><span>Overdue: <strong>337d</strong></span><span>Updated: <strong>2026-04-28</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2025-07-01</strong></span><span>Overdue: <strong>338d</strong></span><span>Updated: <strong>2026-04-28</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-high" data-overdue="337" data-reviewer="najlkin"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-najlkin">najlkin</a></td></tr>
-      <tr class="age-high" data-overdue="337" data-reviewer="psocratis"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-psocratis">psocratis</a></td></tr>
+      <tr class="age-high" data-overdue="338" data-reviewer="najlkin"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-najlkin">najlkin</a></td></tr>
+      <tr class="age-high" data-overdue="338" data-reviewer="psocratis"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-psocratis">psocratis</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1303,9 +1396,9 @@
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-high" data-overdue="147" data-reviewer="SchmidtMat"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-SchmidtMat">SchmidtMat</a></td></tr>
       <tr class="age-high" data-overdue="147" data-reviewer="bslazarov"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-bslazarov">bslazarov</a></td></tr>
       <tr class="age-high" data-overdue="147" data-reviewer="jandrej"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-jandrej">jandrej</a></td></tr>
+      <tr class="age-high" data-overdue="147" data-reviewer="SchmidtMat"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-SchmidtMat">SchmidtMat</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1349,10 +1442,10 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-high" data-number="5045" data-overdue="235" data-updated="2026-06-03" data-count="1" data-visible-count="1">
+<section class="reviewer age-high" data-number="5045" data-overdue="235" data-updated="2026-06-04" data-count="1" data-visible-count="1">
   <div class="reviewer-header"><h2><span class="status-icon">⚠️</span> <a href="https://github.com/mfem/mfem/pull/5045">#5045</a> PETSc: Remove ad-hoc code to support PETSc without hypre</h2><span class="count">1 reviewer</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2025-10-11</strong></span><span>Overdue: <strong>235d</strong></span><span>Updated: <strong>2026-06-03</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2025-10-11</strong></span><span>Overdue: <strong>235d</strong></span><span>Updated: <strong>2026-06-04</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
@@ -1524,16 +1617,16 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-high" data-number="5193" data-overdue="114" data-updated="2026-02-10" data-count="3" data-visible-count="3">
+<section class="reviewer age-high" data-number="5193" data-overdue="115" data-updated="2026-02-10" data-count="3" data-visible-count="3">
   <div class="reviewer-header"><h2><span class="status-icon">⚠️</span> <a href="https://github.com/mfem/mfem/pull/5193">#5193</a> Eigen solver interface</h2><span class="count">3 reviewers</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2026-02-09</strong></span><span>Overdue: <strong>114d</strong></span><span>Updated: <strong>2026-02-10</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2026-02-09</strong></span><span>Overdue: <strong>115d</strong></span><span>Updated: <strong>2026-02-10</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-high" data-overdue="114" data-reviewer="dylan-copeland"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-dylan-copeland">dylan-copeland</a></td></tr>
-      <tr class="age-high" data-overdue="114" data-reviewer="mlstowell"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-mlstowell">mlstowell</a></td></tr>
-      <tr class="age-high" data-overdue="114" data-reviewer="tzanio"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-tzanio">tzanio</a></td></tr>
+      <tr class="age-high" data-overdue="115" data-reviewer="dylan-copeland"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-dylan-copeland">dylan-copeland</a></td></tr>
+      <tr class="age-high" data-overdue="115" data-reviewer="mlstowell"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-mlstowell">mlstowell</a></td></tr>
+      <tr class="age-high" data-overdue="115" data-reviewer="tzanio"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-tzanio">tzanio</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1578,15 +1671,15 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-high" data-number="5223" data-overdue="103" data-updated="2026-06-02" data-count="2" data-visible-count="2">
+<section class="reviewer age-high" data-number="5223" data-overdue="104" data-updated="2026-06-02" data-count="2" data-visible-count="2">
   <div class="reviewer-header"><h2><span class="status-icon">⚠️</span> <a href="https://github.com/mfem/mfem/pull/5223">#5223</a> Partial assembly algorithms for Bernstein basis on simplicial meshes [pa-simplices-dev]</h2><span class="count">2 reviewers</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2026-02-20</strong></span><span>Overdue: <strong>103d</strong></span><span>Updated: <strong>2026-06-02</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2026-02-20</strong></span><span>Overdue: <strong>104d</strong></span><span>Updated: <strong>2026-06-02</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-high" data-overdue="103" data-reviewer="camierjs"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-camierjs">camierjs</a></td></tr>
-      <tr class="age-high" data-overdue="103" data-reviewer="v-dobrev"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-v-dobrev">v-dobrev</a></td></tr>
+      <tr class="age-high" data-overdue="104" data-reviewer="camierjs"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-camierjs">camierjs</a></td></tr>
+      <tr class="age-high" data-overdue="104" data-reviewer="v-dobrev"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-v-dobrev">v-dobrev</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1643,14 +1736,14 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-medium" data-number="5274" data-overdue="55" data-updated="2026-05-12" data-count="1" data-visible-count="1">
+<section class="reviewer age-medium" data-number="5274" data-overdue="56" data-updated="2026-05-12" data-count="1" data-visible-count="1">
   <div class="reviewer-header"><h2><span class="status-icon">🟠</span> <a href="https://github.com/mfem/mfem/pull/5274">#5274</a> ComplexGridFunction Lp error implementation</h2><span class="count">1 reviewer</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2026-04-09</strong></span><span>Overdue: <strong>55d</strong></span><span>Updated: <strong>2026-05-12</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2026-04-09</strong></span><span>Overdue: <strong>56d</strong></span><span>Updated: <strong>2026-05-12</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-medium" data-overdue="55" data-reviewer="mlstowell"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-mlstowell">mlstowell</a></td></tr>
+      <tr class="age-medium" data-overdue="56" data-reviewer="mlstowell"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-mlstowell">mlstowell</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1718,15 +1811,15 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-medium" data-number="5309" data-overdue="33" data-updated="2026-06-01" data-count="2" data-visible-count="2">
+<section class="reviewer age-medium" data-number="5309" data-overdue="34" data-updated="2026-06-01" data-count="2" data-visible-count="2">
   <div class="reviewer-header"><h2><span class="status-icon">🟠</span> <a href="https://github.com/mfem/mfem/pull/5309">#5309</a> Fix hipsparse in ROCm 7</h2><span class="count">2 reviewers</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2026-05-01</strong></span><span>Overdue: <strong>33d</strong></span><span>Updated: <strong>2026-06-01</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2026-05-01</strong></span><span>Overdue: <strong>34d</strong></span><span>Updated: <strong>2026-06-01</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-medium" data-overdue="33" data-reviewer="helloworld922"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-helloworld922">helloworld922</a></td></tr>
-      <tr class="age-medium" data-overdue="33" data-reviewer="v-dobrev"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-v-dobrev">v-dobrev</a></td></tr>
+      <tr class="age-medium" data-overdue="34" data-reviewer="helloworld922"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-helloworld922">helloworld922</a></td></tr>
+      <tr class="age-medium" data-overdue="34" data-reviewer="v-dobrev"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-v-dobrev">v-dobrev</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1743,14 +1836,14 @@
   </table>
   </div>
 </section>
-<section class="reviewer age-new" data-number="5330" data-overdue="5" data-updated="2026-05-15" data-count="1" data-visible-count="1">
+<section class="reviewer age-new" data-number="5330" data-overdue="6" data-updated="2026-05-15" data-count="1" data-visible-count="1">
   <div class="reviewer-header"><h2><span class="status-icon">🟢</span> <a href="https://github.com/mfem/mfem/pull/5330">#5330</a> Add device assembly support for H(curl) VectorFEDomainLFIntegrator</h2><span class="count">1 reviewer</span></div>
   <div class="panel-body">
-  <div class="pr-meta"><span>Due: <strong>2026-05-29</strong></span><span>Overdue: <strong>5d</strong></span><span>Updated: <strong>2026-05-15</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
+  <div class="pr-meta"><span>Due: <strong>2026-05-29</strong></span><span>Overdue: <strong>6d</strong></span><span>Updated: <strong>2026-05-15</strong></span><button class="tool-button copy-command" type="button">Copy GitHub comment</button></div>
   <table>
     <thead><tr><th>Reviewer</th></tr></thead>
     <tbody>
-      <tr class="age-new" data-overdue="5" data-reviewer="mlstowell"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-mlstowell">mlstowell</a></td></tr>
+      <tr class="age-new" data-overdue="6" data-reviewer="mlstowell"><td class="reviewer-name"><a class="reviewer-jump" href="#reviewer-mlstowell">mlstowell</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -1796,7 +1889,7 @@
       </div>
     </section>
 
-    <section id="tab-leaders" class="tab-panel active">
+    <section id="tab-leaders" class="tab-panel">
 <div class="leaderboard-tools"><span>Leaderboard period</span><div class="period-radios" role="radiogroup" aria-label="Leaderboard period"><label><input type="radio" name="leaderboard-period" value="week"> Week</label><label><input type="radio" name="leaderboard-period" value="month" checked> Month</label><label><input type="radio" name="leaderboard-period" value="quarter"> Quarter</label><label><input type="radio" name="leaderboard-period" value="six-months"> 6 months</label></div></div>
 <div class="leaderboard-period" data-period="week">
 <div class="leader-cards">
@@ -1846,26 +1939,26 @@
 <div class="leaderboard-period" data-period="quarter">
 <div class="leader-cards">
   <article class="leader-card rank-1"><div class="leader-rank">🏆 #1</div><h3><a class="leaderboard-jump" href="#reviewer-camierjs">camierjs</a></h3><dl><div><dt>Approvals</dt><dd>12</dd></div><div><dt>On time</dt><dd>6 (40%)</dd></div><div><dt>Late now</dt><dd>3</dd></div></dl></article>
-  <article class="leader-card rank-2"><div class="leader-rank">🥈 #2</div><h3><a class="leaderboard-jump" href="#reviewer-kmittal2">kmittal2</a></h3><dl><div><dt>Approvals</dt><dd>8</dd></div><div><dt>On time</dt><dd>6 (55%)</dd></div><div><dt>Late now</dt><dd>3</dd></div></dl></article>
+  <article class="leader-card rank-2"><div class="leader-rank">🥈 #2</div><h3><a class="leaderboard-jump" href="#reviewer-kmittal2">kmittal2</a></h3><dl><div><dt>Approvals</dt><dd>9</dd></div><div><dt>On time</dt><dd>6 (50%)</dd></div><div><dt>Late now</dt><dd>3</dd></div></dl></article>
   <article class="leader-card rank-3"><div class="leader-rank">🥉 #3</div><h3><a class="leaderboard-jump" href="#reviewer-helloworld922">helloworld922</a></h3><dl><div><dt>Approvals</dt><dd>7</dd></div><div><dt>On time</dt><dd>5 (45%)</dd></div><div><dt>Late now</dt><dd>4</dd></div></dl></article>
 </div>
 <table class="leaderboard-table">
   <thead><tr><th>Rank</th><th>Reviewer</th><th>Score</th><th>Approvals</th><th>On time</th><th>Currently late</th><th>On-time rate</th><th>Latest review</th></tr></thead>
   <tbody>
     <tr><td class="rank">🏆 #1</td><td><a class="leaderboard-jump" href="#reviewer-camierjs">camierjs</a></td><td>18</td><td>12</td><td>6</td><td>3</td><td>40%</td><td class="date">2026-06-01</td></tr>
-    <tr><td class="rank">🥈 #2</td><td><a class="leaderboard-jump" href="#reviewer-kmittal2">kmittal2</a></td><td>14</td><td>8</td><td>6</td><td>3</td><td>55%</td><td class="date">2026-05-26</td></tr>
+    <tr><td class="rank">🥈 #2</td><td><a class="leaderboard-jump" href="#reviewer-kmittal2">kmittal2</a></td><td>15</td><td>9</td><td>6</td><td>3</td><td>50%</td><td class="date">2026-05-26</td></tr>
     <tr><td class="rank">🥉 #3</td><td><a class="leaderboard-jump" href="#reviewer-helloworld922">helloworld922</a></td><td>9</td><td>7</td><td>5</td><td>4</td><td>45%</td><td class="date">2026-05-20</td></tr>
     <tr><td class="rank">⭐ #4</td><td><a class="leaderboard-jump" href="#reviewer-pazner">pazner</a></td><td>8</td><td>12</td><td>8</td><td>10</td><td>36%</td><td class="date">2026-06-02</td></tr>
     <tr><td class="rank">⭐ #5</td><td><a class="leaderboard-jump" href="#reviewer-tzanio">tzanio</a></td><td>6</td><td>8</td><td>7</td><td>8</td><td>44%</td><td class="date">2026-06-03</td></tr>
-    <tr><td class="rank">⭐ #6</td><td><a class="leaderboard-jump" href="#reviewer-najlkin">najlkin</a></td><td>3</td><td>7</td><td>4</td><td>6</td><td>31%</td><td class="date">2026-06-01</td></tr>
+    <tr><td class="rank">⭐ #6</td><td><a class="leaderboard-jump" href="#reviewer-najlkin">najlkin</a></td><td>4</td><td>8</td><td>4</td><td>6</td><td>29%</td><td class="date">2026-06-01</td></tr>
     <tr><td class="rank">⭐ #7</td><td><a class="leaderboard-jump" href="#reviewer-dylan-copeland">dylan-copeland</a></td><td>3</td><td>5</td><td>3</td><td>4</td><td>33%</td><td class="date">2026-05-27</td></tr>
     <tr><td class="rank">⭐ #8</td><td><a class="leaderboard-jump" href="#reviewer-stefanozampini">stefanozampini</a></td><td>2</td><td>2</td><td>1</td><td>1</td><td>33%</td><td class="date">2026-04-08</td></tr>
     <tr><td class="rank">⭐ #9</td><td><a href="https://github.com/hughcars">hughcars</a></td><td>1</td><td>1</td><td>0</td><td>0</td><td>0%</td><td class="date">2026-03-10</td></tr>
     <tr><td class="rank">⭐ #10</td><td><a class="leaderboard-jump" href="#reviewer-psocratis">psocratis</a></td><td>0</td><td>6</td><td>3</td><td>6</td><td>25%</td><td class="date">2026-05-28</td></tr>
     <tr><td class="rank">⭐ #11</td><td><a class="leaderboard-jump" href="#reviewer-cjvogl">cjvogl</a></td><td>0</td><td>2</td><td>1</td><td>2</td><td>25%</td><td class="date">2026-05-21</td></tr>
     <tr><td class="rank">⭐ #12</td><td><a class="leaderboard-jump" href="#reviewer-jdongg">jdongg</a></td><td>0</td><td>2</td><td>0</td><td>1</td><td>0%</td><td class="date">2026-06-02</td></tr>
-    <tr><td class="rank">⭐ #13</td><td><a class="leaderboard-jump" href="#reviewer-vladotomov">vladotomov</a></td><td>-8</td><td>2</td><td>1</td><td>6</td><td>13%</td><td class="date">2026-05-19</td></tr>
-    <tr><td class="rank">⭐ #14</td><td><a class="leaderboard-jump" href="#reviewer-mlstowell">mlstowell</a></td><td>-9</td><td>9</td><td>2</td><td>11</td><td>10%</td><td class="date">2026-05-19</td></tr>
+    <tr><td class="rank">⭐ #13</td><td><a class="leaderboard-jump" href="#reviewer-mlstowell">mlstowell</a></td><td>-8</td><td>10</td><td>2</td><td>11</td><td>10%</td><td class="date">2026-05-19</td></tr>
+    <tr><td class="rank">⭐ #14</td><td><a class="leaderboard-jump" href="#reviewer-vladotomov">vladotomov</a></td><td>-8</td><td>2</td><td>1</td><td>6</td><td>13%</td><td class="date">2026-05-19</td></tr>
     <tr><td class="rank">⭐ #15</td><td><a class="leaderboard-jump" href="#reviewer-bslazarov">bslazarov</a></td><td>-15</td><td>1</td><td>0</td><td>8</td><td>0%</td><td class="date">2026-04-08</td></tr>
     <tr><td class="rank">⭐ #16</td><td><a class="leaderboard-jump" href="#reviewer-jandrej">jandrej</a></td><td>-19</td><td>5</td><td>2</td><td>14</td><td>11%</td><td class="date">2026-05-05</td></tr>
     <tr><td class="rank">⭐ #17</td><td><a class="leaderboard-jump" href="#reviewer-v-dobrev">v-dobrev</a></td><td>-34</td><td>6</td><td>3</td><td>23</td><td>10%</td><td class="date">2026-06-01</td></tr>
@@ -1874,36 +1967,36 @@
 </div>
 <div class="leaderboard-period" data-period="six-months">
 <div class="leader-cards">
-  <article class="leader-card rank-1"><div class="leader-rank">🏆 #1</div><h3><a class="leaderboard-jump" href="#reviewer-camierjs">camierjs</a></h3><dl><div><dt>Approvals</dt><dd>20</dd></div><div><dt>On time</dt><dd>14 (61%)</dd></div><div><dt>Late now</dt><dd>3</dd></div></dl></article>
+  <article class="leader-card rank-1"><div class="leader-rank">🏆 #1</div><h3><a class="leaderboard-jump" href="#reviewer-camierjs">camierjs</a></h3><dl><div><dt>Approvals</dt><dd>21</dd></div><div><dt>On time</dt><dd>14 (58%)</dd></div><div><dt>Late now</dt><dd>3</dd></div></dl></article>
   <article class="leader-card rank-2"><div class="leader-rank">🥈 #2</div><h3><a class="leaderboard-jump" href="#reviewer-tzanio">tzanio</a></h3><dl><div><dt>Approvals</dt><dd>20</dd></div><div><dt>On time</dt><dd>17 (61%)</dd></div><div><dt>Late now</dt><dd>8</dd></div></dl></article>
   <article class="leader-card rank-3"><div class="leader-rank">🥉 #3</div><h3><a class="leaderboard-jump" href="#reviewer-helloworld922">helloworld922</a></h3><dl><div><dt>Approvals</dt><dd>20</dd></div><div><dt>On time</dt><dd>13 (54%)</dd></div><div><dt>Late now</dt><dd>4</dd></div></dl></article>
 </div>
 <table class="leaderboard-table">
   <thead><tr><th>Rank</th><th>Reviewer</th><th>Score</th><th>Approvals</th><th>On time</th><th>Currently late</th><th>On-time rate</th><th>Latest review</th></tr></thead>
   <tbody>
-    <tr><td class="rank">🏆 #1</td><td><a class="leaderboard-jump" href="#reviewer-camierjs">camierjs</a></td><td>42</td><td>20</td><td>14</td><td>3</td><td>61%</td><td class="date">2026-06-01</td></tr>
+    <tr><td class="rank">🏆 #1</td><td><a class="leaderboard-jump" href="#reviewer-camierjs">camierjs</a></td><td>43</td><td>21</td><td>14</td><td>3</td><td>58%</td><td class="date">2026-06-01</td></tr>
     <tr><td class="rank">🥈 #2</td><td><a class="leaderboard-jump" href="#reviewer-tzanio">tzanio</a></td><td>38</td><td>20</td><td>17</td><td>8</td><td>61%</td><td class="date">2026-06-03</td></tr>
     <tr><td class="rank">🥉 #3</td><td><a class="leaderboard-jump" href="#reviewer-helloworld922">helloworld922</a></td><td>38</td><td>20</td><td>13</td><td>4</td><td>54%</td><td class="date">2026-05-20</td></tr>
     <tr><td class="rank">⭐ #4</td><td><a class="leaderboard-jump" href="#reviewer-dylan-copeland">dylan-copeland</a></td><td>35</td><td>17</td><td>13</td><td>4</td><td>62%</td><td class="date">2026-05-27</td></tr>
     <tr><td class="rank">⭐ #5</td><td><a class="leaderboard-jump" href="#reviewer-pazner">pazner</a></td><td>33</td><td>21</td><td>16</td><td>10</td><td>52%</td><td class="date">2026-06-02</td></tr>
-    <tr><td class="rank">⭐ #6</td><td><a class="leaderboard-jump" href="#reviewer-kmittal2">kmittal2</a></td><td>20</td><td>10</td><td>8</td><td>3</td><td>62%</td><td class="date">2026-05-26</td></tr>
-    <tr><td class="rank">⭐ #7</td><td><a class="leaderboard-jump" href="#reviewer-najlkin">najlkin</a></td><td>19</td><td>13</td><td>9</td><td>6</td><td>47%</td><td class="date">2026-06-01</td></tr>
+    <tr><td class="rank">⭐ #6</td><td><a class="leaderboard-jump" href="#reviewer-kmittal2">kmittal2</a></td><td>21</td><td>11</td><td>8</td><td>3</td><td>57%</td><td class="date">2026-05-26</td></tr>
+    <tr><td class="rank">⭐ #7</td><td><a class="leaderboard-jump" href="#reviewer-najlkin">najlkin</a></td><td>20</td><td>14</td><td>9</td><td>6</td><td>45%</td><td class="date">2026-06-01</td></tr>
     <tr><td class="rank">⭐ #8</td><td><a class="leaderboard-jump" href="#reviewer-psocratis">psocratis</a></td><td>17</td><td>13</td><td>8</td><td>6</td><td>42%</td><td class="date">2026-05-28</td></tr>
     <tr><td class="rank">⭐ #9</td><td><a class="leaderboard-jump" href="#reviewer-justinlaughlin">justinlaughlin</a></td><td>12</td><td>6</td><td>4</td><td>1</td><td>57%</td><td class="date">2026-01-25</td></tr>
-    <tr><td class="rank">⭐ #10</td><td><a class="leaderboard-jump" href="#reviewer-mlstowell">mlstowell</a></td><td>8</td><td>18</td><td>6</td><td>11</td><td>21%</td><td class="date">2026-05-19</td></tr>
+    <tr><td class="rank">⭐ #10</td><td><a class="leaderboard-jump" href="#reviewer-mlstowell">mlstowell</a></td><td>9</td><td>19</td><td>6</td><td>11</td><td>20%</td><td class="date">2026-05-19</td></tr>
     <tr><td class="rank">⭐ #11</td><td><a class="leaderboard-jump" href="#reviewer-stefanozampini">stefanozampini</a></td><td>5</td><td>3</td><td>2</td><td>1</td><td>50%</td><td class="date">2026-04-08</td></tr>
     <tr><td class="rank">⭐ #12</td><td><a href="https://github.com/thartland">thartland</a></td><td>3</td><td>1</td><td>1</td><td>0</td><td>100%</td><td class="date">2026-01-24</td></tr>
     <tr><td class="rank">⭐ #13</td><td><a class="leaderboard-jump" href="#reviewer-cjvogl">cjvogl</a></td><td>1</td><td>3</td><td>1</td><td>2</td><td>20%</td><td class="date">2026-05-21</td></tr>
     <tr><td class="rank">⭐ #14</td><td><a class="leaderboard-jump" href="#reviewer-jamiebramwell">jamiebramwell</a></td><td>1</td><td>1</td><td>1</td><td>1</td><td>50%</td><td class="date">2025-12-16</td></tr>
-    <tr><td class="rank">⭐ #15</td><td><a href="https://github.com/IdoAkkerman">IdoAkkerman</a></td><td>1</td><td>1</td><td>0</td><td>0</td><td>0%</td><td class="date">2026-01-13</td></tr>
-    <tr><td class="rank">⭐ #16</td><td><a href="https://github.com/hughcars">hughcars</a></td><td>1</td><td>1</td><td>0</td><td>0</td><td>0%</td><td class="date">2026-03-10</td></tr>
+    <tr><td class="rank">⭐ #15</td><td><a href="https://github.com/hughcars">hughcars</a></td><td>1</td><td>1</td><td>0</td><td>0</td><td>0%</td><td class="date">2026-03-10</td></tr>
+    <tr><td class="rank">⭐ #16</td><td><a href="https://github.com/IdoAkkerman">IdoAkkerman</a></td><td>1</td><td>1</td><td>0</td><td>0</td><td>0%</td><td class="date">2026-01-13</td></tr>
     <tr><td class="rank">⭐ #17</td><td><a href="https://github.com/tomstitt">tomstitt</a></td><td>1</td><td>1</td><td>0</td><td>0</td><td>0%</td><td class="date">2026-01-30</td></tr>
     <tr><td class="rank">⭐ #18</td><td><a class="leaderboard-jump" href="#reviewer-jdongg">jdongg</a></td><td>0</td><td>2</td><td>0</td><td>1</td><td>0%</td><td class="date">2026-06-02</td></tr>
     <tr><td class="rank">⭐ #19</td><td><a class="leaderboard-jump" href="#reviewer-artv3">artv3</a></td><td>-1</td><td>1</td><td>1</td><td>2</td><td>33%</td><td class="date">2026-02-17</td></tr>
     <tr><td class="rank">⭐ #20</td><td><a class="leaderboard-jump" href="#reviewer-acfisher">acfisher</a></td><td>-1</td><td>1</td><td>0</td><td>1</td><td>0%</td><td class="date">2026-02-13</td></tr>
     <tr><td class="rank">⭐ #21</td><td><a class="leaderboard-jump" href="#reviewer-jandrej">jandrej</a></td><td>-3</td><td>11</td><td>7</td><td>14</td><td>28%</td><td class="date">2026-05-05</td></tr>
     <tr><td class="rank">⭐ #22</td><td><a class="leaderboard-jump" href="#reviewer-vladotomov">vladotomov</a></td><td>-4</td><td>4</td><td>2</td><td>6</td><td>20%</td><td class="date">2026-05-19</td></tr>
-    <tr><td class="rank">⭐ #23</td><td><a class="leaderboard-jump" href="#reviewer-bslazarov">bslazarov</a></td><td>-12</td><td>2</td><td>1</td><td>8</td><td>10%</td><td class="date">2026-04-08</td></tr>
+    <tr><td class="rank">⭐ #23</td><td><a class="leaderboard-jump" href="#reviewer-bslazarov">bslazarov</a></td><td>-11</td><td>3</td><td>1</td><td>8</td><td>9%</td><td class="date">2026-04-08</td></tr>
     <tr><td class="rank">⭐ #24</td><td><a class="leaderboard-jump" href="#reviewer-v-dobrev">v-dobrev</a></td><td>-18</td><td>14</td><td>7</td><td>23</td><td>19%</td><td class="date">2026-06-01</td></tr>
   </tbody>
 </table>
@@ -1919,10 +2012,16 @@
     Leaderboard includes open <code>in-review</code> PR approvals, including PRs already
     labeled <code>in-next</code>, plus merged PRs from
     <code>gh pr list --repo mfem/mfem --state merged --search "merged:>=2025-12-04"</code>.
+    PRs with 100 review records in <code>gh pr list</code> are refreshed with
+    paginated <code>gh api repos/mfem/mfem/pulls/&lt;number&gt;/reviews</code>.
     Leaderboard score: 3 points per on-time approval, 1 point per late approval,
     and -2 points per currently late assignment.
+    Metrics: reviews completed are first approvals from assigned GHEX reviewers in
+    the 6-month period; on-time rate is on-time approvals divided by completed
+    approvals plus currently late assignments; PRs fully reviewed have approvals
+    from all current GHEX reviewers in the 6-month period.
     Color severity: green &lt;7d, yellow 7-29d, orange 30-89d, red 90-364d, purple 365d+.
-    Generated on 2026-06-04 02:43 UTC.
+    Generated on 2026-06-04 15:54 UTC.
   </footer>
   <script>
     const buttons = Array.from(document.querySelectorAll(".tab-button"));
@@ -1958,7 +2057,11 @@
     function sortPeople() {
       const mode = reviewerSort.value;
       sortSections(peopleList, (a, b) => {
-        const byName = a.dataset.reviewer.localeCompare(b.dataset.reviewer);
+        const byName = a.dataset.reviewer.localeCompare(
+          b.dataset.reviewer,
+          undefined,
+          { sensitivity: "base" }
+        );
         if (mode === "count") {
           const byCount = Number(b.dataset.visibleCount) - Number(a.dataset.visibleCount);
           return byCount || byName;
@@ -1987,6 +2090,36 @@
       }
       for (const [panelName, panel] of Object.entries(panels)) {
         panel.classList.toggle("active", panelName === name);
+      }
+    }
+    function currentTab() {
+      const active = buttons.find((button) => button.classList.contains("active"));
+      return active ? active.dataset.tab : "people";
+    }
+    function baseURL() {
+      return window.location.href.split("#")[0];
+    }
+    function pushTabState(name) {
+      showTab(name);
+      history.pushState({ tab: name }, "", baseURL());
+    }
+    function openReviewerLink(link) {
+      const hash = link.getAttribute("href");
+      showTab("people");
+      const target = document.querySelector(hash);
+      if (target) {
+        target.scrollIntoView({ block: "start" });
+        history.pushState({ tab: "people", target: hash }, "", hash);
+      }
+    }
+    function restoreHistoryState(state) {
+      const view = state || { tab: location.hash.startsWith("#reviewer-") ? "people" : "people" };
+      showTab(view.tab || "people");
+      if (view.target) {
+        const target = document.querySelector(view.target);
+        if (target) {
+          target.scrollIntoView({ block: "start" });
+        }
       }
     }
     function setCollapsed(containerId, collapsed) {
@@ -2199,7 +2332,7 @@
     }
     for (const button of buttons) {
       button.addEventListener("click", () => {
-        showTab(button.dataset.tab);
+        pushTabState(button.dataset.tab);
       });
     }
     for (const button of document.querySelectorAll(".collapse-toggle")) {
@@ -2251,12 +2384,7 @@
     for (const link of document.querySelectorAll(".reviewer-jump")) {
       link.addEventListener("click", (event) => {
         event.preventDefault();
-        showTab("people");
-        const target = document.querySelector(link.getAttribute("href"));
-        if (target) {
-          target.scrollIntoView({ block: "start" });
-          history.replaceState(null, "", link.getAttribute("href"));
-        }
+        openReviewerLink(link);
       });
     }
     panels.leaders.addEventListener("click", (event) => {
@@ -2265,18 +2393,17 @@
         return;
       }
       event.preventDefault();
-      showTab("people");
-      const target = document.querySelector(link.getAttribute("href"));
-      if (target) {
-        target.scrollIntoView({ block: "start" });
-        history.replaceState(null, "", link.getAttribute("href"));
-      }
+      openReviewerLink(link);
+    });
+    window.addEventListener("popstate", (event) => {
+      restoreHistoryState(event.state);
     });
     captureOriginalSeverity();
     sortPeople();
     sortPRs();
     applyOverdueFilter();
     checkStaleReport();
+    history.replaceState({ tab: currentTab() }, "", location.href);
     setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
   </script>
 </body>
