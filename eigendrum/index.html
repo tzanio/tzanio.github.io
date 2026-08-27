@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f3efe7" />
+  <meta name="description" content="An MFEM-based browser instrument for hearing and seeing membrane eigenmodes." />
+  <title>EigenDrum — MFEM edition</title>
+  <link rel="stylesheet" href="./src/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><circle cx=%2232%22 cy=%2232%22 r=%2226%22 fill=%22none%22 stroke=%22%231d1d1b%22 stroke-width=%224%22/><path d=%22M12 34Q22 18 32 34T52 34%22 fill=%22none%22 stroke=%22%23b54b37%22 stroke-width=%224%22/></svg>" />
+</head>
+<body>
+  <noscript>This application requires JavaScript.</noscript>
+  <div id="app">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">A finite-element musical instrument</p>
+        <h1>EigenDrum <span>MFEM edition</span></h1>
+      </div>
+      <div class="masthead-meta">
+        <span id="backend-badge" class="badge">Loading solver…</span>
+        <a href="https://mfem.org" target="_blank" rel="noreferrer">MFEM</a>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="controls" aria-label="Instrument controls">
+        <section class="control-section">
+          <h2>Shape</h2>
+          <div id="shape-grid" class="shape-grid" role="group" aria-label="Membrane shapes">
+            <button class="shape-button is-active" data-shape="circle" title="Circle" aria-label="Circle">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15"/></svg><span>Circle</span>
+            </button>
+            <button class="shape-button" data-shape="square" title="Square" aria-label="Square">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="10" width="28" height="28"/></svg><span>Square</span>
+            </button>
+            <button class="shape-button" data-shape="triangle" title="Triangle" aria-label="Triangle">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8 L40 38 L8 38 Z"/></svg><span>Triangle</span>
+            </button>
+            <button class="shape-button" data-shape="star" title="Five-point star" aria-label="Five-point star">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 6 L28.2 18.2 L41 18.5 L30.8 26.2 L34.5 39 L24 31.7 L13.5 39 L17.2 26.2 L7 18.5 L19.8 18.2 Z"/></svg><span>Star</span>
+            </button>
+            <button class="shape-button" data-shape="flower" title="Flower" aria-label="Flower">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8 C29 8 29 16 33 14 C38 12 42 18 38 22 C35 25 42 30 38 35 C34 40 29 34 27 39 C25 44 18 42 18 37 C18 33 10 36 9 30 C8 24 16 25 13 20 C10 15 16 11 20 14 C22 16 21 8 24 8 Z"/></svg><span>Flower</span>
+            </button>
+            <button class="shape-button" data-shape="lshape" title="L-shaped domain" aria-label="L-shaped domain">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 9 H24 V24 H39 V39 H10 Z"/></svg><span>L-shape</span>
+            </button>
+          </div>
+          <button id="draw-button" class="wide-button secondary">Draw your own shape</button>
+          <p id="draw-help" class="help" hidden>Click or drag a simple outline. Release near the first point to auto-close and smooth it. Press <kbd>Enter</kbd> to finish or <kbd>Esc</kbd> to cancel.</p>
+        </section>
+
+        <section class="control-section">
+          <h2>Discretization</h2>
+          <label class="field-row" for="dof-target">
+            <span>Interior DOFs</span><output id="dof-target-output">400</output>
+          </label>
+          <input id="dof-target" type="range" min="160" max="6000" step="40" value="400" />
+          <label class="field-row" for="mode-count">
+            <span>Eigenmodes</span><output id="mode-count-output">10</output>
+          </label>
+          <input id="mode-count" type="range" min="4" max="20" step="1" value="10" />
+          <p class="help">Conforming P1 triangles, consistent mass, and homogeneous Dirichlet boundary conditions.</p>
+        </section>
+
+        <section class="control-section">
+          <h2>Sound</h2>
+          <label class="field-row" for="pitch"><span>Reference pitch</span><output id="pitch-output">220 Hz</output></label>
+          <input id="pitch" type="range" min="80" max="520" step="1" value="220" />
+          <label class="field-row" for="decay"><span>Decay</span><output id="decay-output">2.8 s</output></label>
+          <input id="decay" type="range" min="0.5" max="8" step="0.1" value="2.8" />
+          <label class="field-row" for="brightness"><span>Brightness</span><output id="brightness-output">55%</output></label>
+          <input id="brightness" type="range" min="0" max="100" step="1" value="55" />
+          <label class="field-row" for="mallet"><span>Mallet size</span><output id="mallet-output">6%</output></label>
+          <input id="mallet" type="range" min="2" max="16" step="1" value="6" />
+        </section>
+
+        <section class="control-section">
+          <h2>View</h2>
+          <label class="select-row">Palette
+            <select id="palette-select"></select>
+          </label>
+          <label class="check-row"><input id="mesh-toggle" type="checkbox" /> Mesh edges</label>
+          <label class="check-row"><input id="nodal-toggle" type="checkbox" /> Nodal lines</label>
+          <label class="field-row" for="display-gain"><span>Displacement color gain</span><output id="display-gain-output">1×</output></label>
+          <input id="display-gain" type="range" min="1" max="64" step="1" value="1" />
+          <label class="check-row"><input id="auto-contrast" type="checkbox" /> Auto-range each frame</label>
+          <p class="help">Display-only amplification of the signed transverse displacement encoded by color. It changes neither the membrane solution nor the sound. GLVis export keeps the field values unscaled and records this setting only as a suggested color range and vertical stretch.</p>
+        </section>
+
+        <section class="control-section">
+          <h2>GLVis export</h2>
+          <label class="select-row">Fundamental cycles
+            <select id="glvis-cycles">
+              <option value="2">2 cycles</option>
+              <option value="4" selected>4 cycles</option>
+              <option value="6">6 cycles</option>
+              <option value="8">8 cycles</option>
+            </select>
+          </label>
+          <label class="select-row">Playback rate
+            <select id="glvis-fps">
+              <option value="24">24 fps</option>
+              <option value="30" selected>30 fps</option>
+              <option value="60">60 fps</option>
+            </select>
+          </label>
+          <button id="export-glvis" class="wide-button secondary" disabled>Export last vibration</button>
+          <p class="help">Strike first. The ZIP contains the MFEM mesh, exact time-dependent P1 grid functions, a GLVis stepping script, and a standard-library Python player. Physical time is replayed in slow motion to resolve the audible modes without temporal aliasing.</p>
+        </section>
+      </aside>
+
+      <section class="instrument" aria-label="EigenDrum instrument">
+        <div class="instrument-header">
+          <div>
+            <p class="panel-kicker">Strike anywhere on the membrane</p>
+            <h2 id="shape-title">Unit-area circle</h2>
+          </div>
+          <div id="solve-status" class="solve-status" role="status" aria-live="polite">Preparing mesh…</div>
+        </div>
+
+        <figure class="view-card primary-view">
+          <figcaption><span>Top view</span><small>Click to strike</small></figcaption>
+          <div id="top-view-wrap" class="canvas-wrap">
+            <canvas id="top-view" aria-label="Top-down membrane visualization"></canvas>
+            <div id="drawing-overlay" class="drawing-overlay" hidden>
+              <span>Draw a closed membrane outline</span>
+            </div>
+          </div>
+        </figure>
+
+        <div class="readout" id="readout">
+          <span><strong id="readout-dofs">—</strong> interior DOFs</span>
+          <span><strong id="readout-elements">—</strong> triangles</span>
+          <span><strong id="readout-residual">—</strong> max residual</span>
+          <span><strong id="readout-time">—</strong> solve</span>
+        </div>
+
+        <section class="spectrum-section">
+          <div class="section-heading">
+            <div><p class="panel-kicker">Computed spectrum</p><h2>Eigenmodes</h2></div>
+            <p id="mode-caption">Select a mode to inspect it while the drum is idle.</p>
+          </div>
+          <div id="mode-strip" class="mode-strip" role="listbox" aria-label="Eigenmode spectrum"></div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <p>Homogeneous membrane model: <span class="math">−Δu = λu</span> in Ω, <span class="math">u = 0</span> on ∂Ω. The browser uses MFEM when the WebAssembly module is present and a numerically matched P1 reference backend otherwise.</p>
+    </footer>
+  </div>
+  <script>
+    window.addEventListener('error', (event) => {
+      const status = document.querySelector('#solve-status');
+      if (status) {
+        status.textContent = `Startup error: ${event.message || 'a local module could not be loaded'}`;
+        status.classList.add('is-error');
+      }
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+      const status = document.querySelector('#solve-status');
+      if (status) {
+        const message = event.reason instanceof Error ? event.reason.message : String(event.reason);
+        status.textContent = `Startup error: ${message}`;
+        status.classList.add('is-error');
+      }
+    });
+  </script>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+Prebuilt MFEM WebAssembly backend: NOT PRESENT
+
+The v3.2 static site therefore labels and uses the independent
+"Reference P1 FEM · MFEM-matched" backend. It does not claim that fallback
+computations were performed by MFEM.
+
+The source archive contains the MFEM 4.9 C++ kernel and an Emscripten build
+script. Running scripts/build-mfem-wasm.sh in an activated Emscripten
+environment produces mfem/mfem_drum.js and mfem/mfem_drum.wasm; the same
+no-npm site then selects MFEM automatically.
