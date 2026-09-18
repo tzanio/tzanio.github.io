@@ -1,0 +1,204 @@
+"""Bounded, acknowledged delivery of complete native GLVis protocol records."""
+import json
+import os
+import resource
+import socket
+import subprocess
+import threading
+
+MAX_FRAME = 64 * 1024 * 1024
+ACK_TIMEOUT = 120
+
+
+def records(source):
+    """Read framed records without depending on pipe/read packet boundaries."""
+    while True:
+        header = source.readline(80)
+        if not header:
+            return
+        fields = header.split()
+        if not header.endswith(b'\n') or len(fields) != 2 or fields[0] not in (b'F', b'C'):
+            raise ValueError('Invalid GLVis framer output')
+        size = int(fields[1])
+        if not 0 < size <= MAX_FRAME:
+            raise ValueError('GLVis frame exceeds 64 MiB or is empty')
+        data = bytearray()
+        while len(data) < size:
+            part = source.read(min(65536, size - len(data)))
+            if not part:
+                raise ValueError('Incomplete GLVis framer output')
+            data.extend(part)
+        yield fields[0], data
+
+
+class Visualizations:
+    def __init__(self, emit, snapshot, helper='/usr/local/bin/studio-glvis-stream'):
+        self.emit, self.snapshot, self.helper = emit, snapshot, helper
+        self.lock = threading.Lock()
+        self.channels, self.deliveries = {}, {}
+        # Bound simultaneous parsers, buffers and outstanding browser snapshots.
+        self.slots = threading.BoundedSemaphore(8)
+
+    def acknowledge(self, path):
+        with self.lock:
+            event = self.deliveries.get(path)
+        if event:
+            event.set()
+
+    def control(self, number, op, step=False):
+        with self.lock:
+            channel = self.channels.get(number)
+        if not channel:
+            return False
+        if op == 'vis-cancel':
+            channel.cancel()
+        elif op == 'vis-pause':
+            channel.play.clear()
+        else:
+            channel.single_step = step
+            channel.play.set()
+        return True
+
+    def serve(self, connection, number):
+        if not self.slots.acquire(blocking=False):
+            connection.close()
+            self.emit({'event': 'error', 'error': 'At most eight GLVis connections can be active.'})
+            return
+        channel = Channel(self, connection, number)
+        with self.lock:
+            self.channels[number] = channel
+        try:
+            channel.run()
+        except Exception as error:
+            if not channel.cancelled.is_set():
+                self.emit({'event': 'error', 'client': number, 'error': 'GLVis: ' + str(error)})
+        finally:
+            channel.cancel()
+            with self.lock:
+                self.channels.pop(number, None)
+            self.slots.release()
+            self.emit({'event': 'glvis-end', 'client': number, 'frames': channel.frame})
+
+
+class Channel:
+    def __init__(self, manager, connection, number):
+        self.manager, self.connection, self.number = manager, connection, number
+        self.play, self.cancelled = threading.Event(), threading.Event()
+        self.play.set()
+        self.single_step = False
+        self.autopause = False
+        self.process = None
+        self.frame = 0
+
+    def cancel(self):
+        self.cancelled.set()
+        self.play.set()
+        try:
+            self.connection.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
+        self.connection.close()
+        if self.process and self.process.poll() is None:
+            self.process.terminate()
+
+    def wait_play(self):
+        self.play.wait()
+        if self.cancelled.is_set():
+            raise RuntimeError('Visualization cancelled')
+
+    def pause(self):
+        self.play.clear()
+        self.manager.emit({'event': 'glvis-command', 'client': self.number,
+                           'command': 'pause', 'args': []})
+        self.wait_play()
+
+    def deliver(self, data):
+        self.wait_play()
+        path = self.manager.snapshot(data)
+        ack = threading.Event()
+        with self.manager.lock:
+            self.manager.deliveries[path] = ack
+        self.frame += 1
+        try:
+            self.manager.emit({'event': 'glvis', 'client': self.number,
+                               'frame': self.frame, 'path': path})
+            # One outstanding snapshot per connection; backpressure propagates
+            # through the helper pipe and socket to the unmodified MFEM solver.
+            waited = 0
+            while not ack.wait(1):
+                if self.cancelled.is_set():
+                    raise RuntimeError('Visualization cancelled')
+                # A user may keep a paused visualization open indefinitely.
+                # Browser-held frames are still bounded to one per connection.
+                if not self.play.is_set():
+                    continue
+                waited += 1
+                if waited >= ACK_TIMEOUT:
+                    raise TimeoutError('Viewer did not acknowledge a frame within two minutes')
+        finally:
+            with self.manager.lock:
+                self.manager.deliveries.pop(path, None)
+            try:
+                os.unlink(path)
+            except FileNotFoundError:
+                pass
+
+    def run(self):
+        # Limit parser address space without preexec_fn (unsafe in this threaded
+        # bridge). The helper itself enforces the 64 MiB serialized frame limit.
+        self.process = subprocess.Popen([self.manager.helper], stdin=self.connection,
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        errors = bytearray()
+        def collect_errors():
+            while True:
+                data = self.process.stderr.read(4096)
+                if not data:
+                    return
+                errors.extend(data)
+                del errors[:-4096]
+        error_reader = threading.Thread(target=collect_errors, daemon=True)
+        error_reader.start()
+        try:
+            try:
+                resource.prlimit(self.process.pid, resource.RLIMIT_AS, (384 * 1024 * 1024,) * 2)
+            except (AttributeError, ProcessLookupError):
+                pass
+            try:
+                pause_before_frame = False
+                for kind, data in records(self.process.stdout):
+                    if kind == b'F':
+                        # Consume commands belonging to the previous frame
+                        # before stopping. Its explicit socket "pause" counts
+                        # as the same stop as Step/autopause, not a second stop.
+                        # In particular ex21 sends "pause" after every frame.
+                        if pause_before_frame and (self.single_step or self.autopause):
+                            self.pause()
+                        self.deliver(data)
+                        pause_before_frame = self.single_step or self.autopause
+                    else:
+                        command = json.loads(data)
+                        if command['command'] == 'pause':
+                            self.pause()
+                            pause_before_frame = False
+                        else:
+                            if command['command'] == 'autopause':
+                                self.autopause = command['args'][0] not in ('0', 'off')
+                                pause_before_frame = self.autopause or self.single_step
+                            self.manager.emit({'event': 'glvis-command', 'client': self.number, **command})
+                code = self.process.wait(timeout=5)
+                error_reader.join(timeout=5)
+                if code:
+                    detail = errors.decode('utf-8', 'replace').strip()
+                    raise ValueError(detail or 'Native GLVis parser exited with status ' + str(code))
+            finally:
+                if self.process.poll() is None:
+                    self.process.terminate()
+                    try:
+                        self.process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        self.process.kill()
+                        self.process.wait()
+                self.process.stdout.close()
+        finally:
+            error_reader.join(timeout=5)
+            self.process.stderr.close()

@@ -1,0 +1,16 @@
+main{display:grid;grid-template-columns:var(--files-width,224px) 6px minmax(0,1fr)}
+aside{width:auto;min-width:0;border-right:0;overflow:hidden}.work{display:grid;grid-template-rows:minmax(0,1fr) 6px var(--terminal-size,36%);min-height:0}
+.upper{display:grid;grid-template-columns:minmax(0,var(--editor-size,50%)) 6px minmax(0,1fr);min-height:0}
+.editor,.viewer{width:auto;min-width:0;min-height:0}.editor{border-right:0}.console{height:auto;min-height:0;border-top:0}
+.pane-separator{background:#1a2531;position:relative;touch-action:none;z-index:5;outline:0}.pane-separator:hover,.pane-separator:focus-visible{background:#6ba08c}
+.files-separator,.editor-separator{cursor:col-resize}.terminal-separator{cursor:row-resize}.pane-separator:focus-visible:after{content:'';position:absolute;inset:0;border:1px solid #b7f1cb}
+.resizing-panes,.resizing-panes *{user-select:none!important}.resizing-panes canvas{pointer-events:none}
+.bar .pane-maximize{font-size:14px;line-height:16px;padding:2px 6px;margin-left:7px;flex-shrink:0}.editor>.bar #filename{margin-right:auto}.editor>.bar #save{margin-left:8px}.console>.bar #boot-progress{margin-left:auto}
+.files-hidden main{grid-template-columns:minmax(0,1fr)}.files-hidden aside,.files-hidden .files-separator{display:none}
+body[data-maximized] main{grid-template-columns:minmax(0,1fr)}body[data-maximized] aside,body[data-maximized] .pane-separator{display:none}body[data-maximized] .work{display:flex;min-height:0}
+body[data-maximized="terminal"] .upper{display:none}body[data-maximized="terminal"] .console{flex:1;min-height:0}
+body[data-maximized="editor"] .console,body[data-maximized="viewer"] .console{display:none}
+body[data-maximized="editor"] .upper,body[data-maximized="viewer"] .upper{display:flex;flex:1;min-height:0}
+body[data-maximized="editor"] .viewer,body[data-maximized="viewer"] .editor{display:none}
+body[data-maximized="editor"] .editor,body[data-maximized="viewer"] .viewer{flex:1;width:100%;min-height:0}
+@media(max-width:850px){main{grid-template-columns:150px minmax(0,1fr)}.files-separator,.editor-separator{display:none}.upper{display:flex;flex-direction:column;overflow:auto}.editor,.viewer{min-height:280px;width:100%;flex-shrink:0}.editor{height:330px}.work{grid-template-rows:minmax(0,1fr) 6px var(--terminal-size,36%)}.console>.bar small,#boot-progress{display:none}header{flex-wrap:wrap;height:auto;min-height:62px;padding:8px 10px;gap:7px}header nav{flex-wrap:wrap}body[data-maximized] .upper{overflow:hidden}body[data-maximized] .editor,body[data-maximized] .viewer{height:auto;min-height:0}.pane-maximize{display:inline-block}}

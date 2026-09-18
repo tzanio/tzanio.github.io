@@ -1,0 +1,24 @@
+.mesh-inspector .inspect-top{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.mesh-inspector .inspect-frame{font-family:var(--wb-heading-font,inherit);font-size:11px}
+.mesh-inspector .inspect-summary{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin:10px 0}
+.mesh-inspector .inspect-summary dt{color:var(--wb-muted,#9aafc2)}
+.mesh-inspector .inspect-summary dd{margin:0;text-align:right;font-family:ui-monospace,monospace}
+.mesh-inspector .inspect-attributes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mesh-inspector .inspect-attributes b{display:block;font-size:11px}
+.mesh-inspector .inspect-attribute{display:inline-flex;align-items:center;gap:5px;margin-right:12px;font-family:ui-monospace,monospace}
+.mesh-inspector .inspect-attribute i{width:8px;height:8px;border-radius:2px}
+.mesh-inspector .inspect-preview-tools{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 8px}
+.mesh-inspector .inspect-preview-tools label{display:flex;align-items:center;gap:5px}
+.mesh-inspector .inspect-preview-tools select{max-width:155px;padding:4px;font-size:11px}
+.mesh-inspector .inspect-canvas{display:block;width:100%;height:auto;border:1px solid var(--wb-border,#455869);border-radius:5px;cursor:crosshair;touch-action:manipulation;box-sizing:border-box}
+.mesh-inspector .inspect-probe{display:flex;gap:8px;align-items:flex-end;margin:10px 0}
+.mesh-inspector .inspect-coordinates{display:flex;flex:1;min-width:0;gap:7px}
+.mesh-inspector .inspect-coordinates label{flex:1;min-width:0;color:var(--wb-muted,#9aafc2)}
+.mesh-inspector .inspect-coordinates input{display:block;width:100%;min-width:0}
+.mesh-inspector .inspect-probe>button{flex-shrink:0;padding:7px 9px}
+.mesh-inspector .inspect-probe-result{color:var(--wb-text,#d9e1ec);overflow-wrap:anywhere}
+.mesh-inspector details{font-size:11px;color:var(--wb-muted,#9aafc2)}
+.mesh-inspector details summary{cursor:pointer}
+.mesh-inspector .inspect-quality{color:var(--wb-text,#d9e1ec)}
+.mesh-inspector .inspect-field,.mesh-inspector .inspect-preview-note{font-size:11px}
+@media(max-width:450px){.mesh-inspector .inspect-attributes{grid-template-columns:1fr}.mesh-inspector .inspect-probe{flex-wrap:wrap}.mesh-inspector .inspect-coordinates{flex-basis:100%}}

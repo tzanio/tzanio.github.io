@@ -1,0 +1,29 @@
+{
+  "name": "CodeMirror",
+  "version": "5.65.21",
+  "license": "MIT",
+  "source": "https://github.com/codemirror/codemirror5/tree/5.65.21",
+  "archive": "https://registry.npmjs.org/codemirror/-/codemirror-5.65.21.tgz",
+  "archive_sha256": "b26d9d7ae0f42e34b44a8f7667d29a3ab0d3df88d0e79c0dad39dc03ba43f6dc",
+  "bundle_order": [
+    "lib/codemirror.js",
+    "mode/clike/clike.js",
+    "mode/python/python.js",
+    "mode/shell/shell.js",
+    "mode/cmake/cmake.js",
+    "mode/javascript/javascript.js",
+    "addon/dialog/dialog.js",
+    "addon/search/searchcursor.js",
+    "addon/search/search.js",
+    "addon/search/jump-to-line.js",
+    "addon/edit/matchbrackets.js",
+    "addon/edit/closebrackets.js",
+    "addon/comment/comment.js",
+    "addon/selection/active-line.js"
+  ],
+  "bundle_recipe": "Concatenate these unmodified upstream files with newline-semicolon-newline separators. Load as a classic browser script.",
+  "stylesheet_files": [
+    "lib/codemirror.css",
+    "addon/dialog/dialog.css"
+  ]
+}

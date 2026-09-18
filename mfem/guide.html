@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MFEM (web edition) · Documentation</title><link rel="stylesheet" href="style.css">
+<script src="themes.js"></script><link rel="stylesheet" href="themes.css">
+<style>body{height:auto;max-width:850px;margin:50px auto;padding:0 25px;line-height:1.7}h2{margin-top:36px}a{border:0;background:none;padding:0;color:var(--wb-accent)}code{color:var(--wb-text)}li{margin:8px 0}pre{overflow:auto;flex-shrink:0}</style>
+</head>
+<body>
+<a href="index.html">← Workstation</a>
+<h1>MFEM (web edition)</h1>
+<p>This workstation runs Linux on your device through WebAssembly. Bash, GCC, Make, Git and MFEM execute inside it. GitHub Pages serves static files. The GLVis pane uses the official GLVis WebAssembly renderer.</p>
+
+<h2>Run an example</h2>
+<p>Each fresh browser VM automatically runs the bundled <code>./ex1</code> and displays its actual solution in GLVis. After it finishes, the terminal is ready for your commands. Opening another shell does not repeat the startup solve. The dot beside <b>Alpine Linux</b> is amber while starting, green when ready, and red if the runtime stops.</p>
+<p>Export your current work before reloading an old tab to load the updated VM. Content-versioned assets prevent a new page from mixing with an older cached guest image.</p>
+<p>The terminal starts in <code>/root/mfem/examples</code>. All 37 targets selected by MFEM's default serial examples Makefile are already built, along with the shared and static MFEM libraries.</p>
+<pre>./ex1 -m ../data/star.mesh</pre>
+<p>Leave visualization enabled: the guest listens on localhost port 19916 and sends the solution to GLVis. Click the visualization before using keyboard shortcuts such as <code>m</code> for mesh and <code>p</code> for palette. No Cmd/Ctrl modifier is needed. Drag to rotate and scroll to zoom.</p>
+
+<h2>Watch a time-dependent solution</h2>
+<pre>./ex9 -r 1 -o 2 -tf 0.08 -dt 0.01 -vs 1</pre>
+<p>Example 9 initially pauses its visualization. Click <b>Resume</b>, press Space with GLVis focused, or use <b>Step</b> to display one more frame. Frames then update while the example's socket remains open. Pause holds incoming frames; socket backpressure can also make the solver wait.</p>
+<p>Open <b>Controls</b> for the mesh, axes, palette, colorbar, lighting, camera and zoom controls from web GLVis. The toolbar provides pause/resume, stepping, PNG export and fullscreen. <b>Keyboard help</b> shows the loaded renderer's key bindings. When an example opens several visualization connections, a field selector appears beside the GLVis title; choose the field you want to watch.</p>
+
+<h2>Compare, record and replay</h2>
+<p>Use <b>+ View</b> to add up to four GLVis panes. Each pane has its own field selector, camera, palette and controls. Two panes can show the same field from different angles or different fields simultaneously. Pausing a field affects all panes watching that field; other connections continue independently.</p>
+<p>In a pane's <b>Controls</b>, enable <b>Fixed color range</b>, enter Min and Max, then click <b>Apply</b>. These bounds remain fixed as later frames arrive. Applying a changed range initially resets that pane's scene; subsequent updates preserve its camera.</p>
+<p>Click <b>Record</b> before starting a solve, or while it is running. The recorder keeps incoming solution frames in this tab, initially up to 32 MiB. Set <b>Cap</b> from 1 to 256 MiB. The oldest frames expire when the cap or 4,096-frame limit is reached; a frame larger than the cap is skipped. Stop recording to keep the retained frames without adding more.</p>
+<p>Each pane has a frame slider, <b>Replay</b> at five frames per second, and <b>Return live</b>. Replay changes that pane only; incoming frames can continue recording. Frame history is temporary browser memory and is not included in workspace export. PNG export saves the currently displayed image.</p>
+
+<h2>Arrange your workspace</h2>
+<p>Drag the dividers beside Files, between the editor and GLVis, and above the terminal. Focus a divider and use arrow keys for keyboard adjustment, or double-click it to restore its default size. The <b>Files</b> button collapses the sidebar. Pane sizes and sidebar visibility are remembered in this browser.</p>
+<p>The ⤢ button maximizes a pane; Escape restores the layout. Shortcuts: <b>Alt+Shift+E</b> for the editor, <b>Alt+Shift+T</b> for the terminal, <b>Alt+Shift+V</b> for GLVis and <b>Alt+Shift+B</b> to toggle Files. Layout preferences do not save guest files.</p>
+<p>The header's <b>Theme</b> selector offers TMOG, Dark and Light, with TMOG selected by default. It follows the <a href="https://tmog.org/assets/screenshots/summary.webp?v=b45cef9d06b4">full-color TMOG console</a>: charcoal surfaces, rounded inset panels, wide geometric headings and green, blue, purple and amber accents. The locally bundled Michroma font is used in headings. Open <b>Fonts</b> in TMOG to try it separately in the editor and terminal; both default to monospace. The terminal preserves its column grid, so Michroma looks wider. A soft glow accents the official MFEM logo. Syntax colors distinguish comments, keywords, types, definitions, strings, numbers and directives. Your choice is remembered. Retired phosphor preferences migrate to TMOG; saved Dark/Light choices are preserved. GLVis field colors stay unchanged.</p>
+<p><b>Shortcuts</b>, <b>Controls</b>, GLVis keyboard help, New file, search and Offline use compact movable windows. Drag a window by its title bar, or focus the title bar and use arrow keys. The other panes remain usable. Positions are kept while the page is open, and windows stay within the viewport when resized. Escape closes the top window; Escape then restores a maximized pane.</p>
+
+<h2>Inspect a mesh and solution</h2>
+<p>Click <b>Inspect</b> above a GLVis view. A movable window captures the displayed frame and reports mesh dimensions, element counts, element and boundary attributes, and element quality computed by MFEM. <b>Refresh</b> takes the latest displayed frame, including a replayed frame. The quality score is a sampled Jacobian singular-value ratio: 1 is ideal and 0 is degenerate. Sampling cannot prove validity everywhere in a curved element.</p>
+<p>The inspector has an independent XY preview with element-quality or attribute coloring and boundary-attribute highlighting. Click it to probe a solution value, or enter physical coordinates. For a 3D mesh, set the Z coordinate of the probe plane. MFEM locates the element and evaluates the finite-element field directly. Shared-boundary points use the first containing element; discontinuous fields can have different neighboring values. Large previews are thinned but statistics include all elements. Serial mesh and solution streams are supported; complex solution values are not yet evaluated.</p>
+
+<h2>Edit and build</h2>
+<p>The editor automatically opens <code>examples/ex1.cpp</code> while Linux starts. You can edit immediately; saving becomes available when the dot beside <b>Alpine Linux</b> turns green. Save with the button or Ctrl/Cmd+S. Then rebuild and run:</p>
+<pre>make ex1
+./ex1 -m ../data/star.mesh</pre>
+<p>The editor has C++ highlighting, line numbers and independent file tabs. Use <b>Find</b>, <b>Replace</b> and <b>Go to line</b>, or Cmd/Ctrl+F, Cmd+Option+F / Ctrl+Shift+F, and Alt+G. Tab indents by three spaces; Shift+Tab outdents. Cmd/Ctrl+S saves the active tab and Cmd/Ctrl+Shift+S saves all changed tabs. Closing an edited tab asks whether to save or discard its changes.</p>
+<p><b>Open another tab:</b> click a different file in the Files tree. Each file keeps its own text, cursor and undo history. Click a tab to switch back. <b>Create a file:</b> click <b>New file</b> in the editor, enter a filename, and create the tab. Relative names use the current file's directory (initially <code>/root/mfem/examples</code>); an absolute path chooses another directory. The parent directory must already exist. Write your code and press Cmd/Ctrl+S to create the file in Linux. Files saved under <code>/root/mfem</code> appear in the Files tree and are included in workspace export; files elsewhere remain accessible from the terminal and editor. If that path already exists, the editor opens the existing file; a file created concurrently in the terminal is protected by the save check.</p>
+<p>Open <b>Shortcuts</b> in the editor for the complete key list. With the editor focused: <b>Alt+Shift+N</b> opens New file, <b>Alt+Shift+Left/Right</b> switches tabs, <b>Alt+Shift+W</b> closes the active editor tab and <b>Alt+Shift+K</b> shows shortcuts. Cmd/Ctrl+/ toggles a line comment. Browser new-tab and close-tab shortcuts retain their usual behavior.</p>
+<p>Clean tabs automatically reload changes made in the terminal. If both the editor and terminal changed a file, a banner keeps your editor text and offers <b>Reload from disk</b> or <b>Overwrite disk</b>. A normal save checks the file content again and stops if it changed. Click a compiler <code>file.cpp:line:column</code> location in the terminal to open that source line.</p>
+<p><b>Symbols</b> (Cmd/Ctrl+Shift+O) searches C++ declarations in the MFEM release and open buffers. Use <b>Definition</b> (F12 or Cmd/Ctrl+click) to navigate, <b>Complete</b> (Ctrl+Space) for identifier completion, and <b>Back</b> (Alt+Left) to return. Ambiguous names show candidate locations. This local index does not perform full compiler type, macro or template resolution. Open edited files replace their release declarations; unopened files use the bundled release index.</p>
+<p>Use the ↻ <b>Refresh</b> button after creating, moving or deleting files in the terminal. Save editor changes before building.</p>
+<pre>cp ex1.cpp experiment.cpp
+make experiment
+./experiment -m ../data/star.mesh
+
+git status
+git diff</pre>
+<p>The full MFEM v4.10 checkout includes regular examples, miniapps, tests, <code>data/</code> and Git metadata with shallow history. Rebuild the library with <code>make -C /root/mfem</code>. A complete rebuild takes time in an emulated machine.</p>
+
+<h2>A comfortable Bash terminal</h2>
+<p>The colored prompt shows the current directory and the exit status of a failed command. Directory listings, Git output and supported compiler diagnostics use colors. Press Tab to complete commands and filenames; <code>make</code> also completes example targets, <code>git</code> completes common subcommands and <code>glvis</code> completes its options.</p>
+<p>Up/Down search command history, Ctrl+C interrupts a running command, and pasted text uses Bash's bracketed-paste handling. <code>ll</code> gives a detailed listing, <code>..</code> moves up a directory and <code>g</code> is a shortcut for Git. You can edit directly with <code>nano ex1.cpp</code> or <code>vim ex1.cpp</code>.</p>
+<p>To visualize saved files from the terminal:</p>
+<pre>glvis -m refined.mesh -g sol.gf
+glvis -m ../data/star.mesh</pre>
+<p>The supplied <code>glvis</code> helper sends files to the browser viewer. It accepts <code>-m</code>, <code>-g</code> and <code>-k</code>.</p>
+
+<h2>Keep your work</h2>
+<p><b>The VM is temporary.</b> Closing or reloading the page discards its filesystem. Use <b>Export workspace</b> before leaving. It saves all changed editor tabs and downloads a compressed archive containing source, Git metadata, data and results. Object files, static archives and compiled ELF files, including shared libraries, are excluded.</p>
+<p>Import overlays the archive onto a fresh checkout; rebuild changed programs afterward. Files deleted from the base checkout are not deleted by import, and running processes are not saved. Import only archives you trust.</p>
+
+<h2>Included configuration and limits</h2>
+<ul>
+<li>Alpine Linux x86 with Bash, GCC 14, GNU Make, Git, Python 3, nano and Vim.</li>
+<li>MFEM v4.10, serial CPU configuration, with its native Linux libraries and 37 prebuilt default serial example targets. The <a href="provenance/prebuilt-examples.json">build manifest</a> lists exact targets and hashes.</li>
+<li>MPI and optional-library example sources are present, but those targets are not prebuilt. <code>ex38</code> is prebuilt because upstream selects it; its integration methods still require LAPACK or Algoim and retain the upstream missing-dependency guards.</li>
+<li>The GLVis bridge accepts serial streams up to 64 MiB per frame, with at most eight active connections. Each visualization pane chooses which connection to show.</li>
+</ul>
+<p>This is a 32-bit emulated machine with 768 MiB of guest RAM. Compilation and large solves are slower than on a desktop. Start with small meshes and low refinement. MPI, CUDA, external solver packages and an X11 desktop are not preinstalled. Example options that request an unavailable backend require that backend to be built first.</p>
+<p>All calculations stay on your device. Linux runs in a background worker so its computation does not occupy the editor's main JavaScript thread. This improves the opportunity for responsive input; it does not remove x86 emulation overhead. Files are downloaded from this site's host as needed, so first use requires a network connection. External guest networking is not configured: local Git commands work, while remote clone/fetch, package downloads and direct AI API calls from the guest need a separately configured network relay. No AI service or credentials are required. You can copy code to an AI tool and paste it back.</p>
+
+<h2>Use the workstation offline</h2>
+<p>Runtime filesystem files are cached as you use them. For a complete installation, open <b>Offline</b> and choose <b>Download for offline use</b>. The dialog shows the release size, available browser storage and progress. You can cancel and resume an incomplete download. Keep the tab open until it reports <b>Offline ready</b>.</p>
+<p>The complete download includes the compiler, MFEM source/data/examples, editor and GLVis. It lets a fresh page boot and work without a connection. Clearing browser site data removes this installation. <b>Offline files are the supplied tools, not your changes:</b> export your workspace before closing and import it in a later session. Use HTTPS or localhost for offline support.</p>
+
+<h2>Using an iPad</h2>
+<p>iPad use is currently experimental. The layout has been tested at tablet sizes in desktop Chrome, but the workstation has not been tested on a physical iPad. <a href="https://developer.chrome.com/blog/chromium-chronicle-28">Chrome's iOS implementation uses WebKit</a>, so passing desktop Chrome tests does not establish compatibility on your iPad.</p>
+<p>The VM reserves 768 MiB before browser and GLVis overhead. Start with a small prebuilt example and one visualization; a physical keyboard makes editing and terminal commands easier. The GLVis control buttons provide actions without keyboard shortcuts, but touch rotation, pinch zoom and on-screen keyboard behavior need device testing. Keep active calculations in the foreground and export before leaving. The roughly 510 MB offline download stores tools, not your workspace edits.</p>
+
+<h2>Deploy on GitHub Pages</h2>
+<p>Publish the distribution's <code>site/</code> directory with GitHub Pages. Keep every asset and the directory structure, including <code>vm/files-index.json</code>, <code>offline-manifest.json</code>, <code>service-worker.js</code> and the filesystem blobs. Relative URLs work for personal and project Pages. The supplied Actions workflow deploys the site directory. No compute server, custom response headers or secret keys are needed.</p>
+
+<p>The packaged <code>scripts/deploy-pages.py</code> helper can add MFEM under an existing static Pages site while preserving other pages. From the directory containing <code>mfem-desktop/</code>, with GitHub CLI authenticated:</p>
+<pre>python3 mfem-desktop/scripts/deploy-pages.py --repo tzanio/tzanio.github.io --path mfem --publish</pre>
+<p>This publishes to <code>https://tzanio.github.io/mfem/</code>. Omit <code>--publish</code> to prepare a local checkout for review. Existing Actions or Jekyll sites must use their existing build process. Details and prerequisites are in the packaged README.</p>
+
+<h2>Upstream projects</h2>
+<p><a href="https://mfem.org">MFEM</a> · <a href="https://glvis.org">GLVis</a> · <a href="https://github.com/copy/v86">v86</a> · <a href="https://alpinelinux.org">Alpine Linux</a> · <a href="https://xtermjs.org">xterm.js</a> · <a href="https://codemirror.net">CodeMirror</a>. License notices and package provenance are included in the distribution.</p>
+</body>
+</html>

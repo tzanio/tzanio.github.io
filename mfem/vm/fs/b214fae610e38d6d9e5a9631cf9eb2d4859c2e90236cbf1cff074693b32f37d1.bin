@@ -1,0 +1,42 @@
+"""On-demand inspection, isolated from the live GLVis stream and its ACKs."""
+import math
+import pathlib
+import subprocess
+import threading
+
+slots = threading.BoundedSemaphore(1)
+
+
+def inspect(request, snapshot):
+    if not slots.acquire(blocking=False):
+        raise ValueError('Another mesh inspection is running; retry when it finishes')
+    try:
+        return run(request, snapshot)
+    finally:
+        slots.release()
+
+
+def run(request, snapshot):
+    path = request['path']
+    # Inputs are immutable browser-owned snapshots, never a shell command.
+    if not path.startswith('/tmp/studio-upload-') or pathlib.Path(path).parent != pathlib.Path('/tmp'):
+        raise ValueError('Inspection requires an uploaded GLVis snapshot')
+    if pathlib.Path(path).stat().st_size > 64 * 1024 * 1024:
+        raise ValueError('Inspection snapshot exceeds 64 MiB')
+    command = ['/usr/local/bin/studio-mesh-inspect', path]
+    point = request.get('point')
+    if point is None:
+        command.append('report')
+    else:
+        if not isinstance(point, list) or not 1 <= len(point) <= 3 or not all(
+            isinstance(value, (int, float)) and math.isfinite(value) for value in point
+        ):
+            raise ValueError('Provide 1–3 finite point coordinates')
+        command.extend(['probe', '--point', *(str(value) for value in point)])
+    result = subprocess.run(command, capture_output=True, timeout=100)
+    if result.returncode:
+        detail = result.stderr[-3000:].decode('utf-8', 'replace').strip()
+        raise ValueError(detail or 'MFEM could not inspect this stream (exit ' + str(result.returncode) + ')')
+    if len(result.stdout) > 16 * 1024 * 1024:
+        raise ValueError('Inspection report exceeds 16 MiB')
+    return snapshot(result.stdout, 'inspection')

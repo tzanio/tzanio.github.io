@@ -1,0 +1,12 @@
+#!/usr/bin/python3
+"""Send local MFEM files to the workstation's browser GLVis viewer."""
+import argparse,socket,pathlib
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('-m','--mesh',required=True)
+p.add_argument('-g','--gridfunction')
+p.add_argument('-k','--keys',default='')
+a=p.parse_args()
+stream=('solution\n' if a.gridfunction else 'mesh\n')+pathlib.Path(a.mesh).read_text()+'\n'
+if a.gridfunction:stream+=pathlib.Path(a.gridfunction).read_text()+'\n'
+if a.keys:stream+='keys '+a.keys+'\n'
+with socket.create_connection(('127.0.0.1',19916)) as connection:connection.sendall(stream.encode())

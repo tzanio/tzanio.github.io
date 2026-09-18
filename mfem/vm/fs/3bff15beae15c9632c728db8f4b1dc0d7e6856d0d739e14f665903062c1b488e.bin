@@ -1,0 +1,21 @@
+#!/bin/sh
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+# devtmpfs hides the base image's links. Bash process substitution and programs
+# using /dev/stdin need these standard aliases after /proc and /dev are mounted.
+ln -sfn /proc/self/fd /dev/fd
+ln -sfn /proc/self/fd/0 /dev/stdin
+ln -sfn /proc/self/fd/1 /dev/stdout
+ln -sfn /proc/self/fd/2 /dev/stderr
+mkdir -p /dev/pts /run /tmp
+mount -t devpts devpts /dev/pts
+mount -t tmpfs tmpfs /run
+hostname mfem
+ip link set lo up
+export HOME=/root TERM=xterm-256color PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+python3 /usr/local/bin/studio-bridge.py >/tmp/studio-bridge.log 2>&1 &
+exec </dev/ttyS0 >/dev/ttyS0 2>&1
+cd /root/mfem/examples
+printf '\033[2J\033[H'
+while true; do setsid /bin/sh -c 'exec /bin/bash --rcfile /root/.bashrc -i </dev/ttyS0 >/dev/ttyS0 2>&1'; done

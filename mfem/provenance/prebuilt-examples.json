@@ -1,0 +1,206 @@
+{
+  "mfem_version": "4.10",
+  "git_commit": "d964264cdb9a13e94a201b6c236c7721e0c8765f",
+  "target": "i586-alpine-linux-musl",
+  "compiler": "Homebrew clang version 23.1.1",
+  "configuration": "serial CPU, double precision, no optional external solver libraries",
+  "selection": "All executables selected by the upstream examples/ Makefile's default all target",
+  "count": 37,
+  "shared_library": {
+    "name": "libmfem.so.4.10",
+    "bytes": 31823924,
+    "sha256": "817f03bacd4112702684a799dd516300e7fe1173291464d8734b3ea96d6bb964"
+  },
+  "examples": [
+    {
+      "name": "ex0",
+      "bytes": 37400,
+      "sha256": "4f03ceda287d846f2e0234095c7a9655ae7125badcdbf0647df10f9359eec761"
+    },
+    {
+      "name": "ex1",
+      "bytes": 44908,
+      "sha256": "878a3205b59729c634d68fd372bc8b770e7c17d49a53d4e48be746d53d8e3e59"
+    },
+    {
+      "name": "ex2",
+      "bytes": 39088,
+      "sha256": "eb44655a0cb9b2aa7115f2fc53576d91bd2d03d5e7aaa8ac36c5c62d71c2e70a"
+    },
+    {
+      "name": "ex3",
+      "bytes": 40276,
+      "sha256": "bddee91a12d40fa740741e1ad85c51d77761f564d35ce601fc81f08275d11938"
+    },
+    {
+      "name": "ex4",
+      "bytes": 43016,
+      "sha256": "e02e1d276d659d0c36d2dd16c8120c92827c21023f698127b8ee1f7cfa4f79db"
+    },
+    {
+      "name": "ex5",
+      "bytes": 84780,
+      "sha256": "bea9393313a00cdd11ab87022932a16cc146e7bb0e4027e212112c8651601672"
+    },
+    {
+      "name": "ex6",
+      "bytes": 48308,
+      "sha256": "bd340e48fb9c3eebe2c13b9386a8e2e190afcd4cc84a714e7cbc44e8fb6d3fce"
+    },
+    {
+      "name": "ex7",
+      "bytes": 52604,
+      "sha256": "148bf17e7ffd7866ddcf5224d5e7e9b2534d067a78c8c57146a355f525195a03"
+    },
+    {
+      "name": "ex8",
+      "bytes": 50664,
+      "sha256": "bf4456c04c8c4a2589fdede0eeb3473824561a46fbf5a04244b434d524892114"
+    },
+    {
+      "name": "ex9",
+      "bytes": 93304,
+      "sha256": "928b737f8e54cd665d928d0594769342a8fe0cd1e8b85c5508fc3ee091933497"
+    },
+    {
+      "name": "ex10",
+      "bytes": 80544,
+      "sha256": "bcf5956c62b1bf0402f05a429d6dd0b6a7664b8936014c1dd3983b5f439a6159"
+    },
+    {
+      "name": "ex14",
+      "bytes": 45464,
+      "sha256": "e717a9f948e8d1bd5a9273eebd3aaf01385ba29ed395a34c1eef48c31bbd788c"
+    },
+    {
+      "name": "ex15",
+      "bytes": 57728,
+      "sha256": "cb17e7fac31bbf3cb3857d5aaa08d0503931dacfdd8c4336fd464597c94a0593"
+    },
+    {
+      "name": "ex16",
+      "bytes": 59596,
+      "sha256": "0a278267b124ff9d2794ad0501c7eff5ddf58008a838ba569770d4cede85d27c"
+    },
+    {
+      "name": "ex17",
+      "bytes": 65052,
+      "sha256": "37eb3aad9b86f26db4dd6ed18d26029387f3bd90cfd9d04061e2a42616b8120a"
+    },
+    {
+      "name": "ex18",
+      "bytes": 84628,
+      "sha256": "3ece03ea83257bbf2f4abd928352d97dc22c41a0dfbc43236574df095e57cf94"
+    },
+    {
+      "name": "ex19",
+      "bytes": 67736,
+      "sha256": "68922726b81888415f19b24faf77264d4f4e85a0eba43a5ef182f2b60de96e5f"
+    },
+    {
+      "name": "ex20",
+      "bytes": 63192,
+      "sha256": "7ad554a86677820dc0ddaca5aa7841f5ab5076c20e10764e857dbfd0a95faf0e"
+    },
+    {
+      "name": "ex21",
+      "bytes": 56700,
+      "sha256": "abf13f4c644e827243197158dc371228d023b8c47126e57d0548c63bfe0fe339"
+    },
+    {
+      "name": "ex22",
+      "bytes": 73200,
+      "sha256": "8ad258fe6f9abb2c003d31bc132c4bfaed30615f74b78948768cb86299842b55"
+    },
+    {
+      "name": "ex23",
+      "bytes": 59888,
+      "sha256": "3dd755c53d48923be776d4a8060f51d64d1e9ca5a52010ff98c385eb7827ad4e"
+    },
+    {
+      "name": "ex24",
+      "bytes": 69340,
+      "sha256": "a65b9669e973ee8a1286ca7e833e26645fb1974b6f44fb3acc6cba2a16e8f247"
+    },
+    {
+      "name": "ex25",
+      "bytes": 94528,
+      "sha256": "a27042b856ac1cd4b023adc128c00c0d31d10ee9b255799252de39e8811c0b77"
+    },
+    {
+      "name": "ex26",
+      "bytes": 53188,
+      "sha256": "2fc37a8c01acd1fa49cfe0a5aa72016c51b0b97bd9c089dcf419bb029504a953"
+    },
+    {
+      "name": "ex27",
+      "bytes": 68932,
+      "sha256": "09ed13d2a928074a56f0911fb0969232f9474d71c8714e34b3357521a05418b6"
+    },
+    {
+      "name": "ex28",
+      "bytes": 55736,
+      "sha256": "044e79128a85e7c7a26384fbf19b9f965e25f009205954a67129d5b342535b13"
+    },
+    {
+      "name": "ex29",
+      "bytes": 59704,
+      "sha256": "371bfbc63d2106fb735ae0309658f74cb32692f3504a672677f4b67fea18cd2a"
+    },
+    {
+      "name": "ex30",
+      "bytes": 36220,
+      "sha256": "4e7f0b278cb6958382f8b2e1b16e2eadc42db63416a59a2cfbe12fcf7e6b9e49"
+    },
+    {
+      "name": "ex31",
+      "bytes": 71516,
+      "sha256": "1a85855236c0f77a8f115a5d2054a49cd095880dd6e3e1eefedad0f9665ef04f"
+    },
+    {
+      "name": "ex33",
+      "bytes": 80824,
+      "sha256": "dc4b5912c6a0f9dde940514867bdbb3ae620653ebf0e4d4423b388c99bb1711c"
+    },
+    {
+      "name": "ex34",
+      "bytes": 79032,
+      "sha256": "ee3870d3fe6e1f14b324bf1eec91b9b6598ec175854ae0c9729fe60d240705bb"
+    },
+    {
+      "name": "ex36",
+      "bytes": 77068,
+      "sha256": "bb7208c8fae8c831a91dace61112636f2a241a122a59e189b7d2cdee5c094414"
+    },
+    {
+      "name": "ex37",
+      "bytes": 89968,
+      "sha256": "88e6da4f40cbec18c02774ed255ff4d0028b35e6beb03bb6d5746c354f3f6554"
+    },
+    {
+      "name": "ex38",
+      "bytes": 8956,
+      "sha256": "9f3ff9999bbe973026ef2dc18f8d60fe37b462f23e576f6b4906eb55411d3a47"
+    },
+    {
+      "name": "ex39",
+      "bytes": 58188,
+      "sha256": "8a8a27833553d947ae332fadaeaf8d9d02efacfaf95e5a6cb62f3a4c3f79f7f4"
+    },
+    {
+      "name": "ex40",
+      "bytes": 56360,
+      "sha256": "591089aede766e2e0e2a7e7977f85256e384365af536bf4e42ad2d378d2f127e"
+    },
+    {
+      "name": "ex41",
+      "bytes": 95592,
+      "sha256": "84ba29eb80da784693a5c0455200a287068a307ee34fec3efa9140296d8d62ca"
+    }
+  ],
+  "limitations": [
+    "Parallel examples and optional-library subdirectories are excluded by the upstream serial configuration; their sources are present.",
+    "ex38 is prebuilt because upstream selects it, but its integration methods require an optional LAPACK or Algoim build.",
+    "Sample runs requesting optional solver/device backends require those backends to be built first."
+  ]
+}
