@@ -49,6 +49,9 @@ header,aside {background:var(--wb-panel);border-color:var(--wb-border)}
 header {min-width:0;gap:18px;flex-shrink:0}
 header nav {min-width:0;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .bar,.vis-toolbar {background:var(--wb-raised);border-color:var(--wb-border)}
+.pane-caption {font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--wb-text);white-space:nowrap;flex-shrink:0}
+.editor>.bar {gap:8px}
+.editor>.bar #filename {flex:1;min-width:0}
 small,p,.muted,footer,#boot-progress,#view-status,.sim-status,.sim-placeholder,
 .sim-view .sim-status,.sim-record-status,.sim-replay-status,.sim-recording label,
 .sim-range small,.vis-control-group>span,.vis-control-footer a,#offline-storage {color:var(--wb-muted)}
@@ -75,15 +78,6 @@ pre {background:var(--wb-accent-bg);border-color:var(--wb-accent-border);color:v
 .wb-theme-picker select {width:86px;max-width:100%;padding:6px 5px;background:var(--wb-button);font-size:11px;cursor:pointer}
 .wb-theme-picker option {background:var(--wb-panel);color:var(--wb-text)}
 .brand-edition {font-size:.7em;font-weight:400;white-space:nowrap}
-.wb-font-button[hidden] {display:none!important}
-.wb-font-panel {padding:0;color:var(--wb-text);font:12px/1.6 ui-sans-serif,system-ui,sans-serif}
-.wb-font-panel .wb-window-body {padding:13px 16px}
-.wb-font-panel p {margin:0 0 12px}
-.wb-font-panel label {display:flex;align-items:center;gap:8px;margin:8px 0;cursor:pointer}
-.wb-font-panel input {margin:0}
-.wb-font-panel .wb-font-sample {font:13px/1.8 Michroma,ui-sans-serif,sans-serif;color:var(--wb-text)}
-.wb-font-panel .wb-font-note {font-size:11px;margin:12px 0 0}
-:root[data-theme="tmog"][data-editor-font="tmog"] .wb-editor-main .CodeMirror {font-family:Michroma,ui-monospace,monospace;font-size:11px;line-height:1.8}
 
 /* Editor chrome and syntax. Theme changes never recreate editor documents. */
 .wb-editor,.cm-s-workstation.CodeMirror {background:var(--wb-input);color:var(--wb-text)}
@@ -146,14 +140,13 @@ dialog::backdrop,#vis-help::backdrop,.sim-help::backdrop,#offline-dialog::backdr
 :root[data-theme="tmog"] .brand {font-family:Michroma,ui-sans-serif,sans-serif;font-weight:400;font-size:20px;gap:13px;letter-spacing:-.02em;min-width:0}
 :root[data-theme="tmog"] .brand-title {white-space:nowrap}
 :root[data-theme="tmog"] .mfem-logo {filter:drop-shadow(0 0 4px #8fc9ff85) drop-shadow(0 0 11px #568fff55)}
-:root[data-theme="tmog"] .wb-font-button {font-family:Michroma,ui-sans-serif,sans-serif}
 :root[data-theme="tmog"] #status {color:#a9d887;text-shadow:0 0 10px #a9d88720}
 :root[data-theme="tmog"] header nav>button,:root[data-theme="tmog"] header nav>.button,:root[data-theme="tmog"] header nav>a {font-size:12px;padding:7px 10px;border-radius:6px}
 :root[data-theme="tmog"] header nav>a {color:var(--wb-amber)}
 :root[data-theme="tmog"] .wb-theme-picker select {border-radius:6px;padding:7px 6px}
 :root[data-theme="tmog"] aside {border-right:1px solid #3c3f37;background:#202120}
 :root[data-theme="tmog"] aside>.bar {height:47px;padding:0 16px;background:transparent;border-bottom:0}
-:root[data-theme="tmog"] aside>.bar b {font:400 12px Michroma,ui-sans-serif,sans-serif;letter-spacing:0;text-transform:capitalize}
+:root[data-theme="tmog"] .pane-caption {font:400 12px Michroma,ui-sans-serif,sans-serif;letter-spacing:0}
 :root[data-theme="tmog"] #tree {padding:1px 0 12px}
 :root[data-theme="tmog"] #tree button {width:calc(100% - 16px);margin:2px 8px;padding-top:7px;padding-bottom:7px;border-radius:6px;line-height:1.4}
 :root[data-theme="tmog"] #tree button.selected {color:#e2e7f5;background:var(--wb-blue-bg);box-shadow:inset 0 0 0 1px #435375}
@@ -165,7 +158,6 @@ dialog::backdrop,#vis-help::backdrop,.sim-help::backdrop,#offline-dialog::backdr
 :root[data-theme="tmog"] .viewer {border-color:#465876}
 :root[data-theme="tmog"] .console {border-color:#60496e}
 :root[data-theme="tmog"] .editor>.bar,:root[data-theme="tmog"] .sim-heading,:root[data-theme="tmog"] .console>.bar {height:45px;min-height:45px;padding:0 13px;background:#21231f;border-color:#3e4636;gap:8px}
-:root[data-theme="tmog"] .editor>.bar::before {content:"Editor";font:400 13px Michroma,ui-sans-serif,sans-serif;color:var(--wb-text);margin-right:7px;flex-shrink:0}
 :root[data-theme="tmog"] .editor>.bar #filename {font:11px ui-monospace,SFMono-Regular,Consolas,monospace;color:#afd68f;flex:1;min-width:0}
 :root[data-theme="tmog"] .editor>.bar #save {color:#bddf9d;border-color:#64794f;background:#2b3425;white-space:nowrap}
 :root[data-theme="tmog"] .sim-heading {border-color:#39465a}
@@ -173,7 +165,6 @@ dialog::backdrop,#vis-help::backdrop,.sim-help::backdrop,#offline-dialog::backdr
 :root[data-theme="tmog"] .sim-heading strong::before {content:"";display:inline-block;width:10px;height:10px;border:1px solid #88a9e2;border-radius:2px;margin-right:10px;box-shadow:0 0 7px #88a9e21a}
 :root[data-theme="tmog"] .sim-heading button {color:#b7ccf8;border-color:#50617e;background:#28313f}
 :root[data-theme="tmog"] .console>.bar {border-color:#45364f}
-:root[data-theme="tmog"] .console>.bar>span:first-child {font:400 12px Michroma,ui-sans-serif,sans-serif;letter-spacing:0;color:#ddd0e7;white-space:nowrap}
 :root[data-theme="tmog"] .console>.bar>span:first-child::before {content:"";display:inline-block;width:8px;height:8px;border:1px solid #c48bea;border-radius:2px;margin-right:10px;box-shadow:0 0 7px #c48bea20}
 :root[data-theme="tmog"] .console .pane-maximize {color:#d0b5e3;border-color:#665075;background:#302637}
 :root[data-theme="tmog"] #terminal {padding:12px}
@@ -207,7 +198,6 @@ dialog::backdrop,#vis-help::backdrop,.sim-help::backdrop,#offline-dialog::backdr
   :root[data-theme="tmog"] header {padding:0 13px;gap:14px}
   :root[data-theme="tmog"] .brand {font-size:18px;gap:9px}
   :root[data-theme="tmog"] header nav>button,:root[data-theme="tmog"] header nav>.button,:root[data-theme="tmog"] header nav>a {font-size:11px;padding:6px 8px}
-  :root[data-theme="tmog"] .editor>.bar::before {font-size:11px;margin-right:0}
 }
 @media(min-width:851px) and (max-width:1050px) {:root[data-theme="tmog"] header {height:auto;min-height:72px;padding-top:8px;padding-bottom:8px;flex-wrap:wrap}}
 @media(max-width:850px) {
@@ -215,9 +205,8 @@ dialog::backdrop,#vis-help::backdrop,.sim-help::backdrop,#offline-dialog::backdr
   :root[data-theme="tmog"] .brand {font-size:18px}
   :root[data-theme="tmog"] .work {padding:8px 8px 8px 4px}
   :root[data-theme="tmog"] .editor>.bar,:root[data-theme="tmog"] .sim-heading,:root[data-theme="tmog"] .console>.bar {height:39px;min-height:39px;padding:0 9px}
-  :root[data-theme="tmog"] .editor>.bar::before {display:none}
   :root[data-theme="tmog"] .upper {gap:8px}
-  :root[data-theme="tmog"] .console>.bar>span:first-child {font-size:10px}
+  :root[data-theme="tmog"] .pane-caption {font-size:10px}
   :root[data-theme="tmog"] .console>.bar>span:first-child::before {margin-right:7px}
 }
 @media(max-width:480px) {

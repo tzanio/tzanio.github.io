@@ -26,8 +26,20 @@ self.onmessage = async event => {
   try {
     if (message.type === 'init') {
       if (vm) throw new Error('Linux already started');
-      importScripts(message.runtimeURL || 'vendor/libv86.js');
+      importScripts(message.downloadMonitorURL || 'download-monitor.js');
+      self.WorkbenchDownloadMonitor.install(value => postMessage({type: 'download', value}));
+      const runtimeURL = message.runtimeURL || new URL('vendor/libv86.js', self.location.href).href;
+      // importScripts has no transfer-progress API. Report its completion,
+      // while the monitor covers the VM's following XHR downloads in detail.
+      importScripts(runtimeURL);
+      postMessage({type: 'download', value: {url: runtimeURL, loaded: 0, total: 0,
+        lengthComputable: false, done: true, error: false, status: 200}});
       vm = new V86(message.options);
+      vm.add_listener('emulator-loaded',()=>{
+        // Warm the guest's own cache during kernel boot. No bytes cross the UI
+        // worker boundary, and ordinary demand reads remain the fallback.
+        for(const path of message.preloadFiles || [])vm.read_file(path).catch(()=>{});
+      });
       for (const name of ['emulator-ready', 'emulator-loaded', 'emulator-started',
         'emulator-stopped', 'download-progress', 'download-error']) listen(name);
       for (const port of [0, 1]) vm.add_listener('serial' + port + '-output-byte', byte => {
@@ -35,7 +47,8 @@ self.onmessage = async event => {
         if (serial[port].length >= 8192) flush(port);
         else if (!timers[port]) timers[port] = setTimeout(() => flush(port), 8);
       });
-    } else if (message.type === 'input') vm.serial_send_bytes(message.port, message.bytes);
+    } else if (message.type === 'finish-downloads') self.WorkbenchDownloadMonitor?.stop();
+    else if (message.type === 'input') vm.serial_send_bytes(message.port, message.bytes);
     else if (message.type === 'listen') listen(message.name);
     else if (message.type === 'call') {
       if (!methods.has(message.method)) throw new Error('Unsupported VM method: ' + message.method);

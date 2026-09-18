@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const base = new URL('.', document.currentScript.src);
+  const base = new URL('.', document.currentScript.dataset.source || document.currentScript.src);
   const format = bytes => (bytes / (1024 * 1024)).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0) + ' MiB';
   let registration;
   async function connect() {

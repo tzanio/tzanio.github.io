@@ -8,9 +8,7 @@ Original file: https://raw.githubusercontent.com/google/fonts/main/ofl/michroma/
 Downloaded: 2026-09-18
 
 Michroma supplies the wide geometric headings in the workbench's TMOG-inspired
-theme. The theme's Fonts window also offers independent editor and terminal
-previews, both off by default. The editor uses the original proportional face;
-xterm lays its glyphs out on equal-width cells and the workbench recalculates
-terminal columns from those measured cells. It is a stylistic choice, not a
+theme, including its matching FILES, EDITOR and TERMINAL captions. Editor text
+and terminal output use monospace fonts. Michroma is a stylistic choice, not a
 claim about the font used by TMOG.
 All font files are served locally and included in the offline cache.

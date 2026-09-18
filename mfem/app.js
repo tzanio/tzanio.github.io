@@ -4,9 +4,10 @@ const asset = path => window.WorkbenchAssets?.[path] ? path + '?v=' + window.Wor
 const encoder=new TextEncoder(),decoder=new TextDecoder(),serialDecoder=new TextDecoder();
 const sourceRoot='/root/mfem',editorLimit=3*1024*1024;
 const terminal=new Terminal({cursorBlink:true,fontSize:13,fontFamily:'Menlo, Consolas, monospace',theme:{background:'#0c1118',foreground:'#d0dbe7',cursor:'#a6e7be',black:'#17202b',red:'#f08080',green:'#a6e7be',yellow:'#e9cd87',blue:'#81b5f5',magenta:'#c49be8',cyan:'#83d5db',white:'#d0dbe7'},scrollback:5000});
+$('terminal').replaceChildren();
 terminal.open($('terminal'));
 WorkbenchThemes.bindTerminal(terminal);
-terminal.writeln('\x1b[38;5;114mStarting your Linux workstation…\x1b[0m');
+terminal.writeln('\x1b[38;5;114mStarting Linux\x1b[0m');
 let ready=false,currentPath='',dirty=false,sequence=0,serialBuffer='',terminalCwd=sourceRoot+'/examples';
 let editor,simulation,layout,offline;
 const waiting=new Map(),directories=new Map(),fileMetadata=new Map(),expanded=new Set();
@@ -19,12 +20,12 @@ function systemStatus(state,label) {
   const indicator=$('status');indicator.dataset.state=state;
   indicator.title=label;indicator.setAttribute('aria-label',label);
 }
-const vm=WorkbenchRuntime.create({disable_keyboard:true,disable_mouse:true,wasm_path:'vm/v86.wasm',memory_size:768*1024*1024,vga_memory_size:8*1024*1024,bios:{url:'vm/seabios.bin'},vga_bios:{url:'vm/vgabios.bin'},bzimage:{url:'vm/linux.bin'},initrd:{url:'vm/initrd.gz'},filesystem:{basefs:{url:'vm/fs.json'},baseurl:'vm/fs/'},cmdline:'console=ttyS0 quiet tsc=reliable mitigations=off random.trust_cpu=on init=/init mfem.autorun=ex1',autostart:true,uart1:true});
+const vm=WorkbenchRuntime.create({preload_files:['lib/ld-musl-i386.so.1','bin/bash','usr/lib/libpython3.12.so.1.0','usr/lib/libstdc++.so.6.0.33','usr/lib/libgcc_s.so.1','root/mfem/libmfem.so.4.10','root/mfem/examples/ex1','root/mfem/data/star.mesh'],disable_keyboard:true,disable_mouse:true,wasm_path:'vm/v86.wasm',memory_size:768*1024*1024,vga_memory_size:8*1024*1024,bios:{url:'vm/seabios.bin'},vga_bios:{url:'vm/vgabios.bin'},bzimage:{url:'vm/linux.bin'},initrd:{url:'vm/initrd.gz'},filesystem:{basefs:{url:'vm/fs.json'},baseurl:'vm/fs/'},cmdline:'console=ttyS0 quiet tsc=reliable mitigations=off random.trust_cpu=on init=/init mfem.autorun=ex1',autostart:true,uart1:true});
 diagnostics.runtimeMode=vm.mode;
 window.workstation={vm,terminal,diagnostics,get ready(){return ready},get editor(){return editor},get simulation(){return simulation},get layout(){return layout},get offline(){return offline},get viewer(){return simulation?.viewer},get controls(){return simulation?.controls},get streams(){return simulation?.streams},openFile,openDiagnostic,rpc};
 Object.defineProperty(window,'viewer',{get:()=>simulation?.viewer});
 vm.add_listener('serial0-output-bytes',bytes=>terminal.write(bytes));
-vm.add_listener('runtime-error',error=>{systemStatus('error','Alpine Linux stopped');notice(error.message)});
+vm.add_listener('runtime-error',error=>{systemStatus('error','Alpine Linux stopped');window.WorkbenchStartup?.error(error.message);notice(error.message)});
 vm.ready.catch(error=>notice(error.message));
 terminal.onData(data=>vm.serial0_send(data));
 terminal.parser.registerOscHandler(7,data=>{try{const url=new URL(data);if(url.protocol==='file:')terminalCwd=decodeURIComponent(url.pathname)}catch{}return true});
@@ -57,6 +58,7 @@ async function readEditorFile(path,{ifRevision}={}) {
     await indexReady;
     const metadata=fileMetadata.get(path);
     if(!metadata?.blob)throw new Error('This file is available when Linux finishes starting.');
+    if(metadata.encoding)throw new Error('Use the terminal for compiled binary files.');
     const response=await fetch('vm/fs/'+metadata.blob);if(!response.ok)throw new Error('Unable to load source');
     bytes=new Uint8Array(await response.arrayBuffer());
     revision=metadata.blob.replace(/\.bin$/,'');
@@ -79,7 +81,7 @@ editor=WorkbenchEditor.create($('editor-host'),{
   getDefaultDirectory:()=>currentPath?currentPath.slice(0,currentPath.lastIndexOf('/')):sourceRoot+'/examples',
   onSaved:({path,created})=>{if(created)revealCreatedFile(path).catch(error=>notice(error.message));},
 });
-simulation=SimulationWorkbench.create($('simulation'),{rpc,readFile:path=>vm.read_file(path.slice(1)),upload,notice,diagnostics});
+simulation=SimulationWorkbench.create($('simulation'),{rpc,readFile:path=>vm.read_file(path.slice(1)),upload,notice,diagnostics,startupPreview:asset('startup-ex1.json')});
 $('view-placeholder').querySelector('p').textContent='Starting ./ex1…';
 vm.add_listener('serial1-output-bytes',bytes=>{
   serialBuffer+=serialDecoder.decode(bytes,{stream:true});
@@ -90,11 +92,12 @@ vm.add_listener('serial1-output-bytes',bytes=>{
       const message=JSON.parse(line);
       if(message.event==='ready') {
         ready=true;diagnostics.bootMs=performance.now();systemStatus('ready','Alpine Linux ready');
+        window.WorkbenchStartup?.linuxReady();
         $('refresh').disabled=false;$('backup').disabled=false;$('save').disabled=!currentPath;
         if(!diagnostics.frames)$('view-placeholder').querySelector('p').textContent='Running ./ex1…';
         if(!diagnostics.filesIndexed)refresh();fit();editor.checkExternal().catch(error=>notice(error.message));
       } else if(['glvis','glvis-command','glvis-end'].includes(message.event)) {
-        simulation.handle(message).then(()=>{if(diagnostics.firstRenderMs===null&&diagnostics.frames)diagnostics.firstRenderMs=performance.now()}).catch(error=>notice('GLVis: '+(error.message||error)));
+        simulation.handle(message).then(()=>{if(diagnostics.firstRenderMs===null&&diagnostics.frames){diagnostics.firstRenderMs=performance.now();window.WorkbenchStartup?.visualReady()}}).catch(error=>{window.WorkbenchStartup?.error('GLVis: '+(error.message||error));notice('GLVis: '+(error.message||error))});
       } else if(message.event==='error')notice(message.error);
       else if(waiting.has(message.id)) {
         const task=waiting.get(message.id);waiting.delete(message.id);clearTimeout(task.timer);
@@ -116,9 +119,9 @@ function fit() {
   if($('editor-host').clientWidth)editor?.cm?.refresh();
 }
 const sizeObserver=new ResizeObserver(()=>requestAnimationFrame(fit));
-window.addEventListener('workbench-fontchange',()=>requestAnimationFrame(fit));
 sizeObserver.observe($('terminal'));sizeObserver.observe($('simulation'));sizeObserver.observe($('editor-host'));
 layout=WorkbenchLayout.create({onResize:fit});
+document.body.removeAttribute('data-loading-interface');
 offline=WorkbenchOffline.mount({container:document.querySelector('header nav')});
 WorkbenchThemes.mount(document.querySelector('header nav'));
 function cacheDirectory(path,files) {

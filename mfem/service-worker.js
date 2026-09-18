@@ -156,7 +156,7 @@ self.addEventListener('fetch', event => {
     const canonical = new URL(url); canonical.search = ''; canonical.hash = '';
     if (canonical.pathname === ROOT.pathname) canonical.pathname += 'index.html';
     const state = await readState();
-    const immutable = /\/vm\/fs\/[a-f0-9]{64}\.bin$/.test(canonical.pathname);
+    const immutable = /\/vm\/fs\/[a-f0-9]{64}\.bin(?:\.zst)?$/.test(canonical.pathname);
     const cache = state.ready ? await caches.open(PREFIX + state.version) : null;
     if (immutable && cache) {
       const cached = await cache.match(canonical.href); if (cached) return cached;

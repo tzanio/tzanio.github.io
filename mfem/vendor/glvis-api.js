@@ -42,13 +42,15 @@
   }
 
   class State {
-    constructor(div, width = 640, height = 480, canvas = undefined) {
+    constructor(div, width = 640, height = 480, canvas = undefined, moduleOptions = {}) {
       if (div === undefined) {
         throw "div cannot be undefined";
       }
       this.div_ = div;
       this.canvas_ = canvas;
-      this.emglv_ = emglvis();
+      // Local embedding extension: pass Emscripten module options without
+      // changing the behavior of existing standalone GLVis callers.
+      this.emglv_ = emglvis(moduleOptions);
       this.emsetup_ = false;
       this.setupCanvas(width, height);
       this.new_stream_callbacks = [];

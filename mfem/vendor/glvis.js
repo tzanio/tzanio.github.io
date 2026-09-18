@@ -10165,7 +10165,14 @@ var _emscripten_set_wheel_callback_on_thread = (target, userData, useCapture, ca
  }
 };
 
-var _emscripten_set_window_title = title => document.title = UTF8ToString(title);
+// Local embedding extension: a workbench owns its page title; a GLVis module
+// can send native window titles to its own pane instead. Standalone GLVis
+// retains Emscripten's original document.title behavior.
+var _emscripten_set_window_title = title => {
+ const text = UTF8ToString(title);
+ if (Module["setWindowTitle"]) Module["setWindowTitle"](text);
+ else document.title = text;
+};
 
 var _emscripten_sleep = () => {
  throw "Please compile your program with async support in order to use asynchronous operations like emscripten_sleep";

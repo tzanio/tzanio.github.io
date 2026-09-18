@@ -1,0 +1,192 @@
+#!/usr/bin/python3
+"""Local guest RPC and the standard GLVis TCP listener; no external services."""
+import os, json, threading, socket, termios, tty, fcntl, struct, pathlib, hashlib
+from glvis_socket import Visualizations
+
+port = os.open('/dev/ttyS1', os.O_RDWR | os.O_NOCTTY)
+tty.setraw(port)
+lock = threading.Lock()
+counter = 0
+
+def emit(message):
+    data = (json.dumps(message) + '\n').encode()
+    with lock:
+        while data:
+            data = data[os.write(port, data):]
+
+def snapshot(data, prefix='view'):
+    global counter
+    with lock:
+        counter += 1
+        name = '/tmp/studio-%s-%d' % (prefix, counter)
+    with open(name, 'wb') as out:
+        out.write(data)
+        out.flush()
+        os.fsync(out.fileno())
+    return name
+
+def rpc(request):
+    op = request['op']
+    path = request.get('path', '/root/mfem')
+    if op == 'mesh-inspect':
+        from mesh_inspect import inspect as inspect_mesh
+        return inspect_mesh(request, snapshot)
+    if op == 'list':
+        return directory(path)
+    if op == 'list-many':
+        result = {}
+        for item in request['paths']:
+            try:
+                result[item] = directory(item)
+            except (FileNotFoundError, NotADirectoryError):
+                result[item] = []
+        return result
+    if op == 'read':
+        if os.stat(path).st_size > request.get('max_bytes', 64 * 1024 * 1024):
+            raise ValueError('File is too large for the editor; use the terminal')
+        data = pathlib.Path(path).read_bytes()
+        if request.get('metadata'):
+            revision = hashlib.sha256(data).hexdigest()
+            if request.get('if_revision') == revision:
+                return {'unchanged': True, 'revision': revision}
+            return {'path': snapshot(data, 'read'), 'revision': revision, 'size': len(data)}
+        return snapshot(data, 'read')
+    if op == 'write':
+        if 'expected_hash' in request:
+            return checked_write(path, request['upload'], request['expected_hash'])
+        import shutil
+        with open(request['upload'], 'rb') as src, open(path, 'wb') as dst:
+            shutil.copyfileobj(src, dst)
+            dst.flush()
+            os.fsync(dst.fileno())
+        os.unlink(request['upload'])
+        return True
+    if op == 'unlink':
+        try:
+            os.unlink(path)
+        except FileNotFoundError:
+            pass
+        visualizations.acknowledge(path)
+        return True
+    if op in ('vis-play', 'vis-pause', 'vis-cancel'):
+        return visualizations.control(request['client'], op, request.get('step', False))
+    if op == 'resize':
+        fd = os.open('/dev/ttyS0', os.O_RDWR | os.O_NOCTTY)
+        try:
+            fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack('HHHH', request['rows'], request['cols'], 0, 0))
+        finally:
+            os.close(fd)
+        return True
+    if op == 'export':
+        import tarfile
+        archive = '/tmp/mfem-workspace.tar.gz'
+        def keep(info):
+            # Keep source, Git metadata and results; the base image supplies build artifacts.
+            if info.name.endswith(('.o', '.a')): return None
+            if info.isfile():
+                with open('/root/' + info.name, 'rb') as source:
+                    if source.read(4) == b'\x7fELF': return None
+            return info
+        with tarfile.open(archive, 'w:gz') as out:
+            out.add('/root/mfem', arcname='mfem', filter=keep)
+        return archive
+    if op == 'restore':
+        import tarfile
+        with tarfile.open(request['upload'], 'r:gz') as archive:
+            # Source backup overlays the supplied checkout; Python's data filter rejects escapes.
+            for item in archive.getmembers():
+                if not item.name.startswith('mfem/') and item.name != 'mfem':
+                    raise ValueError('Archive must contain the mfem directory')
+            archive.extractall('/root', filter='data')
+        os.unlink(request['upload'])
+        return True
+    raise ValueError('Unknown operation: ' + op)
+
+def checked_write(path, upload, expected_hash):
+    """Stage a complete save, check the disk content, then atomically replace it.
+
+    A mismatch is a normal conflict result, so the editor keeps its unsaved
+    buffer. Following symlinks matches the previous write operation. Existing
+    permissions survive the replacement. Terminal tools need no lock protocol.
+    """
+    import tempfile, stat
+    target = pathlib.Path(path).resolve()
+    staged = None
+    try:
+        try:
+            original = target.read_bytes()
+            info = target.stat()
+            revision = hashlib.sha256(original).hexdigest()
+        except FileNotFoundError:
+            info, revision = None, None
+        if revision != expected_hash:
+            return {'conflict': True, 'revision': revision}
+        data = pathlib.Path(upload).read_bytes()
+        descriptor, staged = tempfile.mkstemp(prefix='.studio-save-', dir=str(target.parent))
+        with os.fdopen(descriptor, 'wb') as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+            os.fchmod(output.fileno(), stat.S_IMODE(info.st_mode) if info else 0o644)
+        # Include changes made while staging the new file. The RPC request loop
+        # serializes browser saves; replacement itself is atomic for readers.
+        try:
+            current_revision = hashlib.sha256(target.read_bytes()).hexdigest()
+        except FileNotFoundError:
+            current_revision = None
+        if current_revision != expected_hash:
+            return {'conflict': True, 'revision': current_revision}
+        os.replace(staged, target)
+        staged = None
+        return {'revision': hashlib.sha256(data).hexdigest()}
+    finally:
+        for temporary in (staged, upload):
+            if temporary:
+                try:
+                    os.unlink(temporary)
+                except FileNotFoundError:
+                    pass
+
+def directory(path):
+    with os.scandir(path) as entries:
+        return sorted([{'name': entry.name, 'dir': entry.is_dir()} for entry in entries],
+                      key=lambda entry: (not entry['dir'], entry['name']))
+
+def requests():
+    pending = b''
+    while True:
+        pending += os.read(port, 4096)
+        while b'\n' in pending:
+            line, pending = pending.split(b'\n', 1)
+            request = {}
+            try:
+                request = json.loads(line)
+                if request.get('op') == 'mesh-inspect':
+                    # A native inspection may take time on a large mesh. Keep
+                    # terminal/file controls and live visualization ACKs moving.
+                    threading.Thread(target=inspect_request, args=(request,), daemon=True).start()
+                    continue
+                emit({'id': request['id'], 'result': rpc(request)})
+            except Exception as error:
+                emit({'id': request.get('id'), 'error': str(error)})
+
+def inspect_request(request):
+    try:
+        emit({'id': request['id'], 'result': rpc(request)})
+    except Exception as error:
+        emit({'id': request.get('id'), 'error': str(error)})
+
+visualizations = Visualizations(emit, snapshot)
+
+listener = socket.socket()
+listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+listener.bind(('127.0.0.1', 19916))
+listener.listen(16)
+pathlib.Path('/run/studio-visualization-ready').touch()
+threading.Thread(target=requests, daemon=True).start()
+emit({'event': 'ready'})
+number = 0
+while True:
+    connection, _ = listener.accept()
+    number += 1
+    threading.Thread(target=visualizations.serve, args=(connection, number), daemon=True).start()

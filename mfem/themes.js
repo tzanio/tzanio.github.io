@@ -3,7 +3,6 @@
 'use strict';
 (function () {
   const storageKey = 'mfem-workbench.theme.v1';
-  const fontStorageKey = 'mfem-workbench.fonts.v1';
   const defaultTheme = 'tmog';
   const palettes = {
     tmog: {label:'TMOG', scheme:'dark', terminal:{
@@ -22,15 +21,8 @@
       brightBlack:'#596a7e', brightRed:'#ba253b', brightGreen:'#226b39', brightYellow:'#815407', brightBlue:'#255dbb', brightMagenta:'#844395', brightCyan:'#176570', brightWhite:'#253447',
     }},
   };
-  const terminals = new Map();
+  const terminals = new Set();
   const selects = new Set();
-  const fontButtons = new Set();
-  const fontInputs = new Set();
-  let fonts = {editor:false,terminal:false}, fontRevision = 0, fontWindow;
-  try {
-    const savedFonts = JSON.parse(localStorage.getItem(fontStorageKey) || '{}');
-    fonts = {editor:savedFonts.editor === true,terminal:savedFonts.terminal === true};
-  } catch {}
   let current = defaultTheme;
   function valid(id) { return Object.prototype.hasOwnProperty.call(palettes, id); }
   function terminalTheme(id = current) { return {...palettes[valid(id) ? id : defaultTheme].terminal}; }
@@ -39,61 +31,24 @@
     document.documentElement.dataset.theme = current;
     document.documentElement.style.colorScheme = palettes[current].scheme;
     if (persist) {try {localStorage.setItem(storageKey, current);} catch {}}
-    for (const terminal of terminals.keys()) terminal.options.theme = terminalTheme();
+    for (const terminal of terminals) terminal.options.theme = terminalTheme();
     for (const select of selects) select.value = current;
-    for (const button of fontButtons) button.hidden = current !== 'tmog';
-    if (current !== 'tmog') fontWindow?.close({restoreFocus:false});
-    applyFonts(fonts,{persist:false});
     window.dispatchEvent(new CustomEvent('workbench-themechange', {detail:{theme:current}}));
     return current;
   }
   function bindTerminal(terminal) {
-    terminals.set(terminal,terminal.options.fontFamily);
+    terminals.add(terminal);
     terminal.options.theme = terminalTheme();
     // Keep ANSI/256-color shell output readable on both pale and dark surfaces.
     terminal.options.minimumContrastRatio = 4.5;
-    applyFonts(fonts,{persist:false});
     return () => terminals.delete(terminal);
   }
-  async function applyFonts(next, {persist = true} = {}) {
-    fonts = {editor:next.editor === true,terminal:next.terminal === true};
-    const revision = ++fontRevision;
-    if (persist) {try {localStorage.setItem(fontStorageKey,JSON.stringify(fonts));} catch {}}
-    const enabled = current === 'tmog';
-    document.documentElement.dataset.editorFont = enabled && fonts.editor ? 'tmog' : 'mono';
-    for (const input of fontInputs) input.checked = fonts[input.name];
-    if (enabled && (fonts.editor || fonts.terminal)) {
-      try {await document.fonts.load('13px Michroma');} catch {}
-    }
-    if (revision !== fontRevision) return;
-    for (const [terminal,original] of terminals) {
-      terminal.options.fontFamily = enabled && fonts.terminal ? 'Michroma, monospace' : original;
-    }
-    requestAnimationFrame(() => {
-      if (revision === fontRevision) window.dispatchEvent(new CustomEvent('workbench-fontchange',{detail:{...fonts}}));
-    });
-  }
-  // xterm measures and spaces glyphs on a fixed cell grid, even with a display
-  // face. Read its rendered dimensions so the shell's columns follow the font.
+  // Read xterm's rendered cell dimensions so shell columns fit the pane.
   function terminalGeometry(terminal) {
     const screen = terminal.element?.querySelector('.xterm-screen');
     const width = screen?.getBoundingClientRect().width / terminal.cols;
     const height = screen?.getBoundingClientRect().height / terminal.rows;
     return {width:width > 0 ? width : 7.83,height:height > 0 ? height : 15};
-  }
-  function openFonts(button) {
-    if (!fontWindow) {
-      const panel = document.createElement('section');
-      panel.className = 'wb-font-panel';panel.hidden = true;
-      panel.innerHTML = '<p class="wb-font-sample">MFEM · Aa 012345</p><p>Try Michroma in your working text.</p><label><input type="checkbox" name="editor"> Editor</label><label><input type="checkbox" name="terminal"> Terminal</label><p class="wb-font-note">The face is wider than a code font. Terminal columns stay aligned. Turn either option off to return to monospace.</p>';
-      for (const input of panel.querySelectorAll('input')) {
-        input.checked = fonts[input.name];fontInputs.add(input);
-        input.addEventListener('change',() => applyFonts({...fonts,[input.name]:input.checked}));
-      }
-      document.body.append(panel);
-      fontWindow = WorkbenchWindows.attach(panel,{title:'TMOG fonts',width:330,anchor:button,returnFocus:button});
-    }
-    fontWindow.toggle();
   }
   function mount(container = document.querySelector('header nav')) {
     if (!container) return null;
@@ -115,12 +70,6 @@
     select.value = current;
     select.addEventListener('change', () => apply(select.value));
     selects.add(select); label.append(caption, select); container.append(label);
-    const fontButton = document.createElement('button');
-    fontButton.type = 'button';fontButton.className = 'wb-font-button';fontButton.textContent = 'Fonts';
-    fontButton.title = 'TMOG editor and terminal fonts';fontButton.setAttribute('aria-label','TMOG fonts');
-    fontButton.hidden = current !== 'tmog';
-    fontButton.addEventListener('click',() => openFonts(fontButton));
-    fontButtons.add(fontButton);container.append(fontButton);
     return label;
   }
   let saved;
@@ -130,14 +79,9 @@
   apply(migrated ? defaultTheme : saved, {persist:migrated});
   window.addEventListener('storage', event => {
     if (event.key === storageKey || event.key === null) apply(event.newValue, {persist:false});
-    if (event.key === fontStorageKey || event.key === null) {
-      let next;try {next=JSON.parse(event.newValue || '{}');} catch {next={};}
-      applyFonts(next || {},{persist:false});
-    }
   });
   window.WorkbenchThemes = Object.freeze({
-    apply, mount, terminalTheme, bindTerminal, terminalGeometry, applyFonts, get current() {return current;},
-    get fonts() {return {...fonts};},
+    apply, mount, terminalTheme, bindTerminal, terminalGeometry, get current() {return current;},
     themes:Object.freeze(Object.entries(palettes).map(([id, {label}]) => Object.freeze({id, label}))),
   });
 })();

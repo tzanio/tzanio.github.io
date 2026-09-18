@@ -1,7 +1,7 @@
 /* The browser UI talks to the same VM API whether v86 runs in a worker or here. */
 (function () {
   'use strict';
-  const base = new URL('.', document.currentScript.src);
+  const base = new URL('.', document.currentScript.dataset.source || document.currentScript.src);
   const encoder = new TextEncoder();
   const asset = path => {
     const url = new URL(path, base);
@@ -93,6 +93,7 @@
       create_file(path, bytes) {return call('create_file', [path, bytes]);},
       run() {return call('run');},
       stop() {return call('stop');},
+      finishDownloads() {if (worker && !destroyed) worker.postMessage({type: 'finish-downloads'});},
       destroy() {
         if (destroyed) return;
         destroyed = true;
@@ -102,10 +103,14 @@
         input.clear(); listeners.clear();
       },
     };
-    const normalized = absoluteOptions({...options, disable_keyboard: true, disable_mouse: true});
+    const {preload_files:preloadFiles=[],...nativeOptions}=options;
+    const normalized = absoluteOptions({...nativeOptions, disable_keyboard: true, disable_mouse: true});
     if (mode === 'main') {
       if (!window.V86) throw new Error('The main-thread comparison requires vendor/libv86.js');
       direct = new V86(normalized);
+      direct.add_listener('emulator-loaded',()=>{
+        for(const path of preloadFiles)direct.read_file(path).catch(()=>{});
+      });
       for (const name of lifecycle) direct.add_listener(name, value => emit(name, value));
       for (const port of [0, 1]) {
         let bytes = [], timer;
@@ -119,6 +124,7 @@
       worker.onmessage = event => {
         const message = event.data;
         if (message.type === 'serial') serial(message.port, message.bytes);
+        else if (message.type === 'download') window.WorkbenchStartup?.progress(message.value);
         else if (message.type === 'event') emit(message.name, message.value);
         else if (message.type === 'fatal') fail(message.error);
         else if (message.type === 'result') {
@@ -129,7 +135,8 @@
       };
       worker.onerror = event => fail(event.message || 'Linux worker failed to start');
       worker.onmessageerror = () => fail('Could not receive a Linux worker message');
-      worker.postMessage({type: 'init', options: normalized, runtimeURL:asset('vendor/libv86.js').href});
+      worker.postMessage({type: 'init', options: normalized, runtimeURL:asset('vendor/libv86.js').href,
+        downloadMonitorURL:asset('download-monitor.js').href,preloadFiles});
     }
     return facade;
   }
