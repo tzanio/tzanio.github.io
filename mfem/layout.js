@@ -1,4 +1,4 @@
-/* Pane sizes are preferences only; guest files still require workspace export. */
+/* Pane sizes are browser preferences, independent of workspace files. */
 'use strict';
 window.WorkbenchLayout = {
   create({onResize = () => {}} = {}) {
@@ -84,8 +84,28 @@ window.WorkbenchLayout = {
       menuButton.setAttribute('aria-label',active?'Workspace menu · operation in progress':'Workspace menu');
     });
     activityObserver.observe(headerNav,{childList:true,subtree:true,attributes:true,attributeFilter:['data-active']});
-    function closeMenu(){body.classList.remove('phone-menu-open');menuButton.setAttribute('aria-expanded','false')}
+    function closeMenu({restoreFocus=false}={}){
+      body.classList.remove('phone-menu-open');menuButton.setAttribute('aria-expanded','false');
+      if(restoreFocus)menuButton.focus({preventScroll:true});
+    }
+    function focusMenu(){
+      [...headerNav.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled])')].find(item=>item.getClientRects().length)?.focus({preventScroll:true});
+    }
     menuButton.addEventListener('click',()=>{const open=body.classList.toggle('phone-menu-open');menuButton.setAttribute('aria-expanded',String(open))},{signal:abort.signal});
+    menuButton.addEventListener('keydown',event=>{
+      if(!compact||event.shiftKey||event.altKey||event.ctrlKey||event.metaKey)return;
+      if(event.key==='ArrowDown'||(event.key==='Tab'&&body.classList.contains('phone-menu-open'))){
+        event.preventDefault();body.classList.add('phone-menu-open');menuButton.setAttribute('aria-expanded','true');focusMenu();
+      }
+    },{signal:abort.signal});
+    headerNav.addEventListener('keydown',event=>{
+      if(!compact||event.key!=='Tab')return;
+      const items=[...headerNav.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled])')].filter(item=>item.getClientRects().length);
+      if(event.target===(event.shiftKey?items[0]:items.at(-1))){event.preventDefault();closeMenu({restoreFocus:true})}
+    },{signal:abort.signal});
+    document.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&body.classList.contains('phone-menu-open')&&!event.defaultPrevented){event.preventDefault();event.stopPropagation();closeMenu({restoreFocus:true})}
+    },{signal:abort.signal});
     headerNav.addEventListener('click',event=>{if(event.target.closest('button,.button'))closeMenu()},{signal:abort.signal});
     document.addEventListener('pointerdown',event=>{if(!event.target.closest('header'))closeMenu()},{signal:abort.signal});
     function selectPane(name) {
@@ -129,7 +149,7 @@ window.WorkbenchLayout = {
         change(event);apply();
       },{signal:abort.signal});
       const end=()=>{if(pointer===null)return;pointer=null;body.classList.remove('resizing-panes');remember();resize()};
-      handle.addEventListener('pointerup',end,{signal:abort.signal});handle.addEventListener('lostpointercapture',end,{signal:abort.signal});
+      handle.addEventListener('pointerup',end,{signal:abort.signal});handle.addEventListener('pointercancel',end,{signal:abort.signal});handle.addEventListener('lostpointercapture',end,{signal:abort.signal});
       handle.addEventListener('dblclick',()=>{reset(name);remember();apply()},{signal:abort.signal});
       handle.addEventListener('keydown',event=>{
         const positive=vertical?'ArrowRight':'ArrowDown',negative=vertical?'ArrowLeft':'ArrowUp';
@@ -138,7 +158,7 @@ window.WorkbenchLayout = {
         else return;
         remember();apply();
       },{signal:abort.signal});
-      handle.setAttribute('aria-valuemin',name==='files-separator'?'140':'15');handle.setAttribute('aria-valuemax',name==='files-separator'?'480':'80');
+      handle.setAttribute('aria-valuemin',name==='files-separator'?'140':name==='editor-separator'?'20':'15');handle.setAttribute('aria-valuemax',name==='files-separator'?'480':name==='editor-separator'?'80':'75');
     }
     separator('files-separator',main,work,true,()=>state.files,(event,delta)=>{
       const available=Math.min(480,Math.max(140,main.clientWidth-500));

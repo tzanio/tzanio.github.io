@@ -81,13 +81,23 @@
     }
     function hide({restoreFocus = true} = {}) {
       if (!opened) return;
-      const hadFocus = element.contains(document.activeElement);
+      // Safari can leave focus on body after clicking a button or hiding a
+      // focused disclosure field. Returning focus still applies in that case.
+      const hadFocus = element.contains(document.activeElement) || document.activeElement === document.body;
       opened = false;drag = null;
       if (nativeDialog && element.open) element.close();
       element.hidden = true;
       if (restoreFocus && hadFocus) {
-        const target = typeof returnFocus === 'function' ? returnFocus() : returnFocus || previousFocus;
-        if (target?.isConnected) target.focus({preventScroll:true});
+        // Safari does not normally focus a clicked button. An anchored window
+        // should return to its actual opener, regardless of the older focus.
+        const target = typeof returnFocus === 'function' ? returnFocus() : returnFocus || anchor || previousFocus;
+        // A phone menu closes when it opens a window. Its hidden action cannot
+        // receive focus again until the menu is opened, so return to its trigger.
+        const visible = node => node?.isConnected && node.getClientRects().length && !node.disabled;
+        const fallback = document.querySelector('.phone-menu');
+        if (visible(target)) target.focus({preventScroll:true});
+        else if (previousFocus !== document.body && visible(previousFocus)) previousFocus.focus({preventScroll:true});
+        else if (visible(fallback)) fallback.focus({preventScroll:true});
       }
       onClose?.();
     }

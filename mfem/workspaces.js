@@ -26,14 +26,15 @@
   const size=value=>(value/1048576).toFixed(1)+' MiB';
   function mount({rpc,readFile,upload,editor,journal,baseRelease,onRestore=async()=>{},onStatus=()=>{},reload=()=>location.reload()}){
     let db,record,base,started=false,restoring=true,busy=null,draftTimer,saveTimer,pollTimer,lastSequence=-1,startChoice,draftPending=false,draftSequence=0,filesystemPending=true;
-    let owner=id();
+    let owner=id(),lastStatus='',listSignature='',renderedWorkspaceId,renderedWorkspaceName;
     try{
       // Keep ownership across an ordinary reload even if the old page's last
       // lease-release transaction was interrupted by navigation.
       if(performance.getEntriesByType('navigation')[0]?.type==='reload')owner=sessionStorage.getItem('mfem-workspace-tab-owner')||owner;
       sessionStorage.setItem('mfem-workspace-tab-owner',owner);
     }catch{}
-    const button=document.createElement('button');button.id='workspace-open';button.type='button';button.textContent='Workspace';button.dataset.state='starting';
+    const button=document.createElement('button');button.id='workspace-open';button.type='button';button.dataset.state='starting';
+    const buttonLabel=document.createElement('span');buttonLabel.className='workspace-label';buttonLabel.textContent='Workspace';button.append(buttonLabel);
     button.title='Workspace files and drafts are saved in this browser on this device.';
     document.querySelector('header nav').append(button);
     const panel=document.createElement('section');panel.id='workspace-window';
@@ -44,8 +45,14 @@
     const $=selector=>panel.querySelector(selector),action=name=>$('[data-action="'+name+'"]');
     button.onclick=()=>{floating.toggle();refreshList().catch(fail)};
     function status(state,label,detail=''){
-      button.dataset.state=state;button.textContent=(record?.name||'Workspace')+' · '+label;
-      button.title=detail||'Files and drafts are stored in this browser on this device.';
+      const name=record?.name||'Workspace',signature=JSON.stringify([state,label,detail,name]);
+      if(signature===lastStatus)return;lastStatus=signature;
+      // Saving state must not resize the navigation row every time a checkpoint
+      // runs. Keep its label stable; expose details in the dialog and tooltip.
+      if(button.dataset.state!==state)button.dataset.state=state;
+      if(buttonLabel.textContent!==name)buttonLabel.textContent=name;
+      button.title=name+' · '+label+(detail?' · '+detail:'');
+      button.setAttribute('aria-label',name+' workspace: '+label+(detail?'. '+detail:''));
       $('.workspace-state').textContent=label;$('.workspace-error').hidden=!detail;
       $('.workspace-error').textContent=detail;onStatus({state,label,detail,workspace:record?.name});
     }
@@ -57,9 +64,21 @@
     }
     async function refreshList(){
       if(!db)return;
-      const choices=await all(db,'workspaces'),select=$('select');select.replaceChildren();
-      for(const item of choices.sort((a,b)=>a.name.localeCompare(b.name))){const option=document.createElement('option');option.value=item.id;option.textContent=item.name+(item.base_id!==base?.base_id?' (different base)':'');select.append(option)}
-      if(record){select.value=record.id;$('.workspace-name').value=record.name;$('.workspace-builds input').checked=record.keepBuilds!==false}
+      const choices=(await all(db,'workspaces')).sort((a,b)=>a.name.localeCompare(b.name)),select=$('select');
+      const signature=JSON.stringify(choices.map(item=>[item.id,item.name,item.base_id]));
+      if(signature!==listSignature){
+        listSignature=signature;select.replaceChildren();
+        for(const item of choices){const option=document.createElement('option');option.value=item.id;option.textContent=item.name+(item.base_id!==base?.base_id?' (different base)':'');select.append(option)}
+      }
+      if(record){
+        select.value=record.id;
+        const name=$('.workspace-name');
+        // Retain an unsubmitted name even after focus moves to Save now or
+        // another control. Only a real name/workspace change replaces it.
+        if(record.id!==renderedWorkspaceId||record.name!==renderedWorkspaceName||name.value===renderedWorkspaceName)name.value=record.name;
+        renderedWorkspaceId=record.id;renderedWorkspaceName=record.name;
+        $('.workspace-builds input').checked=record.keepBuilds!==false;
+      }
       action('previous').disabled=!record?.previous;action('backup').disabled=!record?.current;
       const estimate=await navigator.storage?.estimate?.().catch(()=>({}))||{};
       $('.workspace-storage').textContent=estimate.quota?size(estimate.usage||0)+' used · '+size(Math.max(0,estimate.quota-(estimate.usage||0)))+' browser storage available':'';
@@ -172,11 +191,19 @@
         let response,writes;
         const added=[];
         try{
-          record=await claim(record);status('saving','Saving');
+          record=await claim(record);
           await captureDrafts({immediate:true});
-          const keys=await transact(db,['blobs'],'readonly',tx=>request(tx.objectStore('blobs').getAllKeys()));
           writes=await journal?.getWorkspaceWrites();
+          // A change notification during the previous save can leave a queued
+          // timer behind. Renew the lease and verify both monitors before
+          // skipping it, without flashing a spurious Saving state.
+          if(!force&&record.current&&!filesystemPending&&!writes?.paths.length&&!writes?.busy){
+            const state=await rpc('workspace-status');
+            if(!state.dirty&&state.sequence===lastSequence)return record.current;
+          }
           if(writes?.busy){status('dirty','Waiting to save','Waiting for file writes to finish');scheduleSave(2000);return null}
+          status('saving','Saving');
+          const keys=await transact(db,['blobs'],'readonly',tx=>request(tx.objectStore('blobs').getAllKeys()));
           response=await rpc('workspace-checkpoint',{known:keys,defer_busy:!force,written_paths:writes?.paths||[]},event=>{
             const meter=$('progress');meter.hidden=false;if(event.total>0){meter.max=event.total;meter.value=event.completed}else meter.removeAttribute('value');
           });
@@ -290,7 +317,7 @@
     };
     action('backup').onclick=()=>downloadCheckpoint().catch(fail);
     action('previous').onclick=()=>previous().catch(fail);
-    action('rename').onclick=async()=>{try{if(!record)return;const name=$('.workspace-name').value.trim().slice(0,80)||record.name;record=await updateRecord(latest=>({...latest,name}));await refreshList()}catch(error){fail(error)}};
+    action('rename').onclick=async()=>{try{if(!record)return;const name=$('.workspace-name').value.trim().slice(0,80)||record.name;record=await updateRecord(latest=>({...latest,name}));const [,label,detail]=JSON.parse(lastStatus);status(button.dataset.state,label,detail);await refreshList()}catch(error){fail(error)}};
     action('new').onclick=async()=>{try{const name=$('.workspace-name').value.trim()||'Workspace';if(started)await checkpoint();await switchWorkspace(await create(name))}catch(error){fail(error)}};
     action('fresh').onclick=async()=>{try{if(!db)db=await openDatabase();if(!base)base=await rpc('workspace-init');const next=await create($('.workspace-name').value.trim()||'New workspace');await switchWorkspace(next)}catch(error){fail(error)}};
     action('temporary').onclick=async()=>{restoring=false;started=false;await rpc('workspace-ready');status('error','Temporary session','Files in this session require export; automatic workspace saving is unavailable.');floating.close();startChoice?.(false);startChoice=null};

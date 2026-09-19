@@ -15,4 +15,8 @@
 .wb-window.sim-help pre{max-height:none;overflow:visible;padding:0;border:0;background:transparent;color:var(--wb-text,#d9e1ec)}
 .wb-window.sim-help{width:max-content;max-width:calc(var(--wb-window-viewport-width,100vw) - 16px)}
 .wb-editor-new .wb-window-body>div:last-child{display:flex;gap:7px}
-@media(pointer:coarse){.wb-window-titlebar>.wb-window-close{min-width:36px;min-height:32px}.wb-window button{min-height:30px}}
+@media(any-pointer:coarse){
+  .wb-window-titlebar>.wb-window-close{min-width:44px;min-height:44px}
+  .wb-window button{min-height:44px}
+  :root .wb-window :is(input:not([type=checkbox]):not([type=range]),select,textarea){font-size:16px;min-height:44px}
+}

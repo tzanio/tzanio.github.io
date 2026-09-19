@@ -229,9 +229,9 @@
       publish();
     }
     async function observeDisk(buffer, remote) {
-      if (remote.revision === buffer.revision) {buffer.conflict=null;publish();return;}
+      if (remote.revision === buffer.revision) {if(buffer.conflict){buffer.conflict=null;publish();}return;}
       if (remote.text === buffer.doc.getValue()) {acceptDisk(buffer,remote);return;}
-      if (buffer.dirty) {buffer.conflict=remote;publish();}
+      if (buffer.dirty) {if(buffer.conflict?.revision!==remote.revision||buffer.conflict?.deleted){buffer.conflict=remote;publish();}}
       else {acceptDisk(buffer,remote);onNotice('Reloaded ' + basename(buffer.path) + ' after a terminal change.');}
     }
     function makeBuffer(path, remote, isNew = false) {
@@ -324,12 +324,12 @@
         try {
           const result = await readFile(buffer.path,{ifRevision:expected});
           if (!buffer.saving && buffer.revision === expected && buffers.has(buffer.path)) {
-            if(result.unchanged){buffer.conflict=null;publish();}
+            if(result.unchanged){if(buffer.conflict){buffer.conflict=null;publish();}}
             else await observeDisk(buffer,await normalize(result));
           }
         } catch (error) {
           if (/No such file|not found|ENOENT/i.test(error?.message || String(error))) {
-            buffer.conflict={deleted:true,revision:null};publish();
+            if(!buffer.conflict?.deleted){buffer.conflict={deleted:true,revision:null};publish();}
           } else throw error;
         }
       })();

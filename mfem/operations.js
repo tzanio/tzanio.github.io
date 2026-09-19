@@ -5,6 +5,7 @@
   let panel,windowHandle,button,timer;
   const elapsed=ms=>{const seconds=Math.floor(ms/1000);return seconds<60?seconds+'s':Math.floor(seconds/60)+'m '+seconds%60+'s'};
   const amount=(value,unit)=>unit==='bytes'?(value/1048576).toFixed(1)+' MiB':Math.floor(value).toLocaleString()+' '+(unit||'items');
+  const setText=(node,value)=>{if(node.textContent!==value)node.textContent=value};
   function mount() {
     if(panel)return;
     panel=document.createElement('section');panel.id='operation-progress';
@@ -18,8 +19,8 @@
   function renderTask(task) {
     const {row,state}=task,active=state==='running',known=Number.isFinite(task.total)&&task.total>0;
     row.dataset.state=state;row.dataset.stage=task.stage||'';
-    row.querySelector('.operation-stage').textContent=task.label||'Working…';
-    row.querySelector('.operation-detail').textContent=task.detail||'';
+    setText(row.querySelector('.operation-stage'),task.label||'Working…');
+    setText(row.querySelector('.operation-detail'),task.detail||'');
     const meter=row.querySelector('progress');meter.hidden=!active;
     if(known){meter.max=task.total;meter.value=Math.min(task.total,Math.max(0,task.completed||0))}
     else meter.removeAttribute('value');
@@ -30,7 +31,7 @@
       parts.push(amount(done,task.unit)+' / '+amount(task.total,task.unit));
     } else if(active&&Number.isFinite(task.completed)&&task.completed>0)parts.push(amount(task.completed,task.unit));
     parts.push(elapsed((task.ended||performance.now())-task.started));
-    row.querySelector('.operation-count').textContent=parts.join(' · ');
+    setText(row.querySelector('.operation-count'),parts.join(' · '));
     row.querySelector('.operation-dismiss').hidden=active;
     row.setAttribute('aria-busy',String(active));
   }

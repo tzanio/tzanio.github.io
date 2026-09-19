@@ -27,6 +27,7 @@ body[data-maximized="editor"] .editor,body[data-maximized="viewer"] .viewer{flex
 :root body[data-phone-pane] .phone-menu[data-busy="true"]::after{content:'';position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--wb-accent,#a4ce83)}
 :root body[data-phone-pane] header nav{display:none;position:absolute;top:100%;left:6px;right:6px;width:auto;margin:0;padding:10px;gap:8px;z-index:30;border:1px solid var(--wb-border,#455869);border-radius:8px;background:var(--wb-panel,#20231e);box-shadow:0 10px 25px #0007}
 :root body[data-phone-pane].phone-menu-open header nav{display:flex;flex-wrap:wrap}
+:root body[data-phone-pane] header nav{max-height:calc(var(--phone-height,100dvh) - 70px - env(safe-area-inset-top));overflow-y:auto;overscroll-behavior:contain}
 :root body[data-phone-pane] header nav>button,:root body[data-phone-pane] header nav>.button,:root body[data-phone-pane] header nav select{min-height:44px;font-size:12px}
 :root body[data-phone-pane] #toggle-files{display:none}
 :root body[data-phone-pane] .wb-theme-picker{margin-left:0}

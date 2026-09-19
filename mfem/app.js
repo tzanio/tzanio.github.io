@@ -27,6 +27,7 @@ Object.defineProperty(window,'viewer',{get:()=>simulation?.viewer});
 vm.add_listener('serial0-output-bytes',bytes=>terminal.write(bytes));
 vm.add_listener('runtime-error',error=>{
   linuxReady=ready=false;systemStatus('error','Alpine Linux stopped');window.WorkbenchStartup?.error(error.message);notice(error.message);
+  setWorkspaceBusy(workspaceBusy);$('save').disabled=true;$('refresh').disabled=true;
   for(const task of waiting.values()){clearTimeout(task.timer);task.reject(error)}waiting.clear();
 });
 vm.ready.catch(error=>notice(error.message));
@@ -96,7 +97,7 @@ async function finishStartup() {
   await workspaces.start();
   ready=true;diagnostics.bootMs=performance.now();systemStatus('ready','Alpine Linux ready');
   window.WorkbenchStartup?.linuxReady();simulation.setGuestReady?.(true);
-  $('refresh').disabled=false;$('backup').disabled=false;$('save').disabled=!currentPath;
+  $('refresh').disabled=false;setWorkspaceBusy(false);$('save').disabled=!currentPath;
   await refresh();fit();
 }
 vm.add_listener('serial1-output-bytes',bytes=>{
@@ -182,14 +183,15 @@ async function renderDirectory(path,container,depth) {
     const filePath=path+'/'+file.name;
     const row=document.createElement('button'),child=document.createElement('div');
     row.textContent=(file.dir?(expanded.has(filePath)?'▾ ':'▸ '):'  ')+file.name;
+    if(file.dir)row.setAttribute('aria-expanded',String(expanded.has(filePath)));
     row.style.paddingLeft=(10+depth*14)+'px';row.title=filePath;
     if(currentPath===filePath)row.classList.add('selected');container.append(row,child);
     if(file.dir&&expanded.has(filePath))await renderDirectory(filePath,child,depth+1);
     row.onclick=async()=>{
       try {
         if(file.dir) {
-          if(expanded.has(filePath)){expanded.delete(filePath);child.hidden=true;row.textContent='▸ '+file.name}
-          else {expanded.add(filePath);row.textContent='▾ '+file.name;child.hidden=false;if(!child.childElementCount)await renderDirectory(filePath,child,depth+1)}
+          if(expanded.has(filePath)){expanded.delete(filePath);row.setAttribute('aria-expanded','false');child.hidden=true;row.textContent='▸ '+file.name}
+          else {expanded.add(filePath);row.setAttribute('aria-expanded','true');row.textContent='▾ '+file.name;child.hidden=false;if(!child.childElementCount)await renderDirectory(filePath,child,depth+1)}
         } else if(file.size>editorLimit)notice('Use the terminal for files larger than 3 MB.');
         else await openFile(filePath);
       } catch(error){notice(error.message)}
@@ -198,12 +200,20 @@ async function renderDirectory(path,container,depth) {
 }
 async function refresh(rethrow=false) {
   if(!ready){await indexReady;return}
+  const focusedRefresh=document.activeElement===$('refresh');
   $('refresh').disabled=true;
   try {
     const listing=await rpc('list-many',{paths:[sourceRoot,...expanded]});
     for(const [path,files] of Object.entries(listing))cacheDirectory(path,files);
-    await renderDirectory(sourceRoot,$('tree'),0);await editor.checkExternal();
-  } catch(error){if(rethrow)throw error;notice(error.message)}finally{$('refresh').disabled=false}
+    const tree=$('tree'),scroll=tree.scrollTop,focusedPath=tree.contains(document.activeElement)?document.activeElement.title:null;
+    await renderDirectory(sourceRoot,tree,0);
+    tree.scrollTop=scroll;
+    if(focusedPath&&document.activeElement===document.body)[...tree.querySelectorAll('button')].find(row=>row.title===focusedPath)?.focus({preventScroll:true});
+    await editor.checkExternal();
+  } catch(error){if(rethrow)throw error;notice(error.message)}finally{
+    $('refresh').disabled=false;
+    if(focusedRefresh&&document.activeElement===document.body)$('refresh').focus({preventScroll:true});
+  }
 }
 async function openFile(path) {
   await editor.open(path);
@@ -247,8 +257,8 @@ $('refresh').onclick=async()=>{
   try{await refresh(true);activity.complete('Files refreshed')}catch(error){activity.fail(error)}
 };
 function setWorkspaceBusy(value) {
-  workspaceBusy=value;$('backup').disabled=value||!ready;$('import').disabled=value;
-  $('import').closest('label').setAttribute('aria-disabled',String(value));
+  workspaceBusy=value;
+  for(const id of ['backup','import','import-open'])$(id).disabled=value||!ready;
 }
 function archiveProgress(activity) {
   const labels={waiting:'Waiting for the other workspace operation…',scanning:'Finding source, data and results…',packing:'Compressing workspace…',validating:'Checking the archive…',restoring:'Restoring workspace files…'};
@@ -301,6 +311,7 @@ async function importArchive(file,confirmed=false) {
   } catch(error){activity?.fail(error,{retry:()=>importArchive(file,true)});notice(error.message)}
   finally{if(uploaded)rpc('unlink',{path:uploaded}).catch(()=>{});if(started){restoringWorkspace=false;setWorkspaceBusy(false)}}
 }
+$('import-open').onclick=()=>$('import').click();
 $('import').onchange=event=>{const file=event.target.files[0];event.target.value='';importArchive(file)};
 const checkEditor=()=>{if(ready&&!restoringWorkspace&&!document.hidden)editor.checkExternal().catch(error=>console.warn(error.message))};
 setInterval(checkEditor,4000);window.addEventListener('focus',checkEditor);

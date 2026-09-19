@@ -50,7 +50,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 :root,body {background:var(--wb-bg);color:var(--wb-text);accent-color:var(--wb-accent)}
 * {scrollbar-color:var(--wb-border) var(--wb-panel)}
 header,aside {background:var(--wb-panel);border-color:var(--wb-border)}
-header {min-width:0;gap:18px;flex-shrink:0}
+header {min-width:0;gap:18px;flex-shrink:0;height:auto;min-height:62px;padding-top:8px;padding-bottom:8px}
 header nav {min-width:0;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .bar,.vis-toolbar {background:var(--wb-raised);border-color:var(--wb-border)}
 .pane-caption {font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--wb-text);white-space:nowrap;flex-shrink:0}
@@ -140,7 +140,7 @@ dialog::backdrop,#vis-help::backdrop,.sim-help::backdrop,#offline-dialog::backdr
 /* The full-color TMOG reference uses a charcoal instrument chassis, wide
    geometric headings, white text, and an individual accent for each panel. */
 :root[data-theme="tmog"] body {font-family:"Avenir Next",Avenir,ui-sans-serif,system-ui,sans-serif}
-:root[data-theme="tmog"] header {height:72px;padding:0 22px;background:#262624;border-bottom-color:#41443c;gap:22px}
+:root[data-theme="tmog"] header {height:auto;min-height:72px;padding:8px 22px;background:#262624;border-bottom-color:#41443c;gap:22px}
 :root[data-theme="tmog"] .brand {font-family:Michroma,ui-sans-serif,sans-serif;font-weight:400;font-size:20px;gap:13px;letter-spacing:-.02em;min-width:0}
 :root[data-theme="tmog"] .brand-title {white-space:nowrap}
 :root[data-theme="tmog"] .mfem-logo {filter:drop-shadow(0 0 4px #8fc9ff85) drop-shadow(0 0 11px #568fff55)}

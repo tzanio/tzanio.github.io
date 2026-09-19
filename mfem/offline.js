@@ -36,7 +36,7 @@
     dialog.innerHTML = '<div class="offline-heading"><h2 id="offline-title">Take the workstation offline</h2><button id="offline-close" aria-label="Close offline downloads">Close ×</button></div>' +
       '<p>Download the tools, MFEM checkout, examples and GLVis to this browser. Keep this tab open until the download finishes.</p>' +
       '<p class="offline-cache-note">Tools you use are also cached automatically, up to 256 MiB. The complete download below enables offline use.</p>' +
-      '<p class="offline-note">This saves the installed tools. Export your workspace to keep your edits and results.</p>' +
+      '<p class="offline-note">This saves the installed tools. Named workspaces save edits and results separately. Export a workspace backup to move your work to another browser or device.</p>' +
       '<p id="offline-storage"></p><progress id="offline-progress" max="1" value="0" hidden></progress>' +
       '<p id="offline-message" role="status">Checking availability…</p>' +
       '<div class="offline-actions"><button id="offline-download">Download for offline use</button><button id="offline-cancel" hidden>Cancel download</button><button id="offline-remove" hidden>Remove offline files</button></div>';
