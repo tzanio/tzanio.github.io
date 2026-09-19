@@ -1,0 +1,50 @@
+linalg/batched/gpu_blas.o: \
+  /root/mfem/linalg/batched/gpu_blas.cpp \
+  /root/mfem/linalg/batched/gpu_blas.hpp \
+  /root/mfem/linalg/batched/batched.hpp \
+  /root/mfem/linalg/batched/../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/linalg/batched/../densemat.hpp \
+  /root/mfem/linalg/batched/../../general/globals.hpp \
+  /root/mfem/linalg/batched/../../general/../config/config.hpp \
+  /root/mfem/linalg/batched/../matrix.hpp \
+  /root/mfem/linalg/batched/../../general/array.hpp \
+  /root/mfem/linalg/batched/../../general/mem_manager.hpp \
+  /root/mfem/linalg/batched/../../general/enzyme.hpp \
+  /root/mfem/linalg/batched/../../general/error.hpp \
+  /root/mfem/linalg/batched/../../general/device.hpp \
+  /root/mfem/linalg/batched/../operator.hpp \
+  /root/mfem/linalg/batched/../vector.hpp \
+  /root/mfem/linalg/batched/../multivector.hpp \
+  /root/mfem/linalg/batched/../../general/backends.hpp \
+  /root/mfem/linalg/batched/../../general/cuda.hpp \
+  /root/mfem/linalg/batched/../../general/hip.hpp \
+  /root/mfem/linalg/batched/../../general/forall.hpp \
+  /root/mfem/linalg/batched/../../general/annotation.hpp \
+  /root/mfem/linalg/batched/../../general/../linalg/dtensor.hpp \
+  /root/mfem/linalg/batched/../../general/../linalg/../config/config.hpp \
+  /root/mfem/linalg/batched/../../general/../linalg/../general/error.hpp
+/root/mfem/linalg/batched/gpu_blas.hpp:
+/root/mfem/linalg/batched/batched.hpp:
+/root/mfem/linalg/batched/../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/linalg/batched/../densemat.hpp:
+/root/mfem/linalg/batched/../../general/globals.hpp:
+/root/mfem/linalg/batched/../../general/../config/config.hpp:
+/root/mfem/linalg/batched/../matrix.hpp:
+/root/mfem/linalg/batched/../../general/array.hpp:
+/root/mfem/linalg/batched/../../general/mem_manager.hpp:
+/root/mfem/linalg/batched/../../general/enzyme.hpp:
+/root/mfem/linalg/batched/../../general/error.hpp:
+/root/mfem/linalg/batched/../../general/device.hpp:
+/root/mfem/linalg/batched/../operator.hpp:
+/root/mfem/linalg/batched/../vector.hpp:
+/root/mfem/linalg/batched/../multivector.hpp:
+/root/mfem/linalg/batched/../../general/backends.hpp:
+/root/mfem/linalg/batched/../../general/cuda.hpp:
+/root/mfem/linalg/batched/../../general/hip.hpp:
+/root/mfem/linalg/batched/../../general/forall.hpp:
+/root/mfem/linalg/batched/../../general/annotation.hpp:
+/root/mfem/linalg/batched/../../general/../linalg/dtensor.hpp:
+/root/mfem/linalg/batched/../../general/../linalg/../config/config.hpp:
+/root/mfem/linalg/batched/../../general/../linalg/../general/error.hpp:

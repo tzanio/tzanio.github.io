@@ -1,0 +1,3 @@
+# Auto-generated file.
+MFEM_DIR = /root/mfem
+include $(MFEM_DIR)/miniapps/spde/makefile

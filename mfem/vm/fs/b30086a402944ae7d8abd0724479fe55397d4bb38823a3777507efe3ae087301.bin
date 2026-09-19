@@ -1,0 +1,12 @@
+mesh/vertex.o: \
+  /root/mfem/mesh/vertex.cpp \
+  /root/mfem/mesh/vertex.hpp \
+  /root/mfem/mesh/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/mesh/../general/globals.hpp \
+  /root/mfem/mesh/../general/../config/config.hpp
+/root/mfem/mesh/vertex.hpp:
+/root/mfem/mesh/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/mesh/../general/globals.hpp:
+/root/mfem/mesh/../general/../config/config.hpp:

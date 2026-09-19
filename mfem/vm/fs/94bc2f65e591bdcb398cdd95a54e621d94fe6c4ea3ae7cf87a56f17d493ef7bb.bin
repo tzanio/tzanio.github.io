@@ -1,0 +1,6 @@
+fem/sidredatacollection.o: \
+  /root/mfem/fem/sidredatacollection.cpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

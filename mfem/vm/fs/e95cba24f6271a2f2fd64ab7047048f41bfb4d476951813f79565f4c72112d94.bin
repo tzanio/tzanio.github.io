@@ -1,0 +1,6 @@
+fem/moonolith/cut.o: \
+  /root/mfem/fem/moonolith/cut.cpp \
+  /root/mfem/fem/moonolith/../../config/config.hpp \
+  /root/mfem/fem/moonolith/../../config/_config.hpp
+/root/mfem/fem/moonolith/../../config/config.hpp:
+/root/mfem/fem/moonolith/../../config/_config.hpp:

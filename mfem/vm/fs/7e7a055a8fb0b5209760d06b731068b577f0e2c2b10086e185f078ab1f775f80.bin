@@ -1,0 +1,8 @@
+linalg/hiop.o: \
+  /root/mfem/linalg/hiop.cpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/linalg/../config/_config.hpp \
+  /root/mfem/linalg/hiop.hpp
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/linalg/../config/_config.hpp:
+/root/mfem/linalg/hiop.hpp:

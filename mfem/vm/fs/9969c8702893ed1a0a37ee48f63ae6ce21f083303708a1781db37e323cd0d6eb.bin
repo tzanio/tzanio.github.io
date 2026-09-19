@@ -1,0 +1,8 @@
+general/occa.o: \
+  /root/mfem/general/occa.cpp \
+  /root/mfem/general/occa.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/general/../config/_config.hpp
+/root/mfem/general/occa.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/general/../config/_config.hpp:

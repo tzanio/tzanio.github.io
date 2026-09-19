@@ -9,7 +9,7 @@
   const retry = document.getElementById('startup-retry');
   const files = new Map();
   let inventory = false, inventoryUnavailable = false, linux = false, visual = false, finished = false, fatalFailure = '', lastChange = performance.now();
-  let renderTimer;
+  let renderTimer,workspaceStage='';
   const mb = bytes => (bytes / 1e6).toFixed(1);
   function relative(value) {
     try {
@@ -42,7 +42,7 @@
     const remaining = Math.max(0,total-loaded);
     const elapsed = Math.floor(performance.now()/1000);
     const time = elapsed < 60 ? elapsed+'s' : Math.floor(elapsed/60)+'m '+elapsed%60+'s';
-    heading.textContent = problem ? 'Startup needs attention' : linux ? 'Linux ready · running ./ex1' : 'Starting Linux';
+    heading.textContent = problem ? 'Startup needs attention' : workspaceStage ? 'Opening workspace' : linux ? 'Linux ready · preparing GLVis' : 'Starting Linux';
     retry.hidden = !problem;
     panel.dataset.state = problem ? 'error' : 'loading';
     if (inventory && total) {
@@ -53,6 +53,7 @@
       meter.removeAttribute('value');meter.removeAttribute('aria-valuetext');
       detail.textContent = problem || (loaded ? mb(loaded)+' MB ready · '+(inventoryUnavailable ? 'total size unavailable' : 'calculating remaining download') : 'Downloading startup files…');
     }
+    if(!problem&&workspaceStage){detail.textContent=workspaceStage;meter.removeAttribute('value');meter.setAttribute('aria-valuetext',workspaceStage)}
     if (!problem && elapsed >= 5) detail.textContent += ' · '+time;
     if (!problem && active && performance.now()-lastChange > 15000) detail.textContent += ' · waiting for network';
   }
@@ -85,7 +86,8 @@
     setTimeout(()=>{panel.hidden=true},1800);
   }
   window.WorkbenchStartup={progress,error,
-    linuxReady(){linux=true;schedule();complete()},
+    linuxReady(){workspaceStage='';linux=true;schedule();complete()},
+    workspace(label){workspaceStage=label;schedule()},
     visualReady(){visual=true;complete()},
     snapshot(){return {...totals(),inventory,linux,visual,finished,failure:failure()}},
   };

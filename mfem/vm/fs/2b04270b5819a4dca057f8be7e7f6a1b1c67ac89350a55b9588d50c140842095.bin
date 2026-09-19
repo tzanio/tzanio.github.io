@@ -1,0 +1,6 @@
+mesh/pncmesh.o: \
+  /root/mfem/mesh/pncmesh.cpp \
+  /root/mfem/mesh/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/mesh/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

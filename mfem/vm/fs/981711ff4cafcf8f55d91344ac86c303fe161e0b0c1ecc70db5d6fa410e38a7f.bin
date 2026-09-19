@@ -1,0 +1,290 @@
+fem/tmop/mult/grad3.o: \
+  /root/mfem/fem/tmop/mult/grad3.cpp \
+  /root/mfem/fem/tmop/mult/../pa.hpp \
+  /root/mfem/fem/tmop/mult/../../kernel_dispatch.hpp \
+  /root/mfem/fem/tmop/mult/../../../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../../config/_config.hpp \
+  /root/mfem/fem/tmop/mult/../../kernel_reporter.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/globals.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/hash_util.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/dinvariants.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/dtensor.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/error.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../tmop.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/invariants.hpp \
+  /root/mfem/fem/tmop/mult/../../nonlininteg.hpp \
+  /root/mfem/fem/tmop/mult/../../fe.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/array.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/mem_manager.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/enzyme.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/error.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/device.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/linalg.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/vector.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/array.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/globals.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/mem_manager.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/device.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/multivector.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/operator.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/matrix.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/sparsemat.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/backends.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/cuda.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/hip.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/mem_alloc.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/table.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/densemat.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/complex_operator.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/complex_densemat.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/blockvector.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/blockmatrix.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/blockoperator.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/sparsesmoothers.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/symmat.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/ode.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/communication.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/solvers.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/handle.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/constraints.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/hypre.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/auxiliary.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/mma.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/batched/batched.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/batched/../../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/batched/../densemat.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/batched/gpu_blas.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/batched/../../general/backends.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/batched/solver.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/batched/../operator.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/tensor.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/dual.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/filteredsolver.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/ordering.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/particlevector.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_base.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../intrules.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../../general/array.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../geom.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../../linalg/densemat.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../../general/hash.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../../general/../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../../general/globals.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../../general/hash_util.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../doftrans.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/../../linalg/linalg.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_fixed_order.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_h1.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_pyramid.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_l2.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_nd.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_rt.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_nurbs.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_pos.hpp \
+  /root/mfem/fem/tmop/mult/../../fe/fe_ser.hpp \
+  /root/mfem/fem/tmop/mult/../../coefficient.hpp \
+  /root/mfem/fem/tmop/mult/../../intrules.hpp \
+  /root/mfem/fem/tmop/mult/../../eltrans.hpp \
+  /root/mfem/fem/tmop/mult/../../fespace.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/mesh.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/stable3d.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/mem_alloc.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/../general/globals.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/globals.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/attribute_sets.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/arrays_by_name.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/array.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/text.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/triangle.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../fem/fe.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/element.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/table.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../linalg/densemat.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../fem/geom.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/hash.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/tetrahedron.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/vertex.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/vtk.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/binaryio.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/ncmesh.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/sort_pairs.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../fem/eltrans.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../fem/coefficient.hpp \
+  /root/mfem/fem/tmop/mult/../../../mesh/../general/zstr.hpp \
+  /root/mfem/fem/tmop/mult/../../fe_coll.hpp \
+  /root/mfem/fem/tmop/mult/../../geom.hpp \
+  /root/mfem/fem/tmop/mult/../../doftrans.hpp \
+  /root/mfem/fem/tmop/mult/../../restriction.hpp \
+  /root/mfem/fem/tmop/mult/../../normal_deriv_restriction.hpp \
+  /root/mfem/fem/tmop/mult/../../ceed/interface/operator.hpp \
+  /root/mfem/fem/tmop/mult/../../ceed/interface/../../../linalg/operator.hpp \
+  /root/mfem/fem/tmop/mult/../../ceed/interface/ceed.hpp \
+  /root/mfem/fem/tmop/mult/../../ceed/interface/../../../config/config.hpp \
+  /root/mfem/fem/tmop/mult/../../integrator.hpp \
+  /root/mfem/fem/tmop/mult/../../kernels.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/forall.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/annotation.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/backends.hpp \
+  /root/mfem/fem/tmop/mult/../../../general/../linalg/dtensor.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/kernels.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/tmatrix.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../config/tconfig.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/tassign.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../general/../config/tconfig.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/tlayout.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../fem/fespace.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/ttensor.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../linalg/simd.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../linalg/../config/tconfig.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../linalg/simd/auto.hpp \
+  /root/mfem/fem/tmop/mult/../../../linalg/../linalg/simd/../../config/tconfig.hpp
+/root/mfem/fem/tmop/mult/../pa.hpp:
+/root/mfem/fem/tmop/mult/../../kernel_dispatch.hpp:
+/root/mfem/fem/tmop/mult/../../../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../../config/_config.hpp:
+/root/mfem/fem/tmop/mult/../../kernel_reporter.hpp:
+/root/mfem/fem/tmop/mult/../../../general/globals.hpp:
+/root/mfem/fem/tmop/mult/../../../general/../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../../general/hash_util.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/dinvariants.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/dtensor.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/error.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../tmop.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/invariants.hpp:
+/root/mfem/fem/tmop/mult/../../nonlininteg.hpp:
+/root/mfem/fem/tmop/mult/../../fe.hpp:
+/root/mfem/fem/tmop/mult/../../../general/array.hpp:
+/root/mfem/fem/tmop/mult/../../../general/mem_manager.hpp:
+/root/mfem/fem/tmop/mult/../../../general/enzyme.hpp:
+/root/mfem/fem/tmop/mult/../../../general/error.hpp:
+/root/mfem/fem/tmop/mult/../../../general/device.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/linalg.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/vector.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/array.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/globals.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/mem_manager.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/device.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/multivector.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/operator.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/matrix.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/sparsemat.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/backends.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/cuda.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/hip.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/mem_alloc.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/table.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/densemat.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/complex_operator.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/complex_densemat.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/blockvector.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/blockmatrix.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/blockoperator.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/sparsesmoothers.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/symmat.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/ode.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/communication.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/solvers.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/handle.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/constraints.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/hypre.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/auxiliary.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/mma.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/batched/batched.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/batched/../../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/batched/../densemat.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/batched/gpu_blas.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/batched/../../general/backends.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/batched/solver.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/batched/../operator.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/tensor.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/dual.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/filteredsolver.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/ordering.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/particlevector.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_base.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../intrules.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../../general/array.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../geom.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../../linalg/densemat.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../../general/hash.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../../general/../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../../general/globals.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../../general/hash_util.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../doftrans.hpp:
+/root/mfem/fem/tmop/mult/../../fe/../../linalg/linalg.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_fixed_order.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_h1.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_pyramid.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_l2.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_nd.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_rt.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_nurbs.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_pos.hpp:
+/root/mfem/fem/tmop/mult/../../fe/fe_ser.hpp:
+/root/mfem/fem/tmop/mult/../../coefficient.hpp:
+/root/mfem/fem/tmop/mult/../../intrules.hpp:
+/root/mfem/fem/tmop/mult/../../eltrans.hpp:
+/root/mfem/fem/tmop/mult/../../fespace.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/mesh.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/stable3d.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/mem_alloc.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/../general/globals.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/globals.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/attribute_sets.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/arrays_by_name.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/array.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/text.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/triangle.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../fem/fe.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/element.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/table.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../linalg/densemat.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../fem/geom.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/hash.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/tetrahedron.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/vertex.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/vtk.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/binaryio.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/ncmesh.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/sort_pairs.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../fem/eltrans.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../fem/coefficient.hpp:
+/root/mfem/fem/tmop/mult/../../../mesh/../general/zstr.hpp:
+/root/mfem/fem/tmop/mult/../../fe_coll.hpp:
+/root/mfem/fem/tmop/mult/../../geom.hpp:
+/root/mfem/fem/tmop/mult/../../doftrans.hpp:
+/root/mfem/fem/tmop/mult/../../restriction.hpp:
+/root/mfem/fem/tmop/mult/../../normal_deriv_restriction.hpp:
+/root/mfem/fem/tmop/mult/../../ceed/interface/operator.hpp:
+/root/mfem/fem/tmop/mult/../../ceed/interface/../../../linalg/operator.hpp:
+/root/mfem/fem/tmop/mult/../../ceed/interface/ceed.hpp:
+/root/mfem/fem/tmop/mult/../../ceed/interface/../../../config/config.hpp:
+/root/mfem/fem/tmop/mult/../../integrator.hpp:
+/root/mfem/fem/tmop/mult/../../kernels.hpp:
+/root/mfem/fem/tmop/mult/../../../general/forall.hpp:
+/root/mfem/fem/tmop/mult/../../../general/annotation.hpp:
+/root/mfem/fem/tmop/mult/../../../general/backends.hpp:
+/root/mfem/fem/tmop/mult/../../../general/../linalg/dtensor.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/kernels.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/tmatrix.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../config/tconfig.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/tassign.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../general/../config/tconfig.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/tlayout.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../fem/fespace.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/ttensor.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../linalg/simd.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../linalg/../config/tconfig.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../linalg/simd/auto.hpp:
+/root/mfem/fem/tmop/mult/../../../linalg/../linalg/simd/../../config/tconfig.hpp:

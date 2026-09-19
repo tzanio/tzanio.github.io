@@ -1,0 +1,22 @@
+mesh/spacing.o: \
+  /root/mfem/mesh/spacing.cpp \
+  /root/mfem/mesh/spacing.hpp \
+  /root/mfem/mesh/../linalg/vector.hpp \
+  /root/mfem/mesh/../linalg/../general/array.hpp \
+  /root/mfem/mesh/../linalg/../general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/mesh/../linalg/../general/mem_manager.hpp \
+  /root/mfem/mesh/../linalg/../general/enzyme.hpp \
+  /root/mfem/mesh/../linalg/../general/globals.hpp \
+  /root/mfem/mesh/../linalg/../general/error.hpp \
+  /root/mfem/mesh/../linalg/../general/device.hpp
+/root/mfem/mesh/spacing.hpp:
+/root/mfem/mesh/../linalg/vector.hpp:
+/root/mfem/mesh/../linalg/../general/array.hpp:
+/root/mfem/mesh/../linalg/../general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/mesh/../linalg/../general/mem_manager.hpp:
+/root/mfem/mesh/../linalg/../general/enzyme.hpp:
+/root/mfem/mesh/../linalg/../general/globals.hpp:
+/root/mfem/mesh/../linalg/../general/error.hpp:
+/root/mfem/mesh/../linalg/../general/device.hpp:

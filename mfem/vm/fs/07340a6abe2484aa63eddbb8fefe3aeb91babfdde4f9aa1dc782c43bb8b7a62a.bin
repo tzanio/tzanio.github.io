@@ -1,0 +1,24 @@
+general/sets.o: \
+  /root/mfem/general/sets.cpp \
+  /root/mfem/general/sets.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/general/../config/_config.hpp \
+  /root/mfem/general/array.hpp \
+  /root/mfem/general/mem_manager.hpp \
+  /root/mfem/general/enzyme.hpp \
+  /root/mfem/general/globals.hpp \
+  /root/mfem/general/error.hpp \
+  /root/mfem/general/device.hpp \
+  /root/mfem/general/table.hpp \
+  /root/mfem/general/mem_alloc.hpp
+/root/mfem/general/sets.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/general/../config/_config.hpp:
+/root/mfem/general/array.hpp:
+/root/mfem/general/mem_manager.hpp:
+/root/mfem/general/enzyme.hpp:
+/root/mfem/general/globals.hpp:
+/root/mfem/general/error.hpp:
+/root/mfem/general/device.hpp:
+/root/mfem/general/table.hpp:
+/root/mfem/general/mem_alloc.hpp:

@@ -1,0 +1,26 @@
+fem/fe/face_map_utils.o: \
+  /root/mfem/fem/fe/face_map_utils.cpp \
+  /root/mfem/fem/fe/face_map_utils.hpp \
+  /root/mfem/fem/fe/../../general/array.hpp \
+  /root/mfem/fem/fe/../../general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/fem/fe/../../general/mem_manager.hpp \
+  /root/mfem/fem/fe/../../general/enzyme.hpp \
+  /root/mfem/fem/fe/../../general/globals.hpp \
+  /root/mfem/fem/fe/../../general/error.hpp \
+  /root/mfem/fem/fe/../../general/device.hpp \
+  /root/mfem/fem/fe/../../general/backends.hpp \
+  /root/mfem/fem/fe/../../general/cuda.hpp \
+  /root/mfem/fem/fe/../../general/hip.hpp
+/root/mfem/fem/fe/face_map_utils.hpp:
+/root/mfem/fem/fe/../../general/array.hpp:
+/root/mfem/fem/fe/../../general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/fem/fe/../../general/mem_manager.hpp:
+/root/mfem/fem/fe/../../general/enzyme.hpp:
+/root/mfem/fem/fe/../../general/globals.hpp:
+/root/mfem/fem/fe/../../general/error.hpp:
+/root/mfem/fem/fe/../../general/device.hpp:
+/root/mfem/fem/fe/../../general/backends.hpp:
+/root/mfem/fem/fe/../../general/cuda.hpp:
+/root/mfem/fem/fe/../../general/hip.hpp:

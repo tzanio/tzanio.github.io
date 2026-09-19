@@ -1,0 +1,6 @@
+fem/moonolith/transferutils.o: \
+  /root/mfem/fem/moonolith/transferutils.cpp \
+  /root/mfem/fem/moonolith/../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/fem/moonolith/../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

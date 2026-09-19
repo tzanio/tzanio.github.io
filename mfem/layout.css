@@ -13,7 +13,7 @@ body[data-maximized="editor"] .console,body[data-maximized="viewer"] .console{di
 body[data-maximized="editor"] .upper,body[data-maximized="viewer"] .upper{display:flex;flex:1;min-height:0}
 body[data-maximized="editor"] .viewer,body[data-maximized="viewer"] .editor{display:none}
 body[data-maximized="editor"] .editor,body[data-maximized="viewer"] .viewer{flex:1;width:100%;min-height:0}
-@media(max-width:850px){main{grid-template-columns:150px minmax(0,1fr)}.files-separator,.editor-separator{display:none}.upper{display:flex;flex-direction:column;overflow:auto}.editor,.viewer{min-height:280px;width:100%;flex-shrink:0}.editor{height:330px}.work{grid-template-rows:minmax(0,1fr) 6px var(--terminal-size,36%)}.console>.bar small,#boot-progress{display:none}header{flex-wrap:wrap;height:auto;min-height:62px;padding:8px 10px;gap:7px}header nav{flex-wrap:wrap}body[data-maximized] .upper{overflow:hidden}body[data-maximized] .editor,body[data-maximized] .viewer{height:auto;min-height:0}.pane-maximize{display:inline-block}}
+@media(max-width:850px){main{grid-template-columns:150px minmax(0,1fr)}.files-separator,.editor-separator{display:none}.upper{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,var(--editor-size,50%)) minmax(0,1fr);overflow:hidden}.editor,.viewer{min-height:0;height:auto;width:100%;flex-shrink:1}.work{grid-template-rows:minmax(0,1fr) 6px var(--terminal-size,36%)}.console>.bar small,#boot-progress{display:none}header{flex-wrap:wrap;height:auto;min-height:62px;padding:8px 10px;gap:7px}header nav{flex-wrap:wrap}body[data-maximized] .upper{overflow:hidden}body[data-maximized] .editor,body[data-maximized] .viewer{height:auto;min-height:0}.pane-maximize{display:inline-block}}
 
 .phone-panes,.phone-menu{display:none}
 /* Phone panes share the viewport; there is no nested desktop-sized split. */
@@ -37,7 +37,7 @@ body[data-maximized="editor"] .editor,body[data-maximized="viewer"] .viewer{flex
 :root body[data-phone-pane="viewer"] .viewer,:root body[data-phone-pane="editor"] .editor,:root body[data-phone-pane="terminal"] .console{display:flex}
 :root body[data-phone-pane="terminal"] .upper,:root body[data-phone-pane="files"] .work{display:none}
 :root body[data-phone-pane="files"] aside{display:flex;flex:1;width:100%;min-width:0}
-:root body[data-phone-pane] #tree button{min-height:44px;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+:root body[data-phone-pane] #tree button{min-height:32px;margin-top:0;margin-bottom:0;padding-top:6px;padding-bottom:6px;overflow:hidden;text-overflow:ellipsis;font-size:13px;line-height:20px}
 :root body[data-phone-pane] .phone-panes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;flex-shrink:0;margin:0;padding:4px 5px calc(4px + env(safe-area-inset-bottom));gap:4px;border-top:1px solid var(--wb-border,#455869);background:var(--wb-panel,#20231e)}
 :root body[data-phone-pane] .phone-panes button{min-height:44px;padding:6px 3px;font-size:12px;border-color:transparent;background:transparent;color:var(--wb-muted,#a4b099)}
 :root body[data-phone-pane] .phone-panes button[aria-pressed="true"]{background:var(--wb-accent-bg,#34452c);border-color:var(--wb-accent-border,#7c9962);color:var(--wb-accent,#c2e49e)}

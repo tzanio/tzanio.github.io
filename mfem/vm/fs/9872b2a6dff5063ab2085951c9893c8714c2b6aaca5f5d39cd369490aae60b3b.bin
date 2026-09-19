@@ -1,0 +1,22 @@
+general/hash.o: \
+  /root/mfem/general/hash.cpp \
+  /root/mfem/general/hash.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/general/array.hpp \
+  /root/mfem/general/mem_manager.hpp \
+  /root/mfem/general/enzyme.hpp \
+  /root/mfem/general/globals.hpp \
+  /root/mfem/general/error.hpp \
+  /root/mfem/general/device.hpp \
+  /root/mfem/general/hash_util.hpp
+/root/mfem/general/hash.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/general/array.hpp:
+/root/mfem/general/mem_manager.hpp:
+/root/mfem/general/enzyme.hpp:
+/root/mfem/general/globals.hpp:
+/root/mfem/general/error.hpp:
+/root/mfem/general/device.hpp:
+/root/mfem/general/hash_util.hpp:

@@ -1,0 +1,498 @@
+dfem/test_divergence.o: \
+  /root/mfem/tests/unit/dfem/test_divergence.cpp \
+  /root/mfem/tests/unit/dfem/../unit_tests.hpp \
+  /root/mfem/tests/unit/dfem/../catch.hpp \
+  /root/mfem/mfem.hpp \
+  /root/mfem/config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/general/error.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/general/device.hpp \
+  /root/mfem/general/enzyme.hpp \
+  /root/mfem/general/globals.hpp \
+  /root/mfem/general/mem_manager.hpp \
+  /root/mfem/general/forall.hpp \
+  /root/mfem/general/annotation.hpp \
+  /root/mfem/general/backends.hpp \
+  /root/mfem/general/cuda.hpp \
+  /root/mfem/general/hip.hpp \
+  /root/mfem/general/../linalg/dtensor.hpp \
+  /root/mfem/general/../linalg/../config/config.hpp \
+  /root/mfem/general/../linalg/../general/error.hpp \
+  /root/mfem/general/array.hpp \
+  /root/mfem/general/arrays_by_name.hpp \
+  /root/mfem/general/text.hpp \
+  /root/mfem/general/sets.hpp \
+  /root/mfem/general/table.hpp \
+  /root/mfem/general/mem_alloc.hpp \
+  /root/mfem/general/hash.hpp \
+  /root/mfem/general/hash_util.hpp \
+  /root/mfem/general/sort_pairs.hpp \
+  /root/mfem/general/stable3d.hpp \
+  /root/mfem/general/../general/globals.hpp \
+  /root/mfem/general/tic_toc.hpp \
+  /root/mfem/general/isockstream.hpp \
+  /root/mfem/general/osockstream.hpp \
+  /root/mfem/general/socketstream.hpp \
+  /root/mfem/general/optparser.hpp \
+  /root/mfem/general/zstr.hpp \
+  /root/mfem/general/version.hpp \
+  /root/mfem/general/kdtree.hpp \
+  /root/mfem/linalg/linalg.hpp \
+  /root/mfem/linalg/vector.hpp \
+  /root/mfem/linalg/../general/array.hpp \
+  /root/mfem/linalg/../general/globals.hpp \
+  /root/mfem/linalg/../general/mem_manager.hpp \
+  /root/mfem/linalg/../general/device.hpp \
+  /root/mfem/linalg/multivector.hpp \
+  /root/mfem/linalg/operator.hpp \
+  /root/mfem/linalg/matrix.hpp \
+  /root/mfem/linalg/sparsemat.hpp \
+  /root/mfem/linalg/../general/backends.hpp \
+  /root/mfem/linalg/../general/mem_alloc.hpp \
+  /root/mfem/linalg/../general/table.hpp \
+  /root/mfem/linalg/densemat.hpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/linalg/complex_operator.hpp \
+  /root/mfem/linalg/complex_densemat.hpp \
+  /root/mfem/linalg/blockvector.hpp \
+  /root/mfem/linalg/blockmatrix.hpp \
+  /root/mfem/linalg/blockoperator.hpp \
+  /root/mfem/linalg/sparsesmoothers.hpp \
+  /root/mfem/linalg/symmat.hpp \
+  /root/mfem/linalg/ode.hpp \
+  /root/mfem/linalg/../general/communication.hpp \
+  /root/mfem/linalg/../general/../config/config.hpp \
+  /root/mfem/linalg/solvers.hpp \
+  /root/mfem/linalg/handle.hpp \
+  /root/mfem/linalg/invariants.hpp \
+  /root/mfem/linalg/../general/error.hpp \
+  /root/mfem/linalg/constraints.hpp \
+  /root/mfem/linalg/hypre.hpp \
+  /root/mfem/linalg/auxiliary.hpp \
+  /root/mfem/linalg/mma.hpp \
+  /root/mfem/linalg/batched/batched.hpp \
+  /root/mfem/linalg/batched/../../config/config.hpp \
+  /root/mfem/linalg/batched/../densemat.hpp \
+  /root/mfem/linalg/batched/gpu_blas.hpp \
+  /root/mfem/linalg/batched/../../general/backends.hpp \
+  /root/mfem/linalg/batched/solver.hpp \
+  /root/mfem/linalg/batched/../operator.hpp \
+  /root/mfem/linalg/tensor.hpp \
+  /root/mfem/linalg/dual.hpp \
+  /root/mfem/linalg/filteredsolver.hpp \
+  /root/mfem/linalg/ordering.hpp \
+  /root/mfem/linalg/particlevector.hpp \
+  /root/mfem/mesh/mesh_headers.hpp \
+  /root/mfem/mesh/vertex.hpp \
+  /root/mfem/mesh/../config/config.hpp \
+  /root/mfem/mesh/../general/globals.hpp \
+  /root/mfem/mesh/element.hpp \
+  /root/mfem/mesh/../general/array.hpp \
+  /root/mfem/mesh/../general/table.hpp \
+  /root/mfem/mesh/../linalg/densemat.hpp \
+  /root/mfem/mesh/../fem/geom.hpp \
+  /root/mfem/mesh/../fem/../config/config.hpp \
+  /root/mfem/mesh/../fem/../linalg/densemat.hpp \
+  /root/mfem/mesh/../fem/intrules.hpp \
+  /root/mfem/mesh/../fem/../general/array.hpp \
+  /root/mfem/mesh/../fem/../general/hash.hpp \
+  /root/mfem/mesh/../general/hash.hpp \
+  /root/mfem/mesh/point.hpp \
+  /root/mfem/mesh/segment.hpp \
+  /root/mfem/mesh/triangle.hpp \
+  /root/mfem/mesh/../fem/fe.hpp \
+  /root/mfem/mesh/../fem/../linalg/linalg.hpp \
+  /root/mfem/mesh/../fem/fe/fe_base.hpp \
+  /root/mfem/mesh/../fem/fe/../intrules.hpp \
+  /root/mfem/mesh/../fem/fe/../geom.hpp \
+  /root/mfem/mesh/../fem/fe/../doftrans.hpp \
+  /root/mfem/mesh/../fem/fe/../../config/config.hpp \
+  /root/mfem/mesh/../fem/fe/../../linalg/linalg.hpp \
+  /root/mfem/mesh/../fem/fe/../../general/hash.hpp \
+  /root/mfem/mesh/../fem/fe/fe_fixed_order.hpp \
+  /root/mfem/mesh/../fem/fe/fe_h1.hpp \
+  /root/mfem/mesh/../fem/fe/fe_pyramid.hpp \
+  /root/mfem/mesh/../fem/fe/fe_l2.hpp \
+  /root/mfem/mesh/../fem/fe/fe_nd.hpp \
+  /root/mfem/mesh/../fem/fe/fe_rt.hpp \
+  /root/mfem/mesh/../fem/fe/fe_nurbs.hpp \
+  /root/mfem/mesh/../fem/fe/fe_pos.hpp \
+  /root/mfem/mesh/../fem/fe/fe_ser.hpp \
+  /root/mfem/mesh/quadrilateral.hpp \
+  /root/mfem/mesh/hexahedron.hpp \
+  /root/mfem/mesh/tetrahedron.hpp \
+  /root/mfem/mesh/ncmesh.hpp \
+  /root/mfem/mesh/../general/sort_pairs.hpp \
+  /root/mfem/mesh/mesh.hpp \
+  /root/mfem/mesh/../general/stable3d.hpp \
+  /root/mfem/mesh/attribute_sets.hpp \
+  /root/mfem/mesh/../general/arrays_by_name.hpp \
+  /root/mfem/mesh/vtk.hpp \
+  /root/mfem/mesh/../general/binaryio.hpp \
+  /root/mfem/mesh/../general/../config/config.hpp \
+  /root/mfem/mesh/../fem/eltrans.hpp \
+  /root/mfem/mesh/../fem/kernel_dispatch.hpp \
+  /root/mfem/mesh/../fem/kernel_reporter.hpp \
+  /root/mfem/mesh/../fem/../general/globals.hpp \
+  /root/mfem/mesh/../fem/../general/hash_util.hpp \
+  /root/mfem/mesh/../fem/coefficient.hpp \
+  /root/mfem/mesh/../general/zstr.hpp \
+  /root/mfem/mesh/mesh_operators.hpp \
+  /root/mfem/mesh/../fem/estimators.hpp \
+  /root/mfem/mesh/../fem/../linalg/vector.hpp \
+  /root/mfem/mesh/../fem/bilinearform.hpp \
+  /root/mfem/mesh/../fem/fespace.hpp \
+  /root/mfem/mesh/../fem/../linalg/ordering.hpp \
+  /root/mfem/mesh/../fem/../linalg/sparsemat.hpp \
+  /root/mfem/mesh/../fem/../mesh/mesh.hpp \
+  /root/mfem/mesh/../fem/fe_coll.hpp \
+  /root/mfem/mesh/../fem/doftrans.hpp \
+  /root/mfem/mesh/../fem/restriction.hpp \
+  /root/mfem/mesh/../fem/../linalg/operator.hpp \
+  /root/mfem/mesh/../fem/normal_deriv_restriction.hpp \
+  /root/mfem/mesh/../fem/gridfunc.hpp \
+  /root/mfem/mesh/../fem/bilininteg.hpp \
+  /root/mfem/mesh/../fem/nonlininteg.hpp \
+  /root/mfem/mesh/../fem/ceed/interface/operator.hpp \
+  /root/mfem/mesh/../fem/ceed/interface/../../../linalg/operator.hpp \
+  /root/mfem/mesh/../fem/ceed/interface/ceed.hpp \
+  /root/mfem/mesh/../fem/ceed/interface/../../../config/config.hpp \
+  /root/mfem/mesh/../fem/integrator.hpp \
+  /root/mfem/mesh/../fem/ceed/interface/util.hpp \
+  /root/mfem/mesh/../fem/ceed/interface/../../../general/error.hpp \
+  /root/mfem/mesh/../fem/qfunction.hpp \
+  /root/mfem/mesh/../fem/qspace.hpp \
+  /root/mfem/mesh/../fem/bounds.hpp \
+  /root/mfem/mesh/../fem/linearform.hpp \
+  /root/mfem/mesh/../fem/lininteg.hpp \
+  /root/mfem/mesh/../fem/linearform_ext.hpp \
+  /root/mfem/mesh/../fem/bilinearform_ext.hpp \
+  /root/mfem/mesh/../fem/../general/device.hpp \
+  /root/mfem/mesh/../fem/staticcond.hpp \
+  /root/mfem/mesh/../fem/hybridization.hpp \
+  /root/mfem/mesh/submesh/ncsubmesh.hpp \
+  /root/mfem/mesh/submesh/../ncmesh.hpp \
+  /root/mfem/mesh/submesh/submesh.hpp \
+  /root/mfem/mesh/submesh/../mesh.hpp \
+  /root/mfem/mesh/submesh/transfermap.hpp \
+  /root/mfem/mesh/submesh/../../fem/gridfunc.hpp \
+  /root/mfem/mesh/submesh/transfer_category.hpp \
+  /root/mfem/mesh/submesh/submesh_utils.hpp \
+  /root/mfem/mesh/submesh/../../fem/fespace.hpp \
+  /root/mfem/mesh/nurbs.hpp \
+  /root/mfem/mesh/../linalg/vector.hpp \
+  /root/mfem/mesh/spacing.hpp \
+  /root/mfem/mesh/wedge.hpp \
+  /root/mfem/mesh/pyramid.hpp \
+  /root/mfem/mesh/bb_grid_map.hpp \
+  /root/mfem/fem/fem.hpp \
+  /root/mfem/fem/intrules.hpp \
+  /root/mfem/fem/intrules_cut.hpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/fem/../general/array.hpp \
+  /root/mfem/fem/eltrans.hpp \
+  /root/mfem/fem/coefficient.hpp \
+  /root/mfem/fem/geom.hpp \
+  /root/mfem/fem/fe.hpp \
+  /root/mfem/fem/fe_coll.hpp \
+  /root/mfem/fem/doftrans.hpp \
+  /root/mfem/fem/complex_fem.hpp \
+  /root/mfem/fem/../linalg/complex_operator.hpp \
+  /root/mfem/fem/gridfunc.hpp \
+  /root/mfem/fem/linearform.hpp \
+  /root/mfem/fem/bilinearform.hpp \
+  /root/mfem/fem/convergence.hpp \
+  /root/mfem/fem/../linalg/linalg.hpp \
+  /root/mfem/fem/lininteg.hpp \
+  /root/mfem/fem/nonlininteg.hpp \
+  /root/mfem/fem/bilininteg.hpp \
+  /root/mfem/fem/fespace.hpp \
+  /root/mfem/fem/kdtree.hpp \
+  /root/mfem/fem/../general/kdtree.hpp \
+  /root/mfem/fem/nonlinearform.hpp \
+  /root/mfem/fem/nonlinearform_ext.hpp \
+  /root/mfem/fem/hybridization.hpp \
+  /root/mfem/fem/datacollection.hpp \
+  /root/mfem/fem/qfunction.hpp \
+  /root/mfem/fem/estimators.hpp \
+  /root/mfem/fem/staticcond.hpp \
+  /root/mfem/fem/tmop.hpp \
+  /root/mfem/fem/../linalg/invariants.hpp \
+  /root/mfem/fem/../linalg/dual.hpp \
+  /root/mfem/fem/tmop_tools.hpp \
+  /root/mfem/fem/pbilinearform.hpp \
+  /root/mfem/fem/gslib.hpp \
+  /root/mfem/fem/tmop_amr.hpp \
+  /root/mfem/fem/pnonlinearform.hpp \
+  /root/mfem/fem/../mesh/mesh_operators.hpp \
+  /root/mfem/fem/restriction.hpp \
+  /root/mfem/fem/quadinterpolator.hpp \
+  /root/mfem/fem/kernel_dispatch.hpp \
+  /root/mfem/fem/quadinterpolator_face.hpp \
+  /root/mfem/fem/transfer.hpp \
+  /root/mfem/fem/fespacehierarchy.hpp \
+  /root/mfem/fem/multigrid.hpp \
+  /root/mfem/fem/../linalg/operator.hpp \
+  /root/mfem/fem/../linalg/handle.hpp \
+  /root/mfem/fem/ceed/solvers/algebraic.hpp \
+  /root/mfem/fem/ceed/solvers/../../fespacehierarchy.hpp \
+  /root/mfem/fem/ceed/solvers/../../multigrid.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/operator.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/ceed.hpp \
+  /root/mfem/fem/lor/lor.hpp \
+  /root/mfem/fem/lor/../bilinearform.hpp \
+  /root/mfem/fem/dgmassinv.hpp \
+  /root/mfem/fem/hyperbolic.hpp \
+  /root/mfem/fem/bounds.hpp \
+  /root/mfem/fem/particleset.hpp \
+  /root/mfem/fem/dfem/doperator.hpp \
+  /root/mfem/fem/dfem/../../config/config.hpp
+/root/mfem/tests/unit/dfem/../unit_tests.hpp:
+/root/mfem/tests/unit/dfem/../catch.hpp:
+/root/mfem/mfem.hpp:
+/root/mfem/config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/general/error.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/general/device.hpp:
+/root/mfem/general/enzyme.hpp:
+/root/mfem/general/globals.hpp:
+/root/mfem/general/mem_manager.hpp:
+/root/mfem/general/forall.hpp:
+/root/mfem/general/annotation.hpp:
+/root/mfem/general/backends.hpp:
+/root/mfem/general/cuda.hpp:
+/root/mfem/general/hip.hpp:
+/root/mfem/general/../linalg/dtensor.hpp:
+/root/mfem/general/../linalg/../config/config.hpp:
+/root/mfem/general/../linalg/../general/error.hpp:
+/root/mfem/general/array.hpp:
+/root/mfem/general/arrays_by_name.hpp:
+/root/mfem/general/text.hpp:
+/root/mfem/general/sets.hpp:
+/root/mfem/general/table.hpp:
+/root/mfem/general/mem_alloc.hpp:
+/root/mfem/general/hash.hpp:
+/root/mfem/general/hash_util.hpp:
+/root/mfem/general/sort_pairs.hpp:
+/root/mfem/general/stable3d.hpp:
+/root/mfem/general/../general/globals.hpp:
+/root/mfem/general/tic_toc.hpp:
+/root/mfem/general/isockstream.hpp:
+/root/mfem/general/osockstream.hpp:
+/root/mfem/general/socketstream.hpp:
+/root/mfem/general/optparser.hpp:
+/root/mfem/general/zstr.hpp:
+/root/mfem/general/version.hpp:
+/root/mfem/general/kdtree.hpp:
+/root/mfem/linalg/linalg.hpp:
+/root/mfem/linalg/vector.hpp:
+/root/mfem/linalg/../general/array.hpp:
+/root/mfem/linalg/../general/globals.hpp:
+/root/mfem/linalg/../general/mem_manager.hpp:
+/root/mfem/linalg/../general/device.hpp:
+/root/mfem/linalg/multivector.hpp:
+/root/mfem/linalg/operator.hpp:
+/root/mfem/linalg/matrix.hpp:
+/root/mfem/linalg/sparsemat.hpp:
+/root/mfem/linalg/../general/backends.hpp:
+/root/mfem/linalg/../general/mem_alloc.hpp:
+/root/mfem/linalg/../general/table.hpp:
+/root/mfem/linalg/densemat.hpp:
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/linalg/complex_operator.hpp:
+/root/mfem/linalg/complex_densemat.hpp:
+/root/mfem/linalg/blockvector.hpp:
+/root/mfem/linalg/blockmatrix.hpp:
+/root/mfem/linalg/blockoperator.hpp:
+/root/mfem/linalg/sparsesmoothers.hpp:
+/root/mfem/linalg/symmat.hpp:
+/root/mfem/linalg/ode.hpp:
+/root/mfem/linalg/../general/communication.hpp:
+/root/mfem/linalg/../general/../config/config.hpp:
+/root/mfem/linalg/solvers.hpp:
+/root/mfem/linalg/handle.hpp:
+/root/mfem/linalg/invariants.hpp:
+/root/mfem/linalg/../general/error.hpp:
+/root/mfem/linalg/constraints.hpp:
+/root/mfem/linalg/hypre.hpp:
+/root/mfem/linalg/auxiliary.hpp:
+/root/mfem/linalg/mma.hpp:
+/root/mfem/linalg/batched/batched.hpp:
+/root/mfem/linalg/batched/../../config/config.hpp:
+/root/mfem/linalg/batched/../densemat.hpp:
+/root/mfem/linalg/batched/gpu_blas.hpp:
+/root/mfem/linalg/batched/../../general/backends.hpp:
+/root/mfem/linalg/batched/solver.hpp:
+/root/mfem/linalg/batched/../operator.hpp:
+/root/mfem/linalg/tensor.hpp:
+/root/mfem/linalg/dual.hpp:
+/root/mfem/linalg/filteredsolver.hpp:
+/root/mfem/linalg/ordering.hpp:
+/root/mfem/linalg/particlevector.hpp:
+/root/mfem/mesh/mesh_headers.hpp:
+/root/mfem/mesh/vertex.hpp:
+/root/mfem/mesh/../config/config.hpp:
+/root/mfem/mesh/../general/globals.hpp:
+/root/mfem/mesh/element.hpp:
+/root/mfem/mesh/../general/array.hpp:
+/root/mfem/mesh/../general/table.hpp:
+/root/mfem/mesh/../linalg/densemat.hpp:
+/root/mfem/mesh/../fem/geom.hpp:
+/root/mfem/mesh/../fem/../config/config.hpp:
+/root/mfem/mesh/../fem/../linalg/densemat.hpp:
+/root/mfem/mesh/../fem/intrules.hpp:
+/root/mfem/mesh/../fem/../general/array.hpp:
+/root/mfem/mesh/../fem/../general/hash.hpp:
+/root/mfem/mesh/../general/hash.hpp:
+/root/mfem/mesh/point.hpp:
+/root/mfem/mesh/segment.hpp:
+/root/mfem/mesh/triangle.hpp:
+/root/mfem/mesh/../fem/fe.hpp:
+/root/mfem/mesh/../fem/../linalg/linalg.hpp:
+/root/mfem/mesh/../fem/fe/fe_base.hpp:
+/root/mfem/mesh/../fem/fe/../intrules.hpp:
+/root/mfem/mesh/../fem/fe/../geom.hpp:
+/root/mfem/mesh/../fem/fe/../doftrans.hpp:
+/root/mfem/mesh/../fem/fe/../../config/config.hpp:
+/root/mfem/mesh/../fem/fe/../../linalg/linalg.hpp:
+/root/mfem/mesh/../fem/fe/../../general/hash.hpp:
+/root/mfem/mesh/../fem/fe/fe_fixed_order.hpp:
+/root/mfem/mesh/../fem/fe/fe_h1.hpp:
+/root/mfem/mesh/../fem/fe/fe_pyramid.hpp:
+/root/mfem/mesh/../fem/fe/fe_l2.hpp:
+/root/mfem/mesh/../fem/fe/fe_nd.hpp:
+/root/mfem/mesh/../fem/fe/fe_rt.hpp:
+/root/mfem/mesh/../fem/fe/fe_nurbs.hpp:
+/root/mfem/mesh/../fem/fe/fe_pos.hpp:
+/root/mfem/mesh/../fem/fe/fe_ser.hpp:
+/root/mfem/mesh/quadrilateral.hpp:
+/root/mfem/mesh/hexahedron.hpp:
+/root/mfem/mesh/tetrahedron.hpp:
+/root/mfem/mesh/ncmesh.hpp:
+/root/mfem/mesh/../general/sort_pairs.hpp:
+/root/mfem/mesh/mesh.hpp:
+/root/mfem/mesh/../general/stable3d.hpp:
+/root/mfem/mesh/attribute_sets.hpp:
+/root/mfem/mesh/../general/arrays_by_name.hpp:
+/root/mfem/mesh/vtk.hpp:
+/root/mfem/mesh/../general/binaryio.hpp:
+/root/mfem/mesh/../general/../config/config.hpp:
+/root/mfem/mesh/../fem/eltrans.hpp:
+/root/mfem/mesh/../fem/kernel_dispatch.hpp:
+/root/mfem/mesh/../fem/kernel_reporter.hpp:
+/root/mfem/mesh/../fem/../general/globals.hpp:
+/root/mfem/mesh/../fem/../general/hash_util.hpp:
+/root/mfem/mesh/../fem/coefficient.hpp:
+/root/mfem/mesh/../general/zstr.hpp:
+/root/mfem/mesh/mesh_operators.hpp:
+/root/mfem/mesh/../fem/estimators.hpp:
+/root/mfem/mesh/../fem/../linalg/vector.hpp:
+/root/mfem/mesh/../fem/bilinearform.hpp:
+/root/mfem/mesh/../fem/fespace.hpp:
+/root/mfem/mesh/../fem/../linalg/ordering.hpp:
+/root/mfem/mesh/../fem/../linalg/sparsemat.hpp:
+/root/mfem/mesh/../fem/../mesh/mesh.hpp:
+/root/mfem/mesh/../fem/fe_coll.hpp:
+/root/mfem/mesh/../fem/doftrans.hpp:
+/root/mfem/mesh/../fem/restriction.hpp:
+/root/mfem/mesh/../fem/../linalg/operator.hpp:
+/root/mfem/mesh/../fem/normal_deriv_restriction.hpp:
+/root/mfem/mesh/../fem/gridfunc.hpp:
+/root/mfem/mesh/../fem/bilininteg.hpp:
+/root/mfem/mesh/../fem/nonlininteg.hpp:
+/root/mfem/mesh/../fem/ceed/interface/operator.hpp:
+/root/mfem/mesh/../fem/ceed/interface/../../../linalg/operator.hpp:
+/root/mfem/mesh/../fem/ceed/interface/ceed.hpp:
+/root/mfem/mesh/../fem/ceed/interface/../../../config/config.hpp:
+/root/mfem/mesh/../fem/integrator.hpp:
+/root/mfem/mesh/../fem/ceed/interface/util.hpp:
+/root/mfem/mesh/../fem/ceed/interface/../../../general/error.hpp:
+/root/mfem/mesh/../fem/qfunction.hpp:
+/root/mfem/mesh/../fem/qspace.hpp:
+/root/mfem/mesh/../fem/bounds.hpp:
+/root/mfem/mesh/../fem/linearform.hpp:
+/root/mfem/mesh/../fem/lininteg.hpp:
+/root/mfem/mesh/../fem/linearform_ext.hpp:
+/root/mfem/mesh/../fem/bilinearform_ext.hpp:
+/root/mfem/mesh/../fem/../general/device.hpp:
+/root/mfem/mesh/../fem/staticcond.hpp:
+/root/mfem/mesh/../fem/hybridization.hpp:
+/root/mfem/mesh/submesh/ncsubmesh.hpp:
+/root/mfem/mesh/submesh/../ncmesh.hpp:
+/root/mfem/mesh/submesh/submesh.hpp:
+/root/mfem/mesh/submesh/../mesh.hpp:
+/root/mfem/mesh/submesh/transfermap.hpp:
+/root/mfem/mesh/submesh/../../fem/gridfunc.hpp:
+/root/mfem/mesh/submesh/transfer_category.hpp:
+/root/mfem/mesh/submesh/submesh_utils.hpp:
+/root/mfem/mesh/submesh/../../fem/fespace.hpp:
+/root/mfem/mesh/nurbs.hpp:
+/root/mfem/mesh/../linalg/vector.hpp:
+/root/mfem/mesh/spacing.hpp:
+/root/mfem/mesh/wedge.hpp:
+/root/mfem/mesh/pyramid.hpp:
+/root/mfem/mesh/bb_grid_map.hpp:
+/root/mfem/fem/fem.hpp:
+/root/mfem/fem/intrules.hpp:
+/root/mfem/fem/intrules_cut.hpp:
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/fem/../general/array.hpp:
+/root/mfem/fem/eltrans.hpp:
+/root/mfem/fem/coefficient.hpp:
+/root/mfem/fem/geom.hpp:
+/root/mfem/fem/fe.hpp:
+/root/mfem/fem/fe_coll.hpp:
+/root/mfem/fem/doftrans.hpp:
+/root/mfem/fem/complex_fem.hpp:
+/root/mfem/fem/../linalg/complex_operator.hpp:
+/root/mfem/fem/gridfunc.hpp:
+/root/mfem/fem/linearform.hpp:
+/root/mfem/fem/bilinearform.hpp:
+/root/mfem/fem/convergence.hpp:
+/root/mfem/fem/../linalg/linalg.hpp:
+/root/mfem/fem/lininteg.hpp:
+/root/mfem/fem/nonlininteg.hpp:
+/root/mfem/fem/bilininteg.hpp:
+/root/mfem/fem/fespace.hpp:
+/root/mfem/fem/kdtree.hpp:
+/root/mfem/fem/../general/kdtree.hpp:
+/root/mfem/fem/nonlinearform.hpp:
+/root/mfem/fem/nonlinearform_ext.hpp:
+/root/mfem/fem/hybridization.hpp:
+/root/mfem/fem/datacollection.hpp:
+/root/mfem/fem/qfunction.hpp:
+/root/mfem/fem/estimators.hpp:
+/root/mfem/fem/staticcond.hpp:
+/root/mfem/fem/tmop.hpp:
+/root/mfem/fem/../linalg/invariants.hpp:
+/root/mfem/fem/../linalg/dual.hpp:
+/root/mfem/fem/tmop_tools.hpp:
+/root/mfem/fem/pbilinearform.hpp:
+/root/mfem/fem/gslib.hpp:
+/root/mfem/fem/tmop_amr.hpp:
+/root/mfem/fem/pnonlinearform.hpp:
+/root/mfem/fem/../mesh/mesh_operators.hpp:
+/root/mfem/fem/restriction.hpp:
+/root/mfem/fem/quadinterpolator.hpp:
+/root/mfem/fem/kernel_dispatch.hpp:
+/root/mfem/fem/quadinterpolator_face.hpp:
+/root/mfem/fem/transfer.hpp:
+/root/mfem/fem/fespacehierarchy.hpp:
+/root/mfem/fem/multigrid.hpp:
+/root/mfem/fem/../linalg/operator.hpp:
+/root/mfem/fem/../linalg/handle.hpp:
+/root/mfem/fem/ceed/solvers/algebraic.hpp:
+/root/mfem/fem/ceed/solvers/../../fespacehierarchy.hpp:
+/root/mfem/fem/ceed/solvers/../../multigrid.hpp:
+/root/mfem/fem/ceed/solvers/../interface/operator.hpp:
+/root/mfem/fem/ceed/solvers/../interface/ceed.hpp:
+/root/mfem/fem/lor/lor.hpp:
+/root/mfem/fem/lor/../bilinearform.hpp:
+/root/mfem/fem/dgmassinv.hpp:
+/root/mfem/fem/hyperbolic.hpp:
+/root/mfem/fem/bounds.hpp:
+/root/mfem/fem/particleset.hpp:
+/root/mfem/fem/dfem/doperator.hpp:
+/root/mfem/fem/dfem/../../config/config.hpp:

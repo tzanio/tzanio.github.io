@@ -1,0 +1,10 @@
+general/binaryio.o: \
+  /root/mfem/general/binaryio.cpp \
+  /root/mfem/general/binaryio.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/general/error.hpp
+/root/mfem/general/binaryio.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/general/error.hpp:

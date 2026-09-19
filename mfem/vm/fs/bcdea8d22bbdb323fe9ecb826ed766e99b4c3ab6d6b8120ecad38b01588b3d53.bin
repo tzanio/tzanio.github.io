@@ -1,0 +1,524 @@
+"""Changed-file checkpoints for the browser workspace; never a VM RAM dump.
+
+The browser's v86 write journal invalidates changed content independently of
+timestamps. Where supported, guest inotify also observes writes; the shipped
+kernel uses periodic metadata reconciliation. Every checkpoint reconciles the
+complete directory tree, and queue overflow forces content revalidation.
+Immutable base files are identified by an image-build manifest, avoiding a
+first-boot download of every object, executable and dataset.
+"""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import stat
+import tempfile
+import threading
+import time
+
+BASE = '/usr/local/share/mfem-workspace-base.json'
+ROOT = '/root/mfem'
+FORMAT = 'mfem-browser-checkpoint-v1'
+_stores = {}
+
+class ChangingWorkspace(ValueError):
+    pass
+
+def normalized(name):
+    if not isinstance(name, str) or not name or name.startswith('/') or '\x00' in name:
+        raise ValueError('Invalid workspace path')
+    if any(part in ('', '.', '..') for part in name.split('/')):
+        raise ValueError('Workspace paths must stay inside the checkout: ' + name)
+    return name
+
+
+def fingerprint(info, link=''):
+    return (info.st_mode, info.st_size, info.st_mtime_ns, info.st_ctime_ns, info.st_ino, link)
+
+
+def scan(root):
+    result = {}
+    def walk(directory, prefix=''):
+        with os.scandir(directory) as children:
+            for child in sorted(children, key=lambda item: item.name):
+                name = prefix + child.name
+                info = child.stat(follow_symlinks=False)
+                link = os.readlink(child.path) if stat.S_ISLNK(info.st_mode) else ''
+                result[name] = (info, link)
+                if stat.S_ISDIR(info.st_mode):
+                    walk(child.path, name + '/')
+    walk(root)
+    return result
+
+
+def metadata(info, link=''):
+    mode = stat.S_IMODE(info.st_mode)
+    value = {'mode': mode, 'mtime_ns': info.st_mtime_ns}
+    if stat.S_ISLNK(info.st_mode):
+        value.update(kind='symlink', target=link)
+    elif stat.S_ISDIR(info.st_mode):
+        value.update(kind='directory')
+    elif stat.S_ISREG(info.st_mode):
+        value.update(kind='file', size=info.st_size)
+    else:
+        raise ValueError('Workspace checkpoints support regular files, directories and links')
+    return value
+
+
+def build_file(name, prefix=b''):
+    return (name.endswith(('.o', '.a', '.gch', '.d')) or '/.mfem-build/' in '/' + name
+            or prefix.startswith((b'\x7fELF', b'!<arch>\n', b'gpch')))
+
+
+class Workspace:
+    def __init__(self, root=ROOT, baseline=BASE, emit=lambda message: None):
+        self.root = Path(root)
+        self.base = json.loads(Path(baseline).read_text())
+        self.emit = emit
+        self.lock = threading.RLock()
+        # Archive restore also calls checkpoint/restore while holding this
+        # lock, so one import excludes autosave across its entire mutation.
+        self.operation_lock = threading.RLock()
+        self.sequence = 0
+        self.saved_sequence = -1
+        self.fingerprints = {}
+        self.cached = {}
+        self.dirty = set()
+        self.overflow = False
+        self.monitor = 'reconciliation'
+        self.monitor_detail = ''
+        self.fd = None
+        self.watches = {}
+        self.last_emit = 0
+        self.last_mutation = time.monotonic()
+        self.closed = False
+        self.reconcile(initial=True)
+        self.start_monitor()
+
+    def start_monitor(self):
+        try:
+            import ctypes
+            self.libc = ctypes.CDLL(None, use_errno=True)
+            self.libc.inotify_init1.argtypes = [ctypes.c_int]
+            self.libc.inotify_add_watch.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32]
+            self.fd = self.libc.inotify_init1(os.O_NONBLOCK | os.O_CLOEXEC)
+            if self.fd < 0:
+                raise OSError(ctypes.get_errno(), 'inotify is unavailable')
+            self.add_watches()
+            self.monitor = 'inotify + reconciliation'
+        except (AttributeError, ImportError, OSError) as error:
+            self.monitor_detail = str(error)
+            if self.fd is not None and self.fd >= 0:
+                os.close(self.fd)
+            self.fd = None
+        threading.Thread(target=self.watch, daemon=True).start()
+
+    def add_watches(self):
+        if self.fd is None:
+            return
+        paths = ['', *[name for name, signature in self.fingerprints.items() if stat.S_ISDIR(signature[0])]]
+        known = set(self.watches.values())
+        for path in paths:
+            if path in known:
+                continue
+            watch = self.libc.inotify_add_watch(self.fd, os.fsencode(self.root / path), 0x00000fff)
+            if watch >= 0:
+                self.watches[watch] = path
+
+    def mark(self, name):
+        with self.lock:
+            if name:
+                self.dirty.add(name)
+            self.sequence += 1
+            now = time.monotonic()
+            self.last_mutation = now
+            if now - self.last_emit >= .5:
+                self.last_emit = now
+                self.emit({'event': 'workspace-dirty', 'sequence': self.sequence})
+
+    def watch(self):
+        import select, struct
+        last_scan = time.monotonic()
+        while not self.closed:
+            try:
+                if self.fd is not None and select.select([self.fd], [], [], 1)[0]:
+                    data = os.read(self.fd, 262144)
+                    offset = 0
+                    while offset + 16 <= len(data):
+                        wd, mask, _cookie, length = struct.unpack_from('iIII', data, offset)
+                        name = os.fsdecode(data[offset + 16:offset + 16 + length].split(b'\0', 1)[0])
+                        offset += 16 + length
+                        if mask & 0x4000:  # IN_Q_OVERFLOW: no lost-event assumption.
+                            self.overflow = True
+                            self.mark('')
+                        elif wd in self.watches:
+                            prefix = self.watches[wd]
+                            # Ignore access/open/close-without-write notifications.
+                            if mask & (0x2 | 0x4 | 0x8 | 0x40 | 0x80 | 0x100 | 0x200 | 0x400 | 0x800):
+                                self.mark('/'.join(part for part in (prefix, name) if part))
+                            if mask & 0x8000:
+                                self.watches.pop(wd, None)
+                elif self.fd is None:
+                    time.sleep(1)
+                if time.monotonic() - last_scan >= (60 if self.fd is not None else 5) and not building():
+                    self.reconcile()
+                    self.add_watches()
+                    last_scan = time.monotonic()
+            except (OSError, ValueError):
+                self.overflow = True
+                time.sleep(1)
+
+    def reconcile(self, initial=False):
+        current = scan(self.root)
+        with self.lock:
+            for name, (info, link) in current.items():
+                signature = fingerprint(info, link)
+                if initial:
+                    entry = metadata(info, link)
+                    base = self.base['entries'].get(name)
+                    # Guest image mtimes have integer-second precision.
+                    if base and all(entry.get(key) == base.get(key) for key in entry):
+                        self.cached[name] = dict(base)
+                    else:
+                        self.dirty.add(name)
+                elif self.fingerprints.get(name) != signature:
+                    self.dirty.add(name)
+                    self.sequence += 1
+                    self.last_mutation = time.monotonic()
+                self.fingerprints[name] = signature
+            removed = set(self.fingerprints) - set(current)
+            for name in removed:
+                self.dirty.add(name)
+                self.fingerprints.pop(name, None)
+                self.cached.pop(name, None)
+                self.sequence += 1
+            if initial and self.dirty:
+                self.sequence += 1
+            return current
+
+    def status(self):
+        return {'base_id': self.base['base_id'], 'base_commit': self.base['base_commit'],
+                'sequence': self.sequence, 'dirty': self.sequence != self.saved_sequence,
+                'monitor': self.monitor, 'monitor_detail': self.monitor_detail}
+
+    def checkpoint(self, known=(), progress=lambda *args, **kwargs: None):
+        for attempt in range(3):
+            try:
+                return self._checkpoint(known, progress)
+            except (FileNotFoundError, NotADirectoryError, ChangingWorkspace):
+                # An editor replacement, Git checkout or terminal rename can
+                # invalidate a scandir entry between stat and open. Reconcile
+                # the tree again rather than recording a partial generation.
+                if attempt == 2:
+                    raise ValueError('Workspace files are still changing; saving will retry after writes finish')
+                time.sleep(.2)
+
+    def _checkpoint(self, known=(), progress=lambda *args, **kwargs: None):
+        current = self.reconcile()
+        self.add_watches()
+        if any(name.endswith('.lock') and name.startswith('.git/') for name in current):
+            raise ChangingWorkspace('Git is updating this workspace; saving will retry when it finishes')
+        known = set(known)
+        files, entries, staged = [], {}, []
+        with self.lock:
+            sequence, dirty, overflow = self.sequence, set(self.dirty), self.overflow
+        try:
+            progress('checkpoint', 0, len(current), 'files')
+            inodes = {}
+            for count, (name, (info, link)) in enumerate(sorted(current.items())):
+                entry = metadata(info, link)
+                signature = fingerprint(info, link)
+                cached = self.cached.get(name)
+                if entry['kind'] == 'file':
+                    inode = (info.st_dev, info.st_ino)
+                    if info.st_nlink > 1 and inode in inodes:
+                        entry = {'kind': 'hardlink', 'target': inodes[inode], 'mode': entry['mode'], 'mtime_ns': entry['mtime_ns']}
+                    else:
+                        inodes[inode] = name
+                        if cached and cached.get('hash') and name not in dirty and not overflow:
+                            entry.update(hash=cached['hash'], build=cached.get('build', False))
+                        else:
+                            descriptor, temporary = tempfile.mkstemp(prefix='workspace-blob-')
+                            staged.append(temporary)
+                            digest = hashlib.sha256()
+                            prefix = b''
+                            with os.fdopen(descriptor, 'wb') as output, open(self.root / name, 'rb') as source:
+                                while True:
+                                    chunk = source.read(1024 * 1024)
+                                    if not chunk:
+                                        break
+                                    if not prefix:
+                                        prefix = chunk[:8]
+                                    digest.update(chunk)
+                                    output.write(chunk)
+                            after = os.lstat(self.root / name)
+                            if fingerprint(after) != signature:
+                                raise ChangingWorkspace('File is still changing; saving will retry: ' + name)
+                            entry.update(hash=digest.hexdigest(), build=build_file(name, prefix))
+                            if entry != self.base['entries'].get(name) and entry['hash'] not in known:
+                                files.append({'hash': entry['hash'], 'path': temporary, 'size': entry['size']})
+                                known.add(entry['hash'])
+                            else:
+                                os.unlink(temporary)
+                                staged.remove(temporary)
+                elif entry['kind'] == 'symlink':
+                    validate_link(name, entry['target'])
+                self.cached[name] = entry
+                if entry != self.base['entries'].get(name):
+                    entries[name] = entry
+                    # Cached changed contents may not yet exist in this browser
+                    # (new workspace name or a previously failed IDB transaction).
+                    if entry['kind'] == 'file' and entry['hash'] not in known:
+                        descriptor, temporary = tempfile.mkstemp(prefix='workspace-blob-')
+                        os.close(descriptor)
+                        shutil.copyfile(self.root / name, temporary)
+                        if hashlib.sha256(Path(temporary).read_bytes()).hexdigest() != entry['hash']:
+                            os.unlink(temporary)
+                            raise ChangingWorkspace('File changed during checkpoint; saving will retry: ' + name)
+                        staged.append(temporary)
+                        files.append({'hash': entry['hash'], 'path': temporary, 'size': entry['size']})
+                        known.add(entry['hash'])
+                progress('checkpoint', count + 1, len(current), 'files', name)
+            deleted = sorted(set(self.base['entries']) - set(current))
+            after = self.reconcile()
+            if (set(after) != set(current) or any(fingerprint(*after[name]) != fingerprint(*current[name]) for name in current)
+                    or self.sequence != sequence):
+                raise ChangingWorkspace('Workspace changed while saving')
+            manifest = {'format': FORMAT, 'base_id': self.base['base_id'], 'base_commit': self.base['base_commit'],
+                        'sequence': sequence, 'created': time.time(), 'entries': entries, 'deleted': deleted}
+            with self.lock:
+                if self.sequence == sequence:
+                    self.dirty.clear()
+                    self.overflow = False
+            progress('checkpoint', len(current), len(current), 'files', final=True)
+            return {'manifest': manifest, 'files': files, 'status': self.status()}
+        except Exception:
+            for path in staged:
+                try:
+                    os.unlink(path)
+                except FileNotFoundError:
+                    pass
+            raise
+
+
+def validate_link(name, target):
+    import posixpath
+    if not isinstance(target, str) or '\x00' in target or target.startswith('/'):
+        raise ValueError('Saved symlinks must point inside the workspace: ' + name)
+    combined = posixpath.normpath(posixpath.join(posixpath.dirname(name), target))
+    if combined == '..' or combined.startswith('../'):
+        raise ValueError('Saved symlink leaves the workspace: ' + name)
+
+
+def validate_manifest(manifest, base):
+    if not isinstance(manifest, dict) or manifest.get('format') != FORMAT:
+        raise ValueError('Unsupported workspace checkpoint format')
+    if manifest.get('base_id') != base['base_id']:
+        raise ValueError('This saved workspace belongs to a different MFEM base image; export it before migrating')
+    entries, deleted = manifest.get('entries'), manifest.get('deleted')
+    if not isinstance(entries, dict) or not isinstance(deleted, list) or len(entries) + len(deleted) > 100000:
+        raise ValueError('Invalid workspace checkpoint entries')
+    for name in deleted:
+        normalized(name)
+    for name, entry in entries.items():
+        normalized(name)
+        if not isinstance(entry, dict) or entry.get('kind') not in ('file', 'directory', 'symlink', 'hardlink'):
+            raise ValueError('Invalid workspace entry: ' + name)
+        if not isinstance(entry.get('mode'), int) or not 0 <= entry['mode'] <= 0o7777:
+            raise ValueError('Invalid workspace permissions: ' + name)
+        if not isinstance(entry.get('mtime_ns'), int) or entry['mtime_ns'] < 0:
+            raise ValueError('Invalid workspace timestamp: ' + name)
+        if entry['kind'] == 'file':
+            digest = entry.get('hash', '')
+            if not isinstance(digest, str) or len(digest) != 64 or any(c not in '0123456789abcdef' for c in digest):
+                raise ValueError('Invalid workspace content hash: ' + name)
+            if not isinstance(entry.get('size'), int) or not 0 <= entry['size'] <= 1024 * 1024 * 1024:
+                raise ValueError('Invalid workspace file size: ' + name)
+        elif entry['kind'] == 'symlink':
+            validate_link(name, entry.get('target'))
+        elif entry['kind'] == 'hardlink':
+            normalized(entry.get('target'))
+    # Validate the resulting tree without following filesystem links. Writes
+    # beneath any symlink are rejected, including existing base-image symlinks.
+    tree = dict(base['entries'])
+    for name in deleted:
+        tree.pop(name, None)
+    tree.update(entries)
+    for name, entry in tree.items():
+        parent = str(Path(name).parent)
+        while parent != '.':
+            ancestor = tree.get(parent)
+            if not ancestor or ancestor['kind'] != 'directory':
+                raise ValueError('Workspace file has a non-directory parent: ' + name)
+            parent = str(Path(parent).parent)
+        if entry['kind'] == 'hardlink':
+            target = tree.get(entry['target'])
+            if not target or target['kind'] != 'file':
+                raise ValueError('Workspace hard link needs a regular target: ' + name)
+        if entry['kind'] == 'symlink':
+            pending, resolved, followed = name.split('/'), [], 0
+            while pending:
+                part = pending.pop(0)
+                if part in ('', '.'):
+                    continue
+                if part == '..':
+                    if not resolved:
+                        raise ValueError('Workspace symlink chain leaves the checkout: ' + name)
+                    resolved.pop()
+                    continue
+                resolved.append(part)
+                linked = tree.get('/'.join(resolved))
+                if linked and linked['kind'] == 'symlink':
+                    followed += 1
+                    if followed > 40:
+                        raise ValueError('Workspace has a symlink cycle: ' + name)
+                    resolved.pop()
+                    pending = linked['target'].split('/') + pending
+    return tree
+
+
+def restore(store, manifest, uploads):
+    blobs = {}
+    temporary = [item.get('upload') for item in uploads if isinstance(item, dict)]
+    try:
+        tree = validate_manifest(manifest, store.base)
+        for name in [*manifest['deleted'], *manifest['entries']]:
+            parent = (store.root / name).parent
+            while parent != store.root:
+                if parent.is_symlink():
+                    raise ValueError('Workspace restore encountered a symlink parent: ' + name)
+                parent = parent.parent
+        for item in uploads:
+            path, digest = item['upload'], item['hash']
+            if hashlib.sha256(Path(path).read_bytes()).hexdigest() != digest:
+                raise ValueError('Saved workspace content failed its checksum')
+            blobs[digest] = path
+        for name, entry in manifest['entries'].items():
+            if entry['kind'] == 'file':
+                if entry['hash'] not in blobs or os.stat(blobs[entry['hash']]).st_size != entry['size']:
+                    raise ValueError('Saved workspace is missing contents: ' + name)
+        # All metadata and content validate before any mutation. The browser
+        # restores into a fresh guest, so a failed device/session can recover
+        # again from either complete IDB generation on the next boot.
+        def remove(path):
+            if path.is_symlink() or path.is_file():
+                path.unlink()
+            elif path.exists():
+                shutil.rmtree(path)
+        for name in sorted(manifest['deleted'], key=lambda name: name.count('/'), reverse=True):
+            remove(store.root / name)
+        items = sorted(manifest['entries'].items(), key=lambda pair: (pair[1]['kind'] != 'directory', pair[0].count('/'), pair[0]))
+        for name, entry in items:
+            path = store.root / name
+            # Re-check actual parents just before writing; never follow links
+            # introduced from outside the validated checkpoint.
+            parent = path.parent
+            while parent != store.root:
+                if parent.is_symlink():
+                    raise ValueError('Workspace restore encountered a symlink parent: ' + name)
+                parent = parent.parent
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if entry['kind'] == 'directory':
+                if path.exists() and not path.is_dir() or path.is_symlink():
+                    remove(path)
+                path.mkdir(exist_ok=True)
+            elif entry['kind'] == 'file':
+                if path.is_dir() and not path.is_symlink():
+                    remove(path)
+                descriptor, staging = tempfile.mkstemp(prefix='.workspace-write-', dir=path.parent)
+                try:
+                    with os.fdopen(descriptor, 'wb') as output, open(blobs[entry['hash']], 'rb') as source:
+                        shutil.copyfileobj(source, output)
+                        output.flush()
+                        os.fsync(output.fileno())
+                    os.replace(staging, path)
+                finally:
+                    if os.path.exists(staging):
+                        os.unlink(staging)
+            elif entry['kind'] == 'symlink':
+                remove(path)
+                path.symlink_to(entry['target'])
+        for name, entry in items:
+            if entry['kind'] == 'hardlink':
+                path = store.root / name
+                remove(path)
+                os.link(store.root / entry['target'], path)
+        # Restore directory timestamps after their children and preserve modes.
+        for name, entry in reversed(items):
+            path = store.root / name
+            if entry['kind'] != 'symlink':
+                os.chmod(path, entry['mode'])
+            os.utime(path, ns=(entry['mtime_ns'], entry['mtime_ns']), follow_symlinks=False)
+        # Atomic file replacement updates parent mtimes even when an original
+        # terminal edit did not. Restore unchanged base directory metadata too,
+        # so a reload does not invent a new checkpoint or lose its predecessor.
+        directories = [(name, entry) for name, entry in tree.items() if entry['kind'] == 'directory']
+        for name, entry in sorted(directories, key=lambda pair: pair[0].count('/'), reverse=True):
+            os.chmod(store.root / name, entry['mode'])
+            os.utime(store.root / name, ns=(entry['mtime_ns'], entry['mtime_ns']))
+        store.reconcile()
+        return store.status()
+    finally:
+        for path in temporary:
+            if path:
+                try:
+                    os.unlink(path)
+                except FileNotFoundError:
+                    pass
+
+
+def get_store(root=ROOT, baseline=BASE, emit=lambda message: None):
+    key = (root, baseline)
+    if key not in _stores:
+        _stores[key] = Workspace(root, baseline, emit)
+    return _stores[key]
+
+
+def building():
+    try:
+        for directory in Path('/proc').iterdir():
+            if directory.name.isdecimal():
+                try:
+                    command = (directory / 'comm').read_text().strip()
+                    if command in ('make', 'gmake', 'ar', 'ranlib', 'cc1plus', 'cc1', 'g++', 'gcc', 'ld', 'ld.lld', 'clang', 'clang++'):
+                        return True
+                    if command.startswith('python'):
+                        arguments = (directory / 'cmdline').read_bytes().split(b'\0')
+                        if any(Path(os.fsdecode(argument)).name in ('mfem-browser-build', 'mfem-c++', 'mfem-build') for argument in arguments):
+                            return True
+                except (FileNotFoundError, PermissionError, ProcessLookupError):
+                    pass
+    except FileNotFoundError:
+        pass
+    return False
+
+
+def dispatch(request, emit=lambda message: None, progress=lambda *args, **kwargs: None):
+    store = get_store(emit=emit)
+    op = request['op']
+    if op in ('workspace-init', 'workspace-status'):
+        result = store.status()
+        if op == 'workspace-init':
+            result['build_paths'] = [name for name, entry in store.base['entries'].items() if entry.get('build')]
+        return result
+    if op == 'workspace-checkpoint':
+        if request.get('defer_busy') and (building() or time.monotonic() - store.last_mutation < 4):
+            return {'deferred': 'Waiting for file writes or the compiler to finish', 'files': []}
+        with store.operation_lock:
+            paths = request.get('written_paths', [])
+            if not isinstance(paths, list) or len(paths) > 100000:
+                raise ValueError('Invalid filesystem write journal')
+            for path in paths:
+                store.mark(normalized(path))
+            return store.checkpoint(request.get('known', []), progress)
+    if op == 'workspace-ack':
+        store.saved_sequence = request['sequence']
+        return store.status()
+    if op == 'workspace-restore':
+        with store.operation_lock:
+            return restore(store, request['manifest'], request.get('files', []))
+    if op == 'workspace-ready':
+        Path('/run/studio-workspace-ready').touch()
+        return True
+    raise ValueError('Unknown workspace operation: ' + op)

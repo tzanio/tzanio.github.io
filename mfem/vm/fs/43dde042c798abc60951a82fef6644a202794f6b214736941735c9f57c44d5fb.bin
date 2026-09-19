@@ -1,0 +1,52 @@
+mesh/vtk.o: \
+  /root/mfem/mesh/vtk.cpp \
+  /root/mfem/mesh/vtk.hpp \
+  /root/mfem/mesh/../fem/geom.hpp \
+  /root/mfem/mesh/../fem/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/mesh/../fem/../linalg/densemat.hpp \
+  /root/mfem/mesh/../fem/../linalg/../config/config.hpp \
+  /root/mfem/mesh/../fem/../linalg/../general/globals.hpp \
+  /root/mfem/mesh/../fem/../linalg/../general/../config/config.hpp \
+  /root/mfem/mesh/../fem/../linalg/matrix.hpp \
+  /root/mfem/mesh/../fem/../linalg/../general/array.hpp \
+  /root/mfem/mesh/../fem/../linalg/../general/mem_manager.hpp \
+  /root/mfem/mesh/../fem/../linalg/../general/enzyme.hpp \
+  /root/mfem/mesh/../fem/../linalg/../general/error.hpp \
+  /root/mfem/mesh/../fem/../linalg/../general/device.hpp \
+  /root/mfem/mesh/../fem/../linalg/operator.hpp \
+  /root/mfem/mesh/../fem/../linalg/vector.hpp \
+  /root/mfem/mesh/../fem/../linalg/multivector.hpp \
+  /root/mfem/mesh/../fem/intrules.hpp \
+  /root/mfem/mesh/../fem/../general/array.hpp \
+  /root/mfem/mesh/../fem/../general/hash.hpp \
+  /root/mfem/mesh/../fem/../general/../config/config.hpp \
+  /root/mfem/mesh/../fem/../general/globals.hpp \
+  /root/mfem/mesh/../fem/../general/hash_util.hpp \
+  /root/mfem/mesh/../general/binaryio.hpp \
+  /root/mfem/mesh/../general/../config/config.hpp
+/root/mfem/mesh/vtk.hpp:
+/root/mfem/mesh/../fem/geom.hpp:
+/root/mfem/mesh/../fem/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/mesh/../fem/../linalg/densemat.hpp:
+/root/mfem/mesh/../fem/../linalg/../config/config.hpp:
+/root/mfem/mesh/../fem/../linalg/../general/globals.hpp:
+/root/mfem/mesh/../fem/../linalg/../general/../config/config.hpp:
+/root/mfem/mesh/../fem/../linalg/matrix.hpp:
+/root/mfem/mesh/../fem/../linalg/../general/array.hpp:
+/root/mfem/mesh/../fem/../linalg/../general/mem_manager.hpp:
+/root/mfem/mesh/../fem/../linalg/../general/enzyme.hpp:
+/root/mfem/mesh/../fem/../linalg/../general/error.hpp:
+/root/mfem/mesh/../fem/../linalg/../general/device.hpp:
+/root/mfem/mesh/../fem/../linalg/operator.hpp:
+/root/mfem/mesh/../fem/../linalg/vector.hpp:
+/root/mfem/mesh/../fem/../linalg/multivector.hpp:
+/root/mfem/mesh/../fem/intrules.hpp:
+/root/mfem/mesh/../fem/../general/array.hpp:
+/root/mfem/mesh/../fem/../general/hash.hpp:
+/root/mfem/mesh/../fem/../general/../config/config.hpp:
+/root/mfem/mesh/../fem/../general/globals.hpp:
+/root/mfem/mesh/../fem/../general/hash_util.hpp:
+/root/mfem/mesh/../general/binaryio.hpp:
+/root/mfem/mesh/../general/../config/config.hpp:

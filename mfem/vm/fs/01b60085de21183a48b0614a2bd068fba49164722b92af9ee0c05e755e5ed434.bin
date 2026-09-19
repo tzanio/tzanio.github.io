@@ -1,0 +1,8 @@
+fem/adios2datacollection.o: \
+  /root/mfem/fem/adios2datacollection.cpp \
+  /root/mfem/fem/adios2datacollection.hpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/fem/adios2datacollection.hpp:
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

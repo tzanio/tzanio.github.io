@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""Run selected prebuilt serial Catch tests against the matched MFEM library."""
+import argparse
+from pathlib import Path
+import subprocess
+import sys
+
+parser = argparse.ArgumentParser(description='Build changed test/library inputs and run serial MFEM unit tests.')
+parser.add_argument('--debug', action='store_true', help='Use the separate MFEM_DEBUG library and tests')
+parser.add_argument('--list', action='store_true', help='List available test cases')
+parser.add_argument('--tags', action='store_true', help='List test tags')
+parser.add_argument('selection', nargs='?', help='Catch test name or tag, for example "[Vector]"')
+options, extra = parser.parse_known_args()
+root = Path('/root/mfem')
+library = root / '.mfem-build/debug' if options.debug else root
+directory = library / 'tests/unit'
+for command in (['make', '--no-print-directory', '-C', str(library), 'lib'],
+                ['make', '--no-print-directory', '-C', str(directory), 'unit_tests']):
+    result = subprocess.run(command)
+    if result.returncode:
+        sys.exit(result.returncode)
+arguments = [str(directory / 'unit_tests')]
+if options.list:
+    arguments.append('--list-tests')
+if options.tags:
+    arguments.append('--list-tags')
+if options.selection:
+    arguments.append(options.selection)
+sys.exit(subprocess.run([*arguments, *extra], cwd=directory).returncode)

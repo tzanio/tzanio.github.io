@@ -1,0 +1,42 @@
+general/array.o: \
+  /root/mfem/general/array.cpp \
+  /root/mfem/general/array.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/general/../config/_config.hpp \
+  /root/mfem/general/mem_manager.hpp \
+  /root/mfem/general/enzyme.hpp \
+  /root/mfem/general/globals.hpp \
+  /root/mfem/general/error.hpp \
+  /root/mfem/general/device.hpp \
+  /root/mfem/general/../general/forall.hpp \
+  /root/mfem/general/../general/../config/config.hpp \
+  /root/mfem/general/../general/annotation.hpp \
+  /root/mfem/general/../general/error.hpp \
+  /root/mfem/general/../general/backends.hpp \
+  /root/mfem/general/../general/cuda.hpp \
+  /root/mfem/general/../general/hip.hpp \
+  /root/mfem/general/../general/device.hpp \
+  /root/mfem/general/../general/mem_manager.hpp \
+  /root/mfem/general/../general/../linalg/dtensor.hpp \
+  /root/mfem/general/../general/../linalg/../config/config.hpp \
+  /root/mfem/general/../general/../linalg/../general/error.hpp
+/root/mfem/general/array.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/general/../config/_config.hpp:
+/root/mfem/general/mem_manager.hpp:
+/root/mfem/general/enzyme.hpp:
+/root/mfem/general/globals.hpp:
+/root/mfem/general/error.hpp:
+/root/mfem/general/device.hpp:
+/root/mfem/general/../general/forall.hpp:
+/root/mfem/general/../general/../config/config.hpp:
+/root/mfem/general/../general/annotation.hpp:
+/root/mfem/general/../general/error.hpp:
+/root/mfem/general/../general/backends.hpp:
+/root/mfem/general/../general/cuda.hpp:
+/root/mfem/general/../general/hip.hpp:
+/root/mfem/general/../general/device.hpp:
+/root/mfem/general/../general/mem_manager.hpp:
+/root/mfem/general/../general/../linalg/dtensor.hpp:
+/root/mfem/general/../general/../linalg/../config/config.hpp:
+/root/mfem/general/../general/../linalg/../general/error.hpp:

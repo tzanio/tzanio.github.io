@@ -1,0 +1,10 @@
+general/isockstream.o: \
+  /root/mfem/general/isockstream.cpp \
+  /root/mfem/general/isockstream.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/general/globals.hpp
+/root/mfem/general/isockstream.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/general/globals.hpp:

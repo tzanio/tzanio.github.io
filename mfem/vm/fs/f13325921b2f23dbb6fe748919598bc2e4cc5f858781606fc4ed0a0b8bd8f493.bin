@@ -1,0 +1,6 @@
+linalg/slepc.o: \
+  /root/mfem/linalg/slepc.cpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

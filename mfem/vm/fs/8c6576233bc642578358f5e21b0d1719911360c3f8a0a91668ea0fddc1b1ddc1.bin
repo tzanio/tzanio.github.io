@@ -1,0 +1,4 @@
+general/tinyxml2.o: \
+  /root/mfem/general/tinyxml2.cpp \
+  /root/mfem/general/tinyxml2.h
+/root/mfem/general/tinyxml2.h:

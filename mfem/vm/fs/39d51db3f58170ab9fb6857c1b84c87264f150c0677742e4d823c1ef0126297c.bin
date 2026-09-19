@@ -1,0 +1,6 @@
+fem/pbilinearform.o: \
+  /root/mfem/fem/pbilinearform.cpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/fem/../config/_config.hpp
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/fem/../config/_config.hpp:

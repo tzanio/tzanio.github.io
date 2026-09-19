@@ -1,0 +1,8 @@
+fem/dfem/doperator.o: \
+  /root/mfem/fem/dfem/doperator.cpp \
+  /root/mfem/fem/dfem/doperator.hpp \
+  /root/mfem/fem/dfem/../../config/config.hpp \
+  /root/mfem/fem/dfem/../../config/_config.hpp
+/root/mfem/fem/dfem/doperator.hpp:
+/root/mfem/fem/dfem/../../config/config.hpp:
+/root/mfem/fem/dfem/../../config/_config.hpp:

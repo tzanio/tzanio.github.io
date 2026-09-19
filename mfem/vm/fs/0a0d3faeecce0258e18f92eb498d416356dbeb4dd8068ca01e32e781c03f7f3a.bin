@@ -1,0 +1,6 @@
+mesh/pmesh.o: \
+  /root/mfem/mesh/pmesh.cpp \
+  /root/mfem/mesh/../config/config.hpp \
+  /root/mfem/mesh/../config/_config.hpp
+/root/mfem/mesh/../config/config.hpp:
+/root/mfem/mesh/../config/_config.hpp:

@@ -1,0 +1,6 @@
+mesh/submesh/psubmesh.o: \
+  /root/mfem/mesh/submesh/psubmesh.cpp \
+  /root/mfem/mesh/submesh/../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/mesh/submesh/../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

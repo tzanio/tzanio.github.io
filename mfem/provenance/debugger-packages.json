@@ -1,0 +1,18 @@
+[
+  {
+    "name": "gdb",
+    "version": "15.2-r0",
+    "architecture": "x86",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86/gdb-15.2-r0.apk",
+    "apk_sha256": "b7eb9e906699e9d3aec332ef2d7c992cb0ebf4fa80599877fc649874846a1d92",
+    "index_control_checksum": "Q1H57uPZOOhrxVt58DQb/o9Un1JXA="
+  },
+  {
+    "name": "musl-dbg",
+    "version": "1.2.5-r12",
+    "architecture": "x86",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86/musl-dbg-1.2.5-r12.apk",
+    "apk_sha256": "c019215cbe09effe7405873572d69886cdc157cc9b002cbed628190c650747ae",
+    "index_control_checksum": "Q1aa0aX6u5Sbat/TE0v9NWh6yhALU="
+  }
+]

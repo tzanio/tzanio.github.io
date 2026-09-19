@@ -1,0 +1,10 @@
+linalg/cpardiso.o: \
+  /root/mfem/linalg/cpardiso.cpp \
+  /root/mfem/linalg/cpardiso.hpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/linalg/hypre.hpp
+/root/mfem/linalg/cpardiso.hpp:
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/linalg/hypre.hpp:

@@ -1,0 +1,103 @@
+#!/usr/bin/python3
+"""Experimental Clang/LLD in a browser worker; resulting ELF runs in this Linux."""
+import argparse
+import base64
+import gzip
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import time
+import uuid
+
+parser=argparse.ArgumentParser(description='Experimental browser-native Clang/LLD for a serial MFEM example. First use downloads an optional compiler; no server is used.')
+profile=parser.add_mutually_exclusive_group()
+profile.add_argument('--fast',action='store_true',help='Compile with Clang -O0')
+profile.add_argument('--optimized',action='store_true',help='Compile with Clang -O2 (default)')
+parser.add_argument('target',help='An example in the current directory, such as ex1')
+options=parser.parse_args()
+root=Path('/root/mfem');source=Path.cwd()/(options.target+'.cpp')
+if not re.fullmatch(r'[A-Za-z0-9_][A-Za-z0-9_.+-]*',options.target) or not source.is_file() or not source.resolve().is_relative_to(root):
+    parser.error('Run inside /root/mfem and name an existing C++ example without .cpp')
+if (root/'.mfem-build/debug') in source.resolve().parents:
+    parser.error('Use mfem-build --debug for the matched debug configuration')
+if not Path('/run/studio-workspace-ready').exists():
+    parser.error('Wait for the browser workspace to become ready')
+started=time.monotonic()
+status=subprocess.run(['make','--no-print-directory','-C',str(root),'lib']).returncode
+if status:sys.exit(status)
+job=Path('/tmp/mfem-browser-builds')/uuid.uuid4().hex;job.mkdir(parents=True)
+print('Browser Clang/LLD: preparing current source, headers and MFEM library…',flush=True)
+def project_tree():
+    names=set()
+    for directory,dirs,files in os.walk(root):
+        dirs[:]=[name for name in dirs if name not in ('.git','.mfem-build')]
+        names.update(str(Path(directory)/name) for name in files)
+    return names
+
+try:
+    layout=project_tree()
+    # Known headers cover Clang/GCC conditionals; GCC's dependency scanner also
+    # finds application headers with arbitrary suffixes. System headers belong
+    # to the versioned SDK shipped with this exact Linux image.
+    dep=subprocess.run(['g++','-MM','-MP','-MQ',options.target,'-std=c++17','-I'+str(root),str(source)],capture_output=True,text=True)
+    if dep.returncode:
+        print(dep.stderr,file=sys.stderr);sys.exit(dep.returncode)
+    import shlex
+    dependencies=shlex.split(dep.stdout.replace('\\\n',' ').splitlines()[0].split(':',1)[1])
+    paths={source,root/'libmfem.so.4.10'}
+    for directory,dirs,names in os.walk(root):
+        dirs[:]=[name for name in dirs if name not in ('.git','.mfem-build')]
+        for name in names:
+            if Path(name).suffix in ('.h','.hpp','.hh','.hxx','.inc','.tpp'):
+                paths.add(Path(directory)/name)
+    for name in dependencies:
+        path=Path(name).absolute()
+        if not path.resolve().is_relative_to(root):
+            raise ValueError('This prototype supports project headers under /root/mfem; use mfem-build for external headers')
+        paths.add(path)
+    files=[];revisions={}
+    for path in sorted(paths):
+        if not path.resolve().is_relative_to(root):raise ValueError('An include link leaves /root/mfem: '+str(path))
+        before=path.stat();data=path.read_bytes();after=path.stat()
+        if (before.st_mtime_ns,before.st_size)!=(after.st_mtime_ns,after.st_size):raise ValueError('Input changed while preparing build: '+str(path))
+        revisions[str(path)]={'mtime_ns':after.st_mtime_ns,'size':after.st_size,'hash':hashlib.sha256(data).hexdigest()}
+        files.append({'path':str(path),'data':base64.b64encode(data).decode()})
+    request={'source':str(source),'optimization':'0' if options.fast else '2','files':files}
+    with gzip.open(job/'input.json.gz','wb',compresslevel=1) as output:output.write(json.dumps(request,separators=(',',':')).encode())
+    (job/'request.json').write_text(json.dumps({'target':str(Path.cwd()/options.target)}))
+    print('Compiling in the browser worker (first use downloads Clang/LLD)…',flush=True)
+    deadline=time.monotonic()+1200
+    while not (job/'done.json').exists():
+        if time.monotonic()>deadline:raise ValueError('Browser compiler timed out. Check Activity; native mfem-build remains available.')
+        time.sleep(.2)
+    result=json.loads((job/'done.json').read_text())
+    print(result['log'],end='',flush=True)
+    if result['error']:raise ValueError(result['error'])
+    if project_tree()!=layout:
+        raise ValueError('Project files were added, removed or renamed during compilation; output was not installed. Run again.')
+    for name,expected in revisions.items():
+        current=Path(name)
+        if not current.exists() or hashlib.sha256(current.read_bytes()).hexdigest()!=expected['hash']:
+            raise ValueError('Inputs changed during compilation; output was not installed. Run again: '+name)
+    target=Path.cwd()/options.target
+    temporary=target.with_name('.'+target.name+'.browser-'+job.name)
+    shutil.copyfile(job/'result',temporary);temporary.chmod(0o755)
+    dependency=Path.cwd()/'.mfem-build/deps'/(hashlib.sha256(options.target.encode()).hexdigest()[:20]+'.mk')
+    dependency.parent.mkdir(parents=True,exist_ok=True)
+    pending=dependency.with_suffix('.tmp')
+    pending.write_text(dep.stdout+'\n'+options.target+': /root/mfem/libmfem.so.4.10\n')
+    os.replace(pending,dependency)
+    os.replace(temporary,target)
+    print('Browser build ready: '+str(target),flush=True)
+    print('Clang %.2fs · LLD %.2fs · total %.2fs (includes input checks and first-use downloads)'%(result['timings'].get('compileMs',0)/1000,result['timings'].get('linkMs',0)/1000,time.monotonic()-started),flush=True)
+except KeyboardInterrupt:
+    (job/'cancelled').touch();print('\nBrowser build cancelled; previous executable kept.',file=sys.stderr);sys.exit(130)
+except Exception as error:
+    (job/'cancelled').touch();print('Browser build: '+str(error),file=sys.stderr);sys.exit(1)
+finally:
+    if (job/'done.json').exists() or not (job/'request.json').exists():shutil.rmtree(job,ignore_errors=True)

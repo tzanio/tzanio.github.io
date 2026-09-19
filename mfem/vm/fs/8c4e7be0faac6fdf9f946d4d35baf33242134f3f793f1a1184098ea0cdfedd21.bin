@@ -1,0 +1,6 @@
+fem/moonolith/pmortarassembler.o: \
+  /root/mfem/fem/moonolith/pmortarassembler.cpp \
+  /root/mfem/fem/moonolith/../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/fem/moonolith/../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

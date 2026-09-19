@@ -1,0 +1,6 @@
+fem/pnonlinearform.o: \
+  /root/mfem/fem/pnonlinearform.cpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/fem/../config/_config.hpp
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/fem/../config/_config.hpp:

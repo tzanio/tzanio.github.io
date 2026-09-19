@@ -1,0 +1,204 @@
+"""Conservative result reuse for the workstation's ordinary example commands.
+
+Native GCC preprocessing is intentional: dependency hashes alone cannot detect
+newly created shadow headers or __has_include changes. Unknown commands fall
+back to the compiler; this module never changes compilation semantics.
+"""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import re
+import tempfile
+
+ROOT = Path('/root/mfem')
+COMPILER = '/usr/bin/g++'
+
+def digest_file(path):
+    digest = hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+def plan(arguments):
+    if os.environ.get('MFEM_BUILD_CACHE') != '1':
+        return None
+    if any(os.environ.get(key) for key in ('CPATH', 'CPLUS_INCLUDE_PATH', 'C_INCLUDE_PATH',
+            'GCC_EXEC_PREFIX', 'COMPILER_PATH', 'LIBRARY_PATH', 'LD_PRELOAD', 'LD_LIBRARY_PATH',
+            'SOURCE_DATE_EPOCH', 'DEPENDENCIES_OUTPUT', 'SUNPRO_DEPENDENCIES')):
+        return None
+    # Only the explicit bundled example profiles are cached. Arbitrary make,
+    # custom libraries, compiler plugins and response files remain ordinary GCC.
+    allowed = {'-O0', '-O2', '-std=c++17', '-I/root/mfem', '-I..',
+               '-L/root/mfem', '-L..', '-lmfem', '-Wl,-rpath,/root/mfem'}
+    sources, output, flags = [], None, []
+    index = 0
+    while index < len(arguments):
+        value = arguments[index]
+        if value == '-o' and index + 1 < len(arguments):
+            output = Path(arguments[index + 1])
+            index += 2
+            continue
+        if value in allowed:
+            if not value.startswith(('-L', '-l', '-Wl,')):
+                flags.append(value)
+        elif not value.startswith('-') and value.endswith('.cpp'):
+            sources.append(value)
+        else:
+            return None
+        index += 1
+    if len(sources) != 1 or output is None or '-std=c++17' not in flags:
+        return None
+    if output.resolve() == Path(sources[0]).resolve():
+        return None
+    if {value for value in flags if value.startswith('-O')} not in ({'-O0'}, {'-O2'}):
+        return None
+    if '-I..' in flags and Path('..').resolve() != ROOT:
+        return None
+    if '-L..' in arguments and Path('..').resolve() != ROOT:
+        return None
+    if not any(value in flags for value in ('-I..', '-I/root/mfem')):
+        return None
+    return {'arguments': arguments, 'source': sources[0], 'flags': flags, 'output': output}
+
+def prepare(item, arguments, validated_pch=None):
+    """Freeze GCC's actual preprocessed input, retaining its supported PCH pragma."""
+    directory = ROOT / '.mfem-build/inputs'
+    directory.mkdir(parents=True, exist_ok=True)
+    temporary = tempfile.TemporaryDirectory(prefix='compile-', dir=directory)
+    item['temporary'] = temporary
+    item['snapshot'] = Path(temporary.name) / 'source.ii'
+    item['snapshot_dependencies'] = Path(temporary.name) / 'source.d'
+    item['compiled_output'] = Path(temporary.name) / 'output'
+    item['validated_pch'] = str(validated_pch) if validated_pch else None
+    flags = []
+    index = 0
+    while index < len(arguments):
+        argument = arguments[index]
+        if argument == '-o':
+            index += 2
+            continue
+        if argument != item['source'] and not argument.startswith(('-L', '-l', '-Wl,')):
+            flags.append(argument)
+        index += 1
+    subprocess.run([COMPILER, *flags, '-E', '-fpch-preprocess', '-fpch-deps',
+                    '-MD', '-MP', '-MF', str(item['snapshot_dependencies']),
+                    '-MQ', str(item['output']), item['source'], '-o', str(item['snapshot'])], check=True)
+
+def compile_arguments(item):
+    result = []
+    index = 0
+    while index < len(item['arguments']):
+        argument = item['arguments'][index]
+        if argument == '-o':
+            result.extend(['-o', str(item['compiled_output'])])
+            index += 2
+            continue
+        if argument == item['source']:
+            result.extend(['-x', 'c++-cpp-output', str(item['snapshot']), '-x', 'none'])
+        else:
+            result.append(argument)
+        index += 1
+    return result
+
+def publish(item):
+    # Separate temporary executables keep concurrent profile builds from
+    # publishing the other compiler's bytes under their own cache key.
+    item['compiled_output'].replace(item['output'])
+
+def signature(path):
+    info = Path(path).stat()
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+def unchanged(item):
+    try:
+        return all(signature(path) == expected for path, expected in item['guard'].items())
+    except OSError:
+        return False
+
+def cleanup(item):
+    if item and item.get('temporary'):
+        item['temporary'].cleanup()
+
+def fingerprint(item):
+    # The default -L/root/mfem could also shadow implicit C++ runtime libraries.
+    # Unexpected local linker inputs opt out instead of guessing resolution.
+    if any(path.name not in ('libmfem.a', 'libmfem.so', 'libmfem.so.4.10')
+           for pattern in ('lib*.so*', 'lib*.a') for path in ROOT.glob(pattern)):
+        return None
+    snapshot = item['snapshot'].read_bytes()
+    digest = hashlib.sha256(b'mfem-snapshot-cache-v1\n' + snapshot)
+    digest.update(json.dumps([str(Path.cwd()), item['arguments']], separators=(',', ':')).encode())
+    item['guard'] = {str(item['snapshot']): signature(item['snapshot'])}
+    # The factory PCH already passed the complete header-content and actual GCC
+    # header-resolution guard. Key it by that manifest and binary identity;
+    # ambiguous/unmanaged pragmas never enter the result cache.
+    for match in re.finditer(rb'^#pragma GCC pch_preprocess "([^"]+)"', snapshot, re.M):
+        pch = Path(os.fsdecode(match[1]))
+        manifest = pch.parent / 'dependencies.json'
+        if str(pch) != item.get('validated_pch') or not manifest.is_file():
+            return None
+        info = signature(pch)
+        digest.update(json.dumps(info).encode())
+        digest.update(manifest.read_bytes())
+        item['guard'][str(pch)] = info
+        item['guard'][str(manifest)] = signature(manifest)
+    # Toolchain/link inputs may be edited in the Linux terminal too. Hash their
+    # contents, not timestamps. MFEM and all system link files are covered.
+    files = {Path(COMPILER), Path('/usr/bin/as'), Path('/usr/bin/ld'),
+             ROOT / 'libmfem.so', Path('/lib/ld-musl-i386.so.1')}
+    gcc = Path('/usr/lib/gcc/i586-alpine-linux-musl/14.2.0')
+    for pattern in ('crt*.o', '*.a', '*.so*', 'specs'):
+        files.update(path for path in gcc.glob(pattern) if path.is_file())
+    executables = Path('/usr/libexec/gcc/i586-alpine-linux-musl/14.2.0')
+    files.update(executables / name for name in ('cc1plus', 'collect2'))
+    for pattern in ('crt*.o', 'Scrt*.o', 'libstdc++*', 'libgcc*', 'libc.*', 'libm.*', 'libpthread.*'):
+        files.update(path for path in Path('/usr/lib').glob(pattern) if path.is_file())
+    # Creation/deletion can change linker/specs lookup without modifying an
+    # already known file. Treat concurrent directory changes conservatively.
+    for directory in (ROOT, gcc, executables, Path('/usr/lib'), Path('/lib')):
+        item['guard'][str(directory)] = signature(directory)
+    for path in sorted(files):
+        item['guard'][str(path)] = signature(path)
+        digest.update(str(path).encode())
+        digest.update(digest_file(path).encode())
+    return digest.hexdigest() if unchanged(item) else None
+
+def location(key):
+    return ROOT / '.mfem-build/results' / key
+
+def dependency(item):
+    return Path('.mfem-build/deps') / (hashlib.sha256(str(item['output']).encode()).hexdigest()[:20] + '.mk')
+
+def restore(item, key):
+    cached = location(key)
+    try:
+        expected = cached.with_suffix('.sha256').read_text().strip()
+        if digest_file(cached) != expected:
+            return False
+        output = item['output']
+        if not output.is_file() or digest_file(output) != expected:
+            temporary = output.with_name(output.name + '.mfem-new')
+            shutil.copyfile(cached, temporary)
+            temporary.chmod(0o755)
+            temporary.replace(output)
+        else:
+            output.touch()
+        dependencies = dependency(item)
+        dependencies.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(cached.with_suffix('.deps'), dependencies)
+        return True
+    except OSError:
+        return False
+
+def store(item, key):
+    cached = location(key)
+    cached.parent.mkdir(parents=True, exist_ok=True)
+    temporary = cached.with_suffix('.tmp')
+    shutil.copyfile(item.get('compiled_output', item['output']), temporary)
+    temporary.replace(cached)
+    cached.with_suffix('.sha256').write_text(digest_file(cached) + '\n')
+    cached.with_suffix('.deps').write_bytes(item.get('dependency_bytes') or dependency(item).read_bytes())

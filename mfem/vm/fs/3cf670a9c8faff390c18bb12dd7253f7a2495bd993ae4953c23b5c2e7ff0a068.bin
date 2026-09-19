@@ -1,0 +1,8 @@
+linalg/amgxsolver.o: \
+  /root/mfem/linalg/amgxsolver.cpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/linalg/../config/_config.hpp \
+  /root/mfem/linalg/amgxsolver.hpp
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/linalg/../config/_config.hpp:
+/root/mfem/linalg/amgxsolver.hpp:

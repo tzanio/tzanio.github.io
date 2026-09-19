@@ -1,0 +1,66 @@
+"""Local terminal/browser compiler hand-off. The browser never writes cached 9p files."""
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import threading
+import time
+
+JOBS = Path('/tmp/mfem-browser-builds')
+
+def job_path(job):
+    if not isinstance(job, str) or not re.fullmatch('[0-9a-f]{32}', job):
+        raise ValueError('Invalid browser build identifier')
+    path = JOBS / job
+    if not (path / 'request.json').is_file() or (path / 'cancelled').exists():
+        raise ValueError('The terminal build was cancelled or has ended')
+    return path
+
+
+def watch(emit):
+    JOBS.mkdir(exist_ok=True)
+    sent = set()
+    while True:
+        for request in JOBS.glob('*/request.json'):
+            job = request.parent.name
+            if job not in sent and not (request.parent / 'cancelled').exists():
+                sent.add(job)
+                emit({'event':'browser-build', 'job':job, 'path':str(request.parent / 'input.json.gz')})
+        for job in list(sent):
+            if (JOBS / job / 'cancelled').exists():
+                emit({'event':'browser-build-cancel', 'job':job})
+                sent.remove(job)
+                shutil.rmtree(JOBS/job,ignore_errors=True)
+            elif not (JOBS/job).exists():
+                sent.remove(job)
+        time.sleep(.25)
+
+
+def start(emit):
+    threading.Thread(target=watch, args=(emit,), daemon=True).start()
+
+
+def dispatch(request):
+    path = job_path(request['job'])
+    if request['op'] != 'browser-build-finish':
+        raise ValueError('Unknown browser compiler operation')
+    upload = request.get('upload')
+    try:
+        if upload:
+            data = Path(upload).read_bytes()
+            if not data.startswith(b'\x7fELF\x01\x01'):
+                raise ValueError('Browser compiler returned an invalid i386 ELF program')
+            # A new path is safe to expose to Linux. Existing source/binary paths
+            # are updated by the waiting Linux process using atomic rename.
+            with open(path / 'result', 'wb') as output:
+                output.write(data)
+                output.flush()
+                os.fsync(output.fileno())
+        result = {'error':str(request.get('error') or ''), 'log':str(request.get('log') or '')[-1024*1024:], 'timings':request.get('timings', {})}
+        (path / 'done.tmp').write_text(json.dumps(result))
+        os.replace(path / 'done.tmp', path / 'done.json')
+        return True
+    finally:
+        if upload:
+            Path(upload).unlink(missing_ok=True)

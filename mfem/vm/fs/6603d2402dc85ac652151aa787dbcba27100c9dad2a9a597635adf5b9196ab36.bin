@@ -1,0 +1,16 @@
+fem/ceed/solvers/solvers-atpmg.o: \
+  /root/mfem/fem/ceed/solvers/solvers-atpmg.cpp \
+  /root/mfem/fem/ceed/solvers/solvers-atpmg.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/ceed.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/../../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/util.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/../../../general/error.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/../../../general/../config/config.hpp
+/root/mfem/fem/ceed/solvers/solvers-atpmg.hpp:
+/root/mfem/fem/ceed/solvers/../interface/ceed.hpp:
+/root/mfem/fem/ceed/solvers/../interface/../../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/fem/ceed/solvers/../interface/util.hpp:
+/root/mfem/fem/ceed/solvers/../interface/../../../general/error.hpp:
+/root/mfem/fem/ceed/solvers/../interface/../../../general/../config/config.hpp:

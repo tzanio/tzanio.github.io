@@ -1,0 +1,54 @@
+# Interactive Bash in the MFEM workstation; no external prompt processes.
+export TERM=xterm-256color COLORTERM=truecolor CLICOLOR=1
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+export EDITOR=nano VISUAL=nano
+export HISTCONTROL=ignoreboth:erasedups HISTSIZE=5000 HISTFILESIZE=10000
+export LS_COLORS='di=01;34:ln=01;36:ex=01;32:*.cpp=00;36:*.hpp=00;36:*.mesh=00;35:*.gf=00;35:*.gz=01;31'
+export GCC_COLORS='error=01;31:warning=01;33:note=01;36:caret=01;32:locus=01:quote=01'
+shopt -s histappend checkwinsize
+alias ls='ls --color=auto'
+alias ll='ls -alF --color=auto'
+alias la='ls -A --color=auto'
+alias ..='cd ..'
+alias g='git'
+__studio_prompt() {
+    local result=$?
+    # Let the browser resolve compiler file:line links in this working directory.
+    printf '\033]7;file://mfem%s\007' "$PWD"
+    PS1='\n\[\e[1;38;5;114m\]mfem\[\e[0m\] \[\e[38;5;245m\]•\[\e[0m\] \[\e[38;5;117m\]\w\[\e[0m\]'
+    if (( result )); then PS1+=" \[\e[38;5;203m\]exit ${result}\[\e[0m\]"; fi
+    PS1+='\n\[\e[38;5;114m\]╰─\[\e[0m\] $ '
+}
+PROMPT_COMMAND=__studio_prompt
+_studio_make_complete() {
+    local word="${COMP_WORDS[COMP_CWORD]}" source
+    local targets='all clean clean-build clean-exec test config serial parallel help'
+    for source in *.cpp; do [[ -f "$source" ]] && targets+=" ${source%.cpp}"; done
+    mapfile -t COMPREPLY < <(compgen -W "$targets" -- "$word")
+}
+_studio_git_complete() {
+    [[ $COMP_CWORD == 1 ]] || return 0
+    mapfile -t COMPREPLY < <(compgen -W 'status diff add commit log show branch switch checkout restore reset tag stash help' -- "${COMP_WORDS[COMP_CWORD]}")
+}
+_studio_glvis_complete() {
+    [[ ${COMP_WORDS[COMP_CWORD]} == -* ]] || return 0
+    mapfile -t COMPREPLY < <(compgen -W '-m --mesh -g --gridfunction -k --keys -h --help' -- "${COMP_WORDS[COMP_CWORD]}")
+}
+complete -o bashdefault -o default -F _studio_make_complete make
+_studio_build_complete() {
+    local current="${COMP_WORDS[COMP_CWORD]}"
+    if [[ "$current" == -* ]]; then
+        COMPREPLY=( $(compgen -W '--fast --optimized --debug --diagnose --no-cache --help' -- "$current") )
+    else
+        local source targets=''
+        for source in *.cpp; do
+            [[ -f "$source" ]] && targets+="${source%.cpp} "
+        done
+        COMPREPLY=( $(compgen -W "$targets" -- "$current") )
+    fi
+}
+complete -F _studio_build_complete mfem-build
+complete -W '--debug --list --tags --help' mfem-test
+complete -W '--fast --optimized --help' mfem-pch-build
+complete -o bashdefault -o default -F _studio_git_complete git g
+complete -o bashdefault -o default -F _studio_glvis_complete glvis

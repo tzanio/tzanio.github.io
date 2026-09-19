@@ -23,7 +23,7 @@
   }
   function create(options) {
     const listeners = new Map(), pending = new Map(), input = new Map();
-    let sequence = 0, destroyed = false, scheduled = false, worker, direct;
+    let sequence = 0, destroyed = false, scheduled = false, worker, direct, journal;
     const mode = new URLSearchParams(location.search).get('runtime') === 'main' ? 'main' : 'worker';
     let resolveReady, rejectReady;
     const ready = new Promise((resolve, reject) => {resolveReady = resolve; rejectReady = reject;});
@@ -67,7 +67,7 @@
     const call = (method, args = []) => {
       if (destroyed) return Promise.reject(new Error('The Linux runtime has stopped'));
       flushInput();
-      if (direct) return Promise.resolve().then(() => direct[method](...args));
+      if (direct) return Promise.resolve().then(() => method==='getWorkspaceWrites'?journal.snapshot():method==='ackWorkspaceWrites'?journal.acknowledge(...args):direct[method](...args));
       return new Promise((resolve, reject) => {
         const id = ++sequence; pending.set(id, {resolve, reject});
         // Do not transfer caller buffers: the editor may still need them.
@@ -79,7 +79,7 @@
       add_listener(name, fn) {
         if (!listeners.has(name)) {
           listeners.set(name, new Set());
-          if (!name.startsWith('serial') && !lifecycle.includes(name) && name !== 'runtime-error') {
+          if (!name.startsWith('serial') && !lifecycle.includes(name) && name !== 'runtime-error' && name !== 'workspace-write') {
             if (worker) worker.postMessage({type: 'listen', name});
             else direct.add_listener(name, value => emit(name, value));
           }
@@ -91,6 +91,8 @@
       serial_send_bytes: send,
       read_file(path) {return call('read_file', [path]);},
       create_file(path, bytes) {return call('create_file', [path, bytes]);},
+      getWorkspaceWrites() {return call('getWorkspaceWrites');},
+      ackWorkspaceWrites(sequence) {return call('ackWorkspaceWrites', [sequence]);},
       run() {return call('run');},
       stop() {return call('stop');},
       finishDownloads() {if (worker && !destroyed) worker.postMessage({type: 'finish-downloads'});},
@@ -98,7 +100,7 @@
         if (destroyed) return;
         destroyed = true;
         if (worker) worker.terminate();
-        else direct.destroy();
+        else {journal?.destroy();direct.destroy();}
         fail(new Error('The Linux runtime has stopped'));
         input.clear(); listeners.clear();
       },
@@ -109,6 +111,7 @@
       if (!window.V86) throw new Error('The main-thread comparison requires vendor/libv86.js');
       direct = new V86(normalized);
       direct.add_listener('emulator-loaded',()=>{
+        journal=WorkbenchFilesystemJournal.install(direct.fs9p,value=>emit('workspace-write',value));
         for(const path of preloadFiles)direct.read_file(path).catch(()=>{});
       });
       for (const name of lifecycle) direct.add_listener(name, value => emit(name, value));
@@ -136,7 +139,7 @@
       worker.onerror = event => fail(event.message || 'Linux worker failed to start');
       worker.onmessageerror = () => fail('Could not receive a Linux worker message');
       worker.postMessage({type: 'init', options: normalized, runtimeURL:asset('vendor/libv86.js').href,
-        downloadMonitorURL:asset('download-monitor.js').href,preloadFiles});
+        downloadMonitorURL:asset('download-monitor.js').href,journalURL:asset('fs-journal.js').href,preloadFiles});
     }
     return facade;
   }

@@ -1,0 +1,10 @@
+linalg/mumps.o: \
+  /root/mfem/linalg/mumps.cpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/linalg/../config/_config.hpp \
+  /root/mfem/linalg/../general/communication.hpp \
+  /root/mfem/linalg/../general/../config/config.hpp
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/linalg/../config/_config.hpp:
+/root/mfem/linalg/../general/communication.hpp:
+/root/mfem/linalg/../general/../config/config.hpp:

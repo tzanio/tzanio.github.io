@@ -1,0 +1,112 @@
+linalg/sparsemat.o: \
+  /root/mfem/linalg/sparsemat.cpp \
+  /root/mfem/linalg/linalg.hpp \
+  /root/mfem/linalg/vector.hpp \
+  /root/mfem/linalg/../general/array.hpp \
+  /root/mfem/linalg/../general/../config/config.hpp \
+  /root/mfem/linalg/../general/../config/_config.hpp \
+  /root/mfem/linalg/../general/mem_manager.hpp \
+  /root/mfem/linalg/../general/enzyme.hpp \
+  /root/mfem/linalg/../general/globals.hpp \
+  /root/mfem/linalg/../general/error.hpp \
+  /root/mfem/linalg/../general/device.hpp \
+  /root/mfem/linalg/multivector.hpp \
+  /root/mfem/linalg/operator.hpp \
+  /root/mfem/linalg/matrix.hpp \
+  /root/mfem/linalg/sparsemat.hpp \
+  /root/mfem/linalg/../general/backends.hpp \
+  /root/mfem/linalg/../general/cuda.hpp \
+  /root/mfem/linalg/../general/hip.hpp \
+  /root/mfem/linalg/../general/mem_alloc.hpp \
+  /root/mfem/linalg/../general/table.hpp \
+  /root/mfem/linalg/densemat.hpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/linalg/complex_operator.hpp \
+  /root/mfem/linalg/complex_densemat.hpp \
+  /root/mfem/linalg/blockvector.hpp \
+  /root/mfem/linalg/blockmatrix.hpp \
+  /root/mfem/linalg/blockoperator.hpp \
+  /root/mfem/linalg/sparsesmoothers.hpp \
+  /root/mfem/linalg/symmat.hpp \
+  /root/mfem/linalg/ode.hpp \
+  /root/mfem/linalg/../general/communication.hpp \
+  /root/mfem/linalg/solvers.hpp \
+  /root/mfem/linalg/handle.hpp \
+  /root/mfem/linalg/invariants.hpp \
+  /root/mfem/linalg/constraints.hpp \
+  /root/mfem/linalg/hypre.hpp \
+  /root/mfem/linalg/auxiliary.hpp \
+  /root/mfem/linalg/mma.hpp \
+  /root/mfem/linalg/batched/batched.hpp \
+  /root/mfem/linalg/batched/../../config/config.hpp \
+  /root/mfem/linalg/batched/../densemat.hpp \
+  /root/mfem/linalg/batched/gpu_blas.hpp \
+  /root/mfem/linalg/batched/../../general/backends.hpp \
+  /root/mfem/linalg/batched/solver.hpp \
+  /root/mfem/linalg/batched/../operator.hpp \
+  /root/mfem/linalg/tensor.hpp \
+  /root/mfem/linalg/dual.hpp \
+  /root/mfem/linalg/filteredsolver.hpp \
+  /root/mfem/linalg/ordering.hpp \
+  /root/mfem/linalg/particlevector.hpp \
+  /root/mfem/linalg/../general/forall.hpp \
+  /root/mfem/linalg/../general/annotation.hpp \
+  /root/mfem/linalg/../general/../linalg/dtensor.hpp \
+  /root/mfem/linalg/../general/../linalg/../config/config.hpp \
+  /root/mfem/linalg/../general/../linalg/../general/error.hpp \
+  /root/mfem/linalg/../general/sort_pairs.hpp
+/root/mfem/linalg/linalg.hpp:
+/root/mfem/linalg/vector.hpp:
+/root/mfem/linalg/../general/array.hpp:
+/root/mfem/linalg/../general/../config/config.hpp:
+/root/mfem/linalg/../general/../config/_config.hpp:
+/root/mfem/linalg/../general/mem_manager.hpp:
+/root/mfem/linalg/../general/enzyme.hpp:
+/root/mfem/linalg/../general/globals.hpp:
+/root/mfem/linalg/../general/error.hpp:
+/root/mfem/linalg/../general/device.hpp:
+/root/mfem/linalg/multivector.hpp:
+/root/mfem/linalg/operator.hpp:
+/root/mfem/linalg/matrix.hpp:
+/root/mfem/linalg/sparsemat.hpp:
+/root/mfem/linalg/../general/backends.hpp:
+/root/mfem/linalg/../general/cuda.hpp:
+/root/mfem/linalg/../general/hip.hpp:
+/root/mfem/linalg/../general/mem_alloc.hpp:
+/root/mfem/linalg/../general/table.hpp:
+/root/mfem/linalg/densemat.hpp:
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/linalg/complex_operator.hpp:
+/root/mfem/linalg/complex_densemat.hpp:
+/root/mfem/linalg/blockvector.hpp:
+/root/mfem/linalg/blockmatrix.hpp:
+/root/mfem/linalg/blockoperator.hpp:
+/root/mfem/linalg/sparsesmoothers.hpp:
+/root/mfem/linalg/symmat.hpp:
+/root/mfem/linalg/ode.hpp:
+/root/mfem/linalg/../general/communication.hpp:
+/root/mfem/linalg/solvers.hpp:
+/root/mfem/linalg/handle.hpp:
+/root/mfem/linalg/invariants.hpp:
+/root/mfem/linalg/constraints.hpp:
+/root/mfem/linalg/hypre.hpp:
+/root/mfem/linalg/auxiliary.hpp:
+/root/mfem/linalg/mma.hpp:
+/root/mfem/linalg/batched/batched.hpp:
+/root/mfem/linalg/batched/../../config/config.hpp:
+/root/mfem/linalg/batched/../densemat.hpp:
+/root/mfem/linalg/batched/gpu_blas.hpp:
+/root/mfem/linalg/batched/../../general/backends.hpp:
+/root/mfem/linalg/batched/solver.hpp:
+/root/mfem/linalg/batched/../operator.hpp:
+/root/mfem/linalg/tensor.hpp:
+/root/mfem/linalg/dual.hpp:
+/root/mfem/linalg/filteredsolver.hpp:
+/root/mfem/linalg/ordering.hpp:
+/root/mfem/linalg/particlevector.hpp:
+/root/mfem/linalg/../general/forall.hpp:
+/root/mfem/linalg/../general/annotation.hpp:
+/root/mfem/linalg/../general/../linalg/dtensor.hpp:
+/root/mfem/linalg/../general/../linalg/../config/config.hpp:
+/root/mfem/linalg/../general/../linalg/../general/error.hpp:
+/root/mfem/linalg/../general/sort_pairs.hpp:

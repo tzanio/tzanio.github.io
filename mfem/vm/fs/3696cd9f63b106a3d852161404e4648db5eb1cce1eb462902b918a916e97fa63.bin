@@ -1,0 +1,6 @@
+linalg/superlu.o: \
+  /root/mfem/linalg/superlu.cpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

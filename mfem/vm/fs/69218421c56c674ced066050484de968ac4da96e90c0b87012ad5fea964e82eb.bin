@@ -1,0 +1,332 @@
+fem/tmop/metrics/318.o: \
+  /root/mfem/fem/tmop/metrics/318.cpp \
+  /root/mfem/fem/tmop/metrics/../pa.hpp \
+  /root/mfem/fem/tmop/metrics/../../kernel_dispatch.hpp \
+  /root/mfem/fem/tmop/metrics/../../../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../../../config/_config.hpp \
+  /root/mfem/fem/tmop/metrics/../../kernel_reporter.hpp \
+  /root/mfem/fem/tmop/metrics/../../../general/globals.hpp \
+  /root/mfem/fem/tmop/metrics/../../../general/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../../../general/hash_util.hpp \
+  /root/mfem/fem/tmop/metrics/../../../linalg/dinvariants.hpp \
+  /root/mfem/fem/tmop/metrics/../../../linalg/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../../../linalg/dtensor.hpp \
+  /root/mfem/fem/tmop/metrics/../../../linalg/../general/error.hpp \
+  /root/mfem/fem/tmop/metrics/../../../linalg/../general/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/mult3.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../pa.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../tmop.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/invariants.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/error.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../nonlininteg.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/array.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/mem_manager.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/enzyme.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/globals.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/error.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/device.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/linalg.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/vector.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/array.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/globals.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/mem_manager.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/device.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/multivector.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/operator.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/matrix.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/sparsemat.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/backends.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/cuda.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/hip.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/mem_alloc.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/table.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/densemat.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/complex_operator.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/complex_densemat.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/blockvector.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/blockmatrix.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/blockoperator.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/sparsesmoothers.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/symmat.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/ode.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/communication.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/solvers.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/handle.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/constraints.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/hypre.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/auxiliary.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/mma.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/batched.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/../../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/../densemat.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/gpu_blas.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/../../general/backends.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/solver.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/../operator.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/tensor.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/dual.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/filteredsolver.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/ordering.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/particlevector.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_base.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../intrules.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/array.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../geom.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../../linalg/densemat.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/hash.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/globals.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/hash_util.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../doftrans.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/../../linalg/linalg.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_fixed_order.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_h1.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_pyramid.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_l2.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_nd.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_rt.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_nurbs.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_pos.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe/fe_ser.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../coefficient.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../intrules.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../eltrans.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../kernel_dispatch.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fespace.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/hash_util.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/mesh.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/stable3d.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/mem_alloc.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/../general/globals.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/globals.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/attribute_sets.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/arrays_by_name.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/array.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/text.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/triangle.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../fem/fe.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/element.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/table.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../linalg/densemat.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../fem/geom.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/hash.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/tetrahedron.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/vertex.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/vtk.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/binaryio.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/ncmesh.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/sort_pairs.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../fem/eltrans.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../fem/coefficient.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/zstr.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../fe_coll.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../geom.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../doftrans.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../restriction.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../normal_deriv_restriction.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../ceed/interface/operator.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../ceed/interface/../../../linalg/operator.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../ceed/interface/ceed.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../ceed/interface/../../../config/config.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../integrator.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../kernels.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/dtensor.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/forall.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/annotation.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/backends.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../general/../linalg/dtensor.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/kernels.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/tmatrix.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../config/tconfig.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/tassign.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/../config/tconfig.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/tlayout.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../fem/fespace.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/ttensor.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../linalg/simd.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../linalg/../config/tconfig.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../linalg/simd/auto.hpp \
+  /root/mfem/fem/tmop/metrics/../mult/../../../linalg/../linalg/simd/../../config/tconfig.hpp \
+  /root/mfem/fem/tmop/metrics/../tools/energy3.hpp \
+  /root/mfem/fem/tmop/metrics/../tools/../../tmop.hpp \
+  /root/mfem/fem/tmop/metrics/../tools/../../kernels.hpp \
+  /root/mfem/fem/tmop/metrics/../tools/../../../general/forall.hpp \
+  /root/mfem/fem/tmop/metrics/../tools/../../../linalg/kernels.hpp \
+  /root/mfem/fem/tmop/metrics/../assemble/grad3.hpp \
+  /root/mfem/fem/tmop/metrics/../assemble/../../tmop.hpp \
+  /root/mfem/fem/tmop/metrics/../assemble/../../kernels.hpp \
+  /root/mfem/fem/tmop/metrics/../assemble/../../../general/forall.hpp \
+  /root/mfem/fem/tmop/metrics/../assemble/../../../linalg/kernels.hpp
+/root/mfem/fem/tmop/metrics/../pa.hpp:
+/root/mfem/fem/tmop/metrics/../../kernel_dispatch.hpp:
+/root/mfem/fem/tmop/metrics/../../../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../../../config/_config.hpp:
+/root/mfem/fem/tmop/metrics/../../kernel_reporter.hpp:
+/root/mfem/fem/tmop/metrics/../../../general/globals.hpp:
+/root/mfem/fem/tmop/metrics/../../../general/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../../../general/hash_util.hpp:
+/root/mfem/fem/tmop/metrics/../../../linalg/dinvariants.hpp:
+/root/mfem/fem/tmop/metrics/../../../linalg/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../../../linalg/dtensor.hpp:
+/root/mfem/fem/tmop/metrics/../../../linalg/../general/error.hpp:
+/root/mfem/fem/tmop/metrics/../../../linalg/../general/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/mult3.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../pa.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../tmop.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/invariants.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/error.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../nonlininteg.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/array.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/mem_manager.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/enzyme.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/globals.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/error.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/device.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/linalg.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/vector.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/array.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/globals.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/mem_manager.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/device.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/multivector.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/operator.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/matrix.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/sparsemat.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/backends.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/cuda.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/hip.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/mem_alloc.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/table.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/densemat.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/complex_operator.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/complex_densemat.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/blockvector.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/blockmatrix.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/blockoperator.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/sparsesmoothers.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/symmat.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/ode.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/communication.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/solvers.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/handle.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/constraints.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/hypre.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/auxiliary.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/mma.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/batched.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/../../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/../densemat.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/gpu_blas.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/../../general/backends.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/solver.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/batched/../operator.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/tensor.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/dual.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/filteredsolver.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/ordering.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/particlevector.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_base.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../intrules.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/array.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../geom.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../../linalg/densemat.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/hash.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/globals.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../../general/hash_util.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../doftrans.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/../../linalg/linalg.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_fixed_order.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_h1.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_pyramid.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_l2.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_nd.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_rt.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_nurbs.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_pos.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe/fe_ser.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../coefficient.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../intrules.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../eltrans.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../kernel_dispatch.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fespace.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/hash_util.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/mesh.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/stable3d.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/mem_alloc.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/../general/globals.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/globals.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/attribute_sets.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/arrays_by_name.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/array.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/text.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/triangle.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../fem/fe.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/element.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/table.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../linalg/densemat.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../fem/geom.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/hash.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/tetrahedron.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/vertex.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/vtk.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/binaryio.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/ncmesh.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/sort_pairs.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../fem/eltrans.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../fem/coefficient.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../mesh/../general/zstr.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../fe_coll.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../geom.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../doftrans.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../restriction.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../normal_deriv_restriction.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../ceed/interface/operator.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../ceed/interface/../../../linalg/operator.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../ceed/interface/ceed.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../ceed/interface/../../../config/config.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../integrator.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../kernels.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/dtensor.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/forall.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/annotation.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/backends.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../general/../linalg/dtensor.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/kernels.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/tmatrix.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../config/tconfig.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/tassign.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../general/../config/tconfig.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/tlayout.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../fem/fespace.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/ttensor.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../linalg/simd.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../linalg/../config/tconfig.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../linalg/simd/auto.hpp:
+/root/mfem/fem/tmop/metrics/../mult/../../../linalg/../linalg/simd/../../config/tconfig.hpp:
+/root/mfem/fem/tmop/metrics/../tools/energy3.hpp:
+/root/mfem/fem/tmop/metrics/../tools/../../tmop.hpp:
+/root/mfem/fem/tmop/metrics/../tools/../../kernels.hpp:
+/root/mfem/fem/tmop/metrics/../tools/../../../general/forall.hpp:
+/root/mfem/fem/tmop/metrics/../tools/../../../linalg/kernels.hpp:
+/root/mfem/fem/tmop/metrics/../assemble/grad3.hpp:
+/root/mfem/fem/tmop/metrics/../assemble/../../tmop.hpp:
+/root/mfem/fem/tmop/metrics/../assemble/../../kernels.hpp:
+/root/mfem/fem/tmop/metrics/../assemble/../../../general/forall.hpp:
+/root/mfem/fem/tmop/metrics/../assemble/../../../linalg/kernels.hpp:

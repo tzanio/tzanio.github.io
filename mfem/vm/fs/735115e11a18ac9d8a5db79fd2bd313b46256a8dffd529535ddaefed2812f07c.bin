@@ -1,0 +1,34 @@
+general/optparser.o: \
+  /root/mfem/general/optparser.cpp \
+  /root/mfem/general/optparser.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/general/array.hpp \
+  /root/mfem/general/mem_manager.hpp \
+  /root/mfem/general/enzyme.hpp \
+  /root/mfem/general/globals.hpp \
+  /root/mfem/general/error.hpp \
+  /root/mfem/general/device.hpp \
+  /root/mfem/general/../linalg/vector.hpp \
+  /root/mfem/general/../linalg/../general/array.hpp \
+  /root/mfem/general/../linalg/../general/globals.hpp \
+  /root/mfem/general/../linalg/../general/mem_manager.hpp \
+  /root/mfem/general/../linalg/../general/device.hpp \
+  /root/mfem/general/../general/communication.hpp \
+  /root/mfem/general/../general/../config/config.hpp
+/root/mfem/general/optparser.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/general/array.hpp:
+/root/mfem/general/mem_manager.hpp:
+/root/mfem/general/enzyme.hpp:
+/root/mfem/general/globals.hpp:
+/root/mfem/general/error.hpp:
+/root/mfem/general/device.hpp:
+/root/mfem/general/../linalg/vector.hpp:
+/root/mfem/general/../linalg/../general/array.hpp:
+/root/mfem/general/../linalg/../general/globals.hpp:
+/root/mfem/general/../linalg/../general/mem_manager.hpp:
+/root/mfem/general/../linalg/../general/device.hpp:
+/root/mfem/general/../general/communication.hpp:
+/root/mfem/general/../general/../config/config.hpp:

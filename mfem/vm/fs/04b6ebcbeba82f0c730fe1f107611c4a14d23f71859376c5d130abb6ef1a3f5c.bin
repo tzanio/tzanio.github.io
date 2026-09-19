@@ -1,0 +1,6 @@
+fem/prestriction.o: \
+  /root/mfem/fem/prestriction.cpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/fem/../config/_config.hpp
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/fem/../config/_config.hpp:

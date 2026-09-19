@@ -1,0 +1,8 @@
+fem/pderefmat_op.o: \
+  /root/mfem/fem/pderefmat_op.cpp \
+  /root/mfem/fem/pderefmat_op.hpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/fem/pderefmat_op.hpp:
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

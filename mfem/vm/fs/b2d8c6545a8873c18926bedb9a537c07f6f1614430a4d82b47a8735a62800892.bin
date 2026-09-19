@@ -1,0 +1,8 @@
+linalg/sundials.o: \
+  /root/mfem/linalg/sundials.cpp \
+  /root/mfem/linalg/sundials.hpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/linalg/sundials.hpp:
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

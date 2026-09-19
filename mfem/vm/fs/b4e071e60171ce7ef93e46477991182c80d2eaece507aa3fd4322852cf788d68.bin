@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Build changed MFEM library inputs, then one example with an explicit profile."""
+import argparse
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import time
+
+parser = argparse.ArgumentParser(description='Build a local MFEM example; default is optimized (-O2).')
+profile = parser.add_mutually_exclusive_group()
+profile.add_argument('--fast', action='store_true', help='Use -O0 for faster iteration; executable code may run slower')
+profile.add_argument('--optimized', action='store_true', help='Use -O2 for normal optimized execution')
+profile.add_argument('--debug', action='store_true', help='Use the separate MFEM_DEBUG library and -Og -g symbols')
+parser.add_argument('--diagnose', action='store_true', help='Print compiler phases, PCH fallback reasons and peak compiler memory')
+parser.add_argument('--no-cache', action='store_true', help='Compile even when an identical reusable result exists')
+parser.add_argument('target', help='Example target in this directory, such as ex1 or experiment')
+options = parser.parse_args()
+target = options.target
+if not re.fullmatch(r'[A-Za-z0-9_][A-Za-z0-9_.+-]*', target) or not Path(target + '.cpp').is_file():
+    parser.error('Run from the example directory and name an existing C++ target, such as ex1.')
+root = Path('/root/mfem')
+directory = root / '.mfem-build/debug' if options.debug else root
+optimization = '-Og -g -fno-omit-frame-pointer' if options.debug else '-O0' if options.fast else '-O2'
+label = 'debug (matched MFEM_DEBUG library)' if options.debug else 'fast iteration' if options.fast else 'optimized'
+print(f'Building {target}: {label} ({optimization})', flush=True)
+environment = dict(os.environ, MFEM_BUILD_CACHE='0' if options.no_cache else '1',
+                   MFEM_BUILD_DIAGNOSTICS='1', MFEM_PCH_VERBOSE='1')
+if options.diagnose:
+    print('Linux guest memory:', flush=True)
+    subprocess.run(['free', '-m'])
+    print('Compiler: /usr/bin/g++; MFEM library:', directory, flush=True)
+started = time.monotonic()
+# Upstream examples require a current library; they do not rebuild it. Respect
+# each matched library configuration before deciding about the example.
+status = subprocess.run(['make', '--no-print-directory', '-C', str(directory), 'lib'], env=environment).returncode
+if status:
+    sys.exit(status)
+print(f'mfem-build: library check/rebuild {time.monotonic()-started:.2f}s', flush=True)
+working = Path.cwd()
+source = target + '.cpp'
+if options.debug:
+    if working != root / 'examples':
+        parser.error('--debug currently supports sources in /root/mfem/examples')
+    working = directory / 'examples'
+    source = str(root / 'examples' / source)
+# Forcing this one recipe lets the guarded output cache check actual source,
+# headers, link inputs and profile. Make timestamps cannot detect flag changes.
+force = [] if options.debug and not options.no_cache else ['-W', source]
+status = subprocess.run(['make', '--no-print-directory', *force, target,
+                         'MFEM_CXXFLAGS=' + optimization + ' -std=c++17'],
+                        cwd=working, env=environment).returncode
+print(f'mfem-build: {"ready" if status == 0 else "failed"} in {time.monotonic()-started:.2f}s: {working / target}', flush=True)
+if status == 0 and options.debug:
+    print(f'Debug: gdb --args {working / target} -no-vis', flush=True)
+sys.exit(status)

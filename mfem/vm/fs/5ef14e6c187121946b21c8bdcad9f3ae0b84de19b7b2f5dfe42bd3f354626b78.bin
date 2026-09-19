@@ -1,0 +1,6 @@
+fem/conduitdatacollection.o: \
+  /root/mfem/fem/conduitdatacollection.cpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

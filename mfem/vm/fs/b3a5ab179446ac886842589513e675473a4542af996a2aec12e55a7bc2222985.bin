@@ -1,0 +1,26 @@
+mesh/attribute_sets.o: \
+  /root/mfem/mesh/attribute_sets.cpp \
+  /root/mfem/mesh/attribute_sets.hpp \
+  /root/mfem/mesh/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/mesh/../general/arrays_by_name.hpp \
+  /root/mfem/mesh/../general/../config/config.hpp \
+  /root/mfem/mesh/../general/array.hpp \
+  /root/mfem/mesh/../general/mem_manager.hpp \
+  /root/mfem/mesh/../general/enzyme.hpp \
+  /root/mfem/mesh/../general/globals.hpp \
+  /root/mfem/mesh/../general/error.hpp \
+  /root/mfem/mesh/../general/device.hpp \
+  /root/mfem/mesh/../general/text.hpp
+/root/mfem/mesh/attribute_sets.hpp:
+/root/mfem/mesh/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/mesh/../general/arrays_by_name.hpp:
+/root/mfem/mesh/../general/../config/config.hpp:
+/root/mfem/mesh/../general/array.hpp:
+/root/mfem/mesh/../general/mem_manager.hpp:
+/root/mfem/mesh/../general/enzyme.hpp:
+/root/mfem/mesh/../general/globals.hpp:
+/root/mfem/mesh/../general/error.hpp:
+/root/mfem/mesh/../general/device.hpp:
+/root/mfem/mesh/../general/text.hpp:

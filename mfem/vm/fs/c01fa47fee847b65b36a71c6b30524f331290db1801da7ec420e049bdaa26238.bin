@@ -1,0 +1,34 @@
+linalg/hypre_parcsr.o: \
+  /root/mfem/linalg/hypre_parcsr.cpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/linalg/../general/error.hpp \
+  /root/mfem/linalg/../general/../config/config.hpp \
+  /root/mfem/linalg/../general/forall.hpp \
+  /root/mfem/linalg/../general/annotation.hpp \
+  /root/mfem/linalg/../general/backends.hpp \
+  /root/mfem/linalg/../general/cuda.hpp \
+  /root/mfem/linalg/../general/hip.hpp \
+  /root/mfem/linalg/../general/device.hpp \
+  /root/mfem/linalg/../general/enzyme.hpp \
+  /root/mfem/linalg/../general/globals.hpp \
+  /root/mfem/linalg/../general/mem_manager.hpp \
+  /root/mfem/linalg/../general/../linalg/dtensor.hpp \
+  /root/mfem/linalg/../general/../linalg/../config/config.hpp \
+  /root/mfem/linalg/../general/../linalg/../general/error.hpp
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/linalg/../general/error.hpp:
+/root/mfem/linalg/../general/../config/config.hpp:
+/root/mfem/linalg/../general/forall.hpp:
+/root/mfem/linalg/../general/annotation.hpp:
+/root/mfem/linalg/../general/backends.hpp:
+/root/mfem/linalg/../general/cuda.hpp:
+/root/mfem/linalg/../general/hip.hpp:
+/root/mfem/linalg/../general/device.hpp:
+/root/mfem/linalg/../general/enzyme.hpp:
+/root/mfem/linalg/../general/globals.hpp:
+/root/mfem/linalg/../general/mem_manager.hpp:
+/root/mfem/linalg/../general/../linalg/dtensor.hpp:
+/root/mfem/linalg/../general/../linalg/../config/config.hpp:
+/root/mfem/linalg/../general/../linalg/../general/error.hpp:

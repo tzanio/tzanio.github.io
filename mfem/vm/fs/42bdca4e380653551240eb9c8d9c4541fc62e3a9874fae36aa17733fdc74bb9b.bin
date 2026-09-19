@@ -1,0 +1,304 @@
+fem/ceed/integrators/diffusion/diffusion.o: \
+  /root/mfem/fem/ceed/integrators/diffusion/diffusion.cpp \
+  /root/mfem/fem/ceed/integrators/diffusion/diffusion.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/integrator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../config/_config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../fespace.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../general/hash_util.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/ordering.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/vector.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/array.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/mem_manager.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/enzyme.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/globals.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/error.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/device.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/sparsemat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/backends.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/cuda.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/hip.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/mem_alloc.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/table.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/densemat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/matrix.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/operator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/multivector.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/mesh.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/stable3d.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/mem_alloc.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/../general/globals.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/globals.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/attribute_sets.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/arrays_by_name.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/array.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/text.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/triangle.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../general/array.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/linalg.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/vector.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/multivector.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/operator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/matrix.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/sparsemat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/complex_operator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/complex_densemat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/blockvector.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/array.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/blockmatrix.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/globals.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/blockoperator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/sparsesmoothers.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/densemat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/symmat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/ode.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/communication.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/solvers.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/handle.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/invariants.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/error.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/constraints.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/hypre.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/auxiliary.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/mma.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/batched.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/../../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/../densemat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/gpu_blas.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/../../general/backends.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/solver.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/../operator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/tensor.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/backends.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/dual.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/filteredsolver.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/ordering.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/particlevector.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_base.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../intrules.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/array.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../geom.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../linalg/densemat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/hash.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/globals.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/hash_util.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../doftrans.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../linalg/linalg.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_fixed_order.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_h1.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_pyramid.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_l2.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_nd.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_rt.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_nurbs.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_pos.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_ser.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/element.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/table.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../linalg/densemat.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/geom.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/hash.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/tetrahedron.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/vertex.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/vtk.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/binaryio.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/ncmesh.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/sort_pairs.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/eltrans.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/intrules.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/kernel_dispatch.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/kernel_reporter.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../general/globals.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../general/hash_util.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/coefficient.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/zstr.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../fe_coll.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../geom.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../fe.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../doftrans.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../restriction.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../normal_deriv_restriction.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../gridfunc.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../coefficient.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../bilininteg.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../nonlininteg.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/operator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/../../../linalg/operator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/ceed.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/../../../config/config.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../integrator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../kernel_dispatch.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/util.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/../../../general/error.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../qfunction.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../qspace.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/../../bounds.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/operator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/coefficient.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/restriction.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/ceed.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/util.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../interface/mixed_integrator.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../../fespace.hpp \
+  /root/mfem/fem/ceed/integrators/diffusion/../../../../config/config.hpp
+/root/mfem/fem/ceed/integrators/diffusion/diffusion.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/integrator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../config/_config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../fespace.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../general/hash_util.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/ordering.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/vector.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/array.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/mem_manager.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/enzyme.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/globals.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/error.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/device.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/sparsemat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/backends.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/cuda.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/hip.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/mem_alloc.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/../general/table.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/densemat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/matrix.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/operator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../linalg/multivector.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/mesh.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/stable3d.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/mem_alloc.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/../general/globals.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/globals.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/attribute_sets.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/arrays_by_name.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/array.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/text.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/triangle.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../general/array.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/linalg.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/vector.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/multivector.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/operator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/matrix.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/sparsemat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/complex_operator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/complex_densemat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/blockvector.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/array.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/blockmatrix.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/globals.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/blockoperator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/sparsesmoothers.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/densemat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/symmat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/ode.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/communication.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/solvers.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/handle.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/invariants.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/error.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/constraints.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/hypre.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/auxiliary.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/mma.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/batched.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/../../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/../densemat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/gpu_blas.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/../../general/backends.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/solver.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/batched/../operator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/tensor.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/../general/backends.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/dual.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/filteredsolver.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/ordering.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../linalg/particlevector.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_base.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../intrules.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/array.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../geom.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../linalg/densemat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/hash.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/globals.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../general/hash_util.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../doftrans.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/../../linalg/linalg.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_fixed_order.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_h1.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_pyramid.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_l2.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_nd.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_rt.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_nurbs.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_pos.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/fe/fe_ser.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/element.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/table.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../linalg/densemat.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/geom.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/hash.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/tetrahedron.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/vertex.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/vtk.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/binaryio.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/ncmesh.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/sort_pairs.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/eltrans.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/intrules.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/kernel_dispatch.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/kernel_reporter.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../general/globals.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/../general/hash_util.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../fem/coefficient.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../../mesh/../general/zstr.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../fe_coll.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../geom.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../fe.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../doftrans.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../restriction.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../normal_deriv_restriction.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../gridfunc.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../coefficient.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../bilininteg.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../nonlininteg.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/operator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/../../../linalg/operator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/ceed.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/../../../config/config.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../integrator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../kernel_dispatch.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/util.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../ceed/interface/../../../general/error.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../qfunction.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../qspace.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/../../bounds.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/operator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/coefficient.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/restriction.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/ceed.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/util.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../interface/mixed_integrator.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../../fespace.hpp:
+/root/mfem/fem/ceed/integrators/diffusion/../../../../config/config.hpp:

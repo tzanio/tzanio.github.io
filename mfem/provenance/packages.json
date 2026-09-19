@@ -1097,5 +1097,38 @@
     "c": "b9c5072464571b09666b65869410ee3d40d2ebb2",
     "D": "so:libc.musl-x86.so.1",
     "p": "so:libskarnet.so.2.14=2.14.4.0"
+  },
+  {
+    "C": "Q1H57uPZOOhrxVt58DQb/o9Un1JXA=",
+    "P": "gdb",
+    "V": "15.2-r0",
+    "A": "x86",
+    "S": "5100921",
+    "I": "12165744",
+    "T": "The GNU Debugger",
+    "U": "https://www.gnu.org/software/gdb/",
+    "L": "GPL-3.0-or-later AND LGPL-3.0-or-later",
+    "o": "gdb",
+    "m": "Natanael Copa <ncopa@alpinelinux.org>",
+    "t": "1727812897",
+    "c": "04f5340513e49fb01a40d87fc906c7c374bab3cb",
+    "D": "musl-dbg so:libc.musl-x86.so.1 so:libexpat.so.1 so:libgcc_s.so.1 so:libgmp.so.10 so:libmpfr.so.6 so:libncursesw.so.6 so:libpython3.12.so.1.0 so:libreadline.so.8 so:libstdc++.so.6 so:libz.so.1 so:libzstd.so.1",
+    "p": "cmd:gcore=15.2-r0 cmd:gdb-add-index=15.2-r0 cmd:gdb=15.2-r0 cmd:gdbserver=15.2-r0"
+  },
+  {
+    "C": "Q1aa0aX6u5Sbat/TE0v9NWh6yhALU=",
+    "P": "musl-dbg",
+    "V": "1.2.5-r12",
+    "A": "x86",
+    "S": "971142",
+    "I": "2629752",
+    "T": "the musl c library (libc) implementation (debug symbols)",
+    "U": "https://musl.libc.org/",
+    "L": "MIT",
+    "o": "musl",
+    "m": "Natanael Copa <ncopa@alpinelinux.org>",
+    "t": "1775835372",
+    "c": "1546f29a1fd233db15464ce000b6247ed71b31e7",
+    "D": "!musl<1.2.5-r12 !musl>1.2.5-r12"
   }
 ]

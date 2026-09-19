@@ -6,6 +6,10 @@
 @media(max-width:1050px){.sim-layout[data-views="2"]{grid-template-columns:1fr;grid-template-rows:repeat(2,minmax(190px,1fr))}.sim-layout[data-views="3"],.sim-layout[data-views="4"]{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(190px,1fr))}.sim-record-status{flex-basis:100%;margin-left:0}}
 
 .sim-record-toggle,.sim-phone-views{display:none}
+/* A tall canvas must not establish a minimum size for the next layout pass. */
+.sim-layout[data-views="1"]{grid-template-rows:minmax(0,1fr)}
+.sim-view .sim-visual{min-height:0}
+.sim-visual canvas{position:absolute;top:0;left:0;max-width:none;max-height:none}
 :root body[data-phone-pane] .sim-heading{height:48px;min-height:48px;padding:2px 7px;gap:6px}
 :root body[data-phone-pane] .sim-heading button{min-height:44px;min-width:44px;padding:4px 8px;font-size:11px}
 :root body[data-phone-pane] .sim-record-toggle{display:inline-block}

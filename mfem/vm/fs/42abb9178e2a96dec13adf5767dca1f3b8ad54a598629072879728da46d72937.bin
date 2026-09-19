@@ -1,0 +1,4 @@
+general/gecko.o: \
+  /root/mfem/general/gecko.cpp \
+  /root/mfem/general/gecko.hpp
+/root/mfem/general/gecko.hpp:

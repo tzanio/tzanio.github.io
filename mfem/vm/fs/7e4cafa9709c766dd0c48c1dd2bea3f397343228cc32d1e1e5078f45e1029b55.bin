@@ -1,0 +1,44 @@
+linalg/sparsesmoothers.o: \
+  /root/mfem/linalg/sparsesmoothers.cpp \
+  /root/mfem/linalg/vector.hpp \
+  /root/mfem/linalg/../general/array.hpp \
+  /root/mfem/linalg/../general/../config/config.hpp \
+  /root/mfem/linalg/../general/../config/_config.hpp \
+  /root/mfem/linalg/../general/mem_manager.hpp \
+  /root/mfem/linalg/../general/enzyme.hpp \
+  /root/mfem/linalg/../general/globals.hpp \
+  /root/mfem/linalg/../general/error.hpp \
+  /root/mfem/linalg/../general/device.hpp \
+  /root/mfem/linalg/matrix.hpp \
+  /root/mfem/linalg/operator.hpp \
+  /root/mfem/linalg/multivector.hpp \
+  /root/mfem/linalg/sparsemat.hpp \
+  /root/mfem/linalg/../general/backends.hpp \
+  /root/mfem/linalg/../general/cuda.hpp \
+  /root/mfem/linalg/../general/hip.hpp \
+  /root/mfem/linalg/../general/mem_alloc.hpp \
+  /root/mfem/linalg/../general/table.hpp \
+  /root/mfem/linalg/densemat.hpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/linalg/sparsesmoothers.hpp
+/root/mfem/linalg/vector.hpp:
+/root/mfem/linalg/../general/array.hpp:
+/root/mfem/linalg/../general/../config/config.hpp:
+/root/mfem/linalg/../general/../config/_config.hpp:
+/root/mfem/linalg/../general/mem_manager.hpp:
+/root/mfem/linalg/../general/enzyme.hpp:
+/root/mfem/linalg/../general/globals.hpp:
+/root/mfem/linalg/../general/error.hpp:
+/root/mfem/linalg/../general/device.hpp:
+/root/mfem/linalg/matrix.hpp:
+/root/mfem/linalg/operator.hpp:
+/root/mfem/linalg/multivector.hpp:
+/root/mfem/linalg/sparsemat.hpp:
+/root/mfem/linalg/../general/backends.hpp:
+/root/mfem/linalg/../general/cuda.hpp:
+/root/mfem/linalg/../general/hip.hpp:
+/root/mfem/linalg/../general/mem_alloc.hpp:
+/root/mfem/linalg/../general/table.hpp:
+/root/mfem/linalg/densemat.hpp:
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/linalg/sparsesmoothers.hpp:

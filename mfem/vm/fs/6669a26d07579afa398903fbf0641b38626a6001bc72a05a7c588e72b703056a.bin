@@ -1,0 +1,2 @@
+# Workbench compiler maintains these files after every successful compile.
+-include $(wildcard $(BLD).mfem-build/deps/*.mk)

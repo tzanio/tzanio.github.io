@@ -1,0 +1,8 @@
+mesh/vtkhdf.o: \
+  /root/mfem/mesh/vtkhdf.cpp \
+  /root/mfem/mesh/vtkhdf.hpp \
+  /root/mfem/mesh/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/mesh/vtkhdf.hpp:
+/root/mfem/mesh/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

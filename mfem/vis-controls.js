@@ -3,7 +3,7 @@
  * See provenance/GLVIS-CONTROLS.md for attribution and the integration API. */
 'use strict';
 (function () {
-  function attach(viewer, {onError = console.error, onPauseChange = () => {}, onStep = () => {},
+  function attach(viewer, {onError = console.error, onPauseChange = () => {}, onStep = () => {}, canPause = () => true,
     root = document, prefix = '', enqueue = action => action()} = {}) {
     // Preserve each view's references when its utility windows move to body.
     const elements = new Map([...root.querySelectorAll('[id]')].map(element => [element.id,element]));
@@ -83,6 +83,7 @@
       } else if (command === 'toggle') {
         setPanel(panel.hidden);
       } else if (command === 'pause') {
+        if(!canPause())return;
         setPaused(!paused);
         focusViewer();
       } else if (command === 'step') {
@@ -123,7 +124,7 @@
       if (event.code === 'Space' && !event.ctrlKey && !event.metaKey && !event.altKey) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (!event.repeat) setPaused(!paused);
+        if (!event.repeat&&canPause()) setPaused(!paused);
       }
     }, {capture: true});
     toolbar.querySelectorAll('button').forEach(button => { button.disabled = false; });

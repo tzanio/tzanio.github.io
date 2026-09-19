@@ -1,0 +1,14 @@
+general/osockstream.o: \
+  /root/mfem/general/osockstream.cpp \
+  /root/mfem/general/osockstream.hpp \
+  /root/mfem/general/socketstream.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/general/../config/_config.hpp \
+  /root/mfem/general/error.hpp \
+  /root/mfem/general/globals.hpp
+/root/mfem/general/osockstream.hpp:
+/root/mfem/general/socketstream.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/general/../config/_config.hpp:
+/root/mfem/general/error.hpp:
+/root/mfem/general/globals.hpp:

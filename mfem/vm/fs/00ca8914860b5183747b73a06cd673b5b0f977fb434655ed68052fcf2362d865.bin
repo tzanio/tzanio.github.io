@@ -1,0 +1,6 @@
+mesh/submesh/ptransfermap.o: \
+  /root/mfem/mesh/submesh/ptransfermap.cpp \
+  /root/mfem/mesh/submesh/../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/mesh/submesh/../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

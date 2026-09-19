@@ -89,7 +89,7 @@
       for(const [attribute] of data.boundaryAttributes)boundary.append(new Option('Attribute '+attribute,attribute));
       const q=data.quality;
       get('.inspect-quality').textContent=`Quality: min ${format(q.min)} · mean ${format(q.mean)} · max ${format(q.max)}. Worst element: ${q.worstElement}. Nonpositive sampled Jacobian: ${q.nonpositive} elements.`;
-      get('.inspect-frame').textContent=`Frame ${frame.frame} snapshot`;
+      get('.inspect-frame').textContent=frame.frame == null ? 'Saved example result' : `Frame ${frame.frame} snapshot`;
       get('.inspect-frame').title='This is the displayed frame captured when you opened or refreshed the inspector.';
       status.textContent='Native MFEM inspection · Refresh captures the latest displayed frame.';
       const truncated=data.previewStride>1 || data.boundaryPreviewStride>1;

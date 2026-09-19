@@ -4,6 +4,10 @@
   font-family:Michroma;src:url("vendor/fonts/Michroma-Regular.ttf") format("truetype");
   font-style:normal;font-weight:400;font-display:swap;
 }
+/* Keep Safari's text autosizing from changing terminal cell metrics and rows.
+ * Page zoom and user font sizing remain available. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.xterm,.xterm-char-measure-element{line-height:normal;letter-spacing:0}
 :root {
   --wb-bg:#10141b; --wb-panel:#131922; --wb-raised:#171e28; --wb-input:#101720;
   --wb-terminal:#0c1118; --wb-text:#d9e1ec; --wb-muted:#9aaabe; --wb-faint:#8b9aaf;

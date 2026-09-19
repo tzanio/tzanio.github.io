@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""Use the bundled GCC MFEM header cache only when its complete input is valid."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+import resource
+
+COMPILER = '/usr/bin/g++'
+ROOT = Path('/root/mfem')
+CACHE = Path('/usr/local/lib/mfem-pch')
+CACHE_FAST = Path('/usr/local/lib/mfem-pch-fast')
+
+def profile_cache(optimization):
+    workspace = ROOT / '.mfem-build' / ('pch-fast' if optimization == '-O0' else 'pch')
+    if (workspace / 'dependencies.json').is_file():
+        return workspace
+    return CACHE_FAST if optimization == '-O0' else CACHE
+
+
+def cached_arguments(arguments):
+    # GCC validates its PCH's built-ins and source-level macros. Restrict the
+    # command-line search paths/options as well: GCC does not check whether an
+    # additional -I path would have selected a different nested header.
+    if os.environ.get('MFEM_PCH') == '0':
+        return None, 'disabled by MFEM_PCH=0'
+    if any(os.environ.get(key) for key in ('CPATH', 'CPLUS_INCLUDE_PATH',
+                                         'C_INCLUDE_PATH', 'GCC_EXEC_PREFIX',
+                                         'COMPILER_PATH')):
+        return None, 'custom compiler environment'
+    optimizations = {arg for arg in arguments if arg.startswith('-O')}
+    if optimizations not in ({'-O2'}, {'-O0'}) or '-std=c++17' not in arguments:
+        return None, 'different compiler options'
+    optimization = next(iter(optimizations))
+    cache = profile_cache(optimization)
+    result = []
+    include_found = False
+    index = 0
+    while index < len(arguments):
+        argument = arguments[index]
+        if argument.startswith('@'):
+            return None, 'compiler response file'
+        if argument == '-I' or argument.startswith('-I'):
+            value = arguments[index + 1] if argument == '-I' else argument[2:]
+            if Path(value).resolve() != ROOT:
+                return None, 'custom header search path'
+            result.append('-I' + str(cache))
+            include_found = True
+            if argument == '-I':
+                result.extend((argument, value))
+                index += 2
+            else:
+                result.append(argument)
+                index += 1
+            continue
+        if argument in ('-o', '-L', '-l'):
+            result.extend(arguments[index:index + 2])
+            index += 2
+            continue
+        if (argument.startswith('-') and argument not in
+                (optimization, '-std=c++17', '-c', '-H', '-pipe', '-Wall', '-Wextra',
+                 '-Werror', '-pedantic', '-fdiagnostics-color=always',
+                 '-fdiagnostics-color=auto') and not
+                argument.startswith(('-L', '-l', '-Wl,'))):
+            return None, 'different compiler options'
+        result.append(argument)
+        index += 1
+    if not include_found:
+        return None, 'no canonical MFEM include path'
+    try:
+        manifest = json.loads((cache / 'dependencies.json').read_text())
+        if (manifest['version'] != 2 or not (cache / 'mfem.hpp.gch').is_file()
+                or manifest['flags'] != [optimization, '-std=c++17', '-I' + str(ROOT)]
+                or not isinstance(manifest['sha256'], dict)
+                or str(ROOT / 'mfem.hpp') not in manifest['sha256']):
+            return None, 'missing header cache'
+        # Check contents on every compile, including system headers. A restored
+        # mtime, same-sized edit, or new guest boot cannot cause stale PCH use.
+        for filename, expected in manifest['sha256'].items():
+            if hashlib.sha256(Path(filename).read_bytes()).hexdigest() != expected:
+                return None, 'changed header: ' + filename
+        if (cache / 'mfem.hpp').read_bytes() != (ROOT / 'mfem.hpp').read_bytes():
+            return None, 'changed header-cache entry point'
+        # Hashing known files alone misses newly created shadow headers and
+        # __has_include changes. Ask GCC's actual preprocessor to confirm the
+        # complete token/macro stream, including resolved include paths. This
+        # still avoids the substantially slower C++ parsing/type checking.
+        preprocessed = subprocess.run([COMPILER, optimization, '-std=c++17',
+            '-I' + str(ROOT), '-E', '-dD', '-x', 'c++', str(ROOT / 'mfem.hpp')],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False)
+        if (preprocessed.returncode or hashlib.sha256(preprocessed.stdout).hexdigest()
+                != manifest['preprocessed_sha256']):
+            return None, 'changed header resolution or preprocessing'
+    except (OSError, ValueError, KeyError, TypeError):
+        return None, 'missing or unreadable header cache'
+    return result, 'validated precompiled MFEM headers (' + optimization + ')'
+
+
+if __name__ == '__main__':
+    args = sys.argv[1:]
+    verbose = os.environ.get('MFEM_BUILD_DIAGNOSTICS') == '1'
+    started = time.monotonic()
+    item = key = None
+    if verbose:
+        print('mfem-c++: validating precompiled headers…', file=sys.stderr, flush=True)
+    try:
+        cached, reason = cached_arguments(args)
+    except (IndexError, OSError):
+        cached, reason = None, 'compiler argument requires normal handling'
+    validated = time.monotonic()
+    if verbose or os.environ.get('MFEM_PCH_VERBOSE') == '1':
+        print(f'mfem-c++: {reason}; validation {validated - started:.2f}s', file=sys.stderr, flush=True)
+    command = [COMPILER, *(cached if cached is not None else args)]
+    if cached is not None and verbose:
+        # GCC can independently reject a valid factory PCH because of macros
+        # defined inside the user's source. Surface that otherwise silent loss
+        # of acceleration, while keeping GCC's correct normal-compile fallback.
+        command.extend(['-Winvalid-pch', '-Wno-error=invalid-pch'])
+    try:
+        import mfem_compile_cache as result_cache
+        item = result_cache.plan(args)
+        if item:
+            if verbose:
+                print('mfem-c++: preparing exact input snapshot and checking reusable output…', file=sys.stderr, flush=True)
+            validated_pch = profile_cache('-O0' if '-O0' in args else '-O2') / 'mfem.hpp.gch' if cached is not None else None
+            result_cache.prepare(item, command[1:], validated_pch)
+            key = result_cache.fingerprint(item)
+            if key and result_cache.restore(item, key) and result_cache.unchanged(item):
+                print(f'mfem-c++: reused identical build ({time.monotonic() - started:.2f}s validation)', file=sys.stderr)
+                result_cache.cleanup(item)
+                sys.exit(0)
+            command = [COMPILER, *result_cache.compile_arguments(item)]
+    except subprocess.CalledProcessError as error:
+        result_cache.cleanup(item)
+        sys.exit(error.returncode)
+    except (OSError, ValueError, ImportError):
+        if item:
+            result_cache.cleanup(item)
+        item = key = None
+    cache_checked = time.monotonic()
+    # Maintain GCC dependency rules for successful source compilations. PCH
+    # dependency expansion makes header edits visible to ordinary Make too.
+    sources = [arg for arg in args if not arg.startswith('-') and arg.endswith(('.cpp', '.cc', '.cxx', '.C'))]
+    dependency = None
+    if len(sources) == 1 and '-o' in args and not any(arg in args for arg in ('-E', '-M', '-MM')):
+        output = args[args.index('-o') + 1]
+        directory = Path('.mfem-build/deps')
+        directory.mkdir(parents=True, exist_ok=True)
+        dependency = directory / (hashlib.sha256(output.encode()).hexdigest()[:20] + '.mk')
+        if not item:
+            command.extend(['-MD', '-MP', '-fpch-deps', '-MF', str(dependency) + '.tmp', '-MQ', output])
+    if verbose:
+        print('mfem-c++: compiling and linking…', file=sys.stderr, flush=True)
+    status = subprocess.run(command).returncode
+    compiled = time.monotonic()
+    if status == 0 and dependency:
+        temporary = item['snapshot_dependencies'] if item else Path(str(dependency) + '.tmp')
+        if temporary.exists():
+            if cached is not None:
+                # GCC's PCH dependency emission differs across builds. Include
+                # the independently validated factory manifest explicitly.
+                cache = profile_cache('-O0' if '-O0' in args else '-O2')
+                paths = json.loads((cache / 'dependencies.json').read_text())['sha256']
+                with temporary.open('a') as stream:
+                    stream.write('\n' + output + ': ' + ' '.join(paths) + '\n')
+            if item:
+                item['dependency_bytes'] = temporary.read_bytes()
+            temporary.replace(dependency)
+    if status == 0 and item and key:
+        if verbose:
+            print('mfem-c++: verifying inputs before saving reusable output…', file=sys.stderr, flush=True)
+        try:
+            if result_cache.unchanged(item):
+                result_cache.store(item, key)
+            elif verbose:
+                print('mfem-c++: compiler/link inputs changed during the build; result was not cached', file=sys.stderr)
+        except OSError:
+            pass
+    if status == 0 and item:
+        result_cache.publish(item)
+    if verbose:
+        peak = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024
+        print(f'mfem-c++: headers {validated-started:.2f}s; snapshot/key {cache_checked-validated:.2f}s; '
+              f'compile/link {compiled-cache_checked:.2f}s; save {time.monotonic()-compiled:.2f}s; '
+              f'compiler peak RSS {peak:.0f} MiB; exit {status}', file=sys.stderr, flush=True)
+    if item:
+        result_cache.cleanup(item)
+    sys.exit(status)

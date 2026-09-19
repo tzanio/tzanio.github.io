@@ -1,0 +1,6 @@
+# Loaded by the generated MFEM configuration. Upstream sources/rules stay intact.
+# The library Makefile loads deps.mk after defining its normal default target.
+ifeq ($(strip $(THIS_MK)),)
+.DEFAULT_GOAL := all
+-include $(wildcard .mfem-build/deps/*.mk)
+endif

@@ -1,0 +1,8 @@
+mesh/pumi.o: \
+  /root/mfem/mesh/pumi.cpp \
+  /root/mfem/mesh/pumi.hpp \
+  /root/mfem/mesh/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/mesh/pumi.hpp:
+/root/mfem/mesh/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

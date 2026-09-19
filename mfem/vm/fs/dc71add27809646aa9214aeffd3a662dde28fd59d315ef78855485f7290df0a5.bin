@@ -1,0 +1,6 @@
+fem/pfespace.o: \
+  /root/mfem/fem/pfespace.cpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/fem/../config/_config.hpp
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/fem/../config/_config.hpp:

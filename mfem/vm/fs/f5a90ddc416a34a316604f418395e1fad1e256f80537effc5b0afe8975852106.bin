@@ -1,0 +1,24 @@
+general/stable3d.o: \
+  /root/mfem/general/stable3d.cpp \
+  /root/mfem/general/error.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/general/../config/_config.hpp \
+  /root/mfem/general/stable3d.hpp \
+  /root/mfem/general/mem_alloc.hpp \
+  /root/mfem/general/array.hpp \
+  /root/mfem/general/mem_manager.hpp \
+  /root/mfem/general/enzyme.hpp \
+  /root/mfem/general/globals.hpp \
+  /root/mfem/general/device.hpp \
+  /root/mfem/general/../general/globals.hpp
+/root/mfem/general/error.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/general/../config/_config.hpp:
+/root/mfem/general/stable3d.hpp:
+/root/mfem/general/mem_alloc.hpp:
+/root/mfem/general/array.hpp:
+/root/mfem/general/mem_manager.hpp:
+/root/mfem/general/enzyme.hpp:
+/root/mfem/general/globals.hpp:
+/root/mfem/general/device.hpp:
+/root/mfem/general/../general/globals.hpp:

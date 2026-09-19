@@ -1,0 +1,40 @@
+fem/lor/lor_ads.o: \
+  /root/mfem/fem/lor/lor_ads.cpp \
+  /root/mfem/fem/lor/lor_ads.hpp \
+  /root/mfem/fem/lor/../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/fem/lor/../../general/forall.hpp \
+  /root/mfem/fem/lor/../../general/../config/config.hpp \
+  /root/mfem/fem/lor/../../general/annotation.hpp \
+  /root/mfem/fem/lor/../../general/error.hpp \
+  /root/mfem/fem/lor/../../general/backends.hpp \
+  /root/mfem/fem/lor/../../general/cuda.hpp \
+  /root/mfem/fem/lor/../../general/hip.hpp \
+  /root/mfem/fem/lor/../../general/device.hpp \
+  /root/mfem/fem/lor/../../general/enzyme.hpp \
+  /root/mfem/fem/lor/../../general/globals.hpp \
+  /root/mfem/fem/lor/../../general/mem_manager.hpp \
+  /root/mfem/fem/lor/../../general/../linalg/dtensor.hpp \
+  /root/mfem/fem/lor/../../general/../linalg/../config/config.hpp \
+  /root/mfem/fem/lor/../../general/../linalg/../general/error.hpp \
+  /root/mfem/fem/lor/../../fem/pbilinearform.hpp \
+  /root/mfem/fem/lor/../../fem/../config/config.hpp
+/root/mfem/fem/lor/lor_ads.hpp:
+/root/mfem/fem/lor/../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/fem/lor/../../general/forall.hpp:
+/root/mfem/fem/lor/../../general/../config/config.hpp:
+/root/mfem/fem/lor/../../general/annotation.hpp:
+/root/mfem/fem/lor/../../general/error.hpp:
+/root/mfem/fem/lor/../../general/backends.hpp:
+/root/mfem/fem/lor/../../general/cuda.hpp:
+/root/mfem/fem/lor/../../general/hip.hpp:
+/root/mfem/fem/lor/../../general/device.hpp:
+/root/mfem/fem/lor/../../general/enzyme.hpp:
+/root/mfem/fem/lor/../../general/globals.hpp:
+/root/mfem/fem/lor/../../general/mem_manager.hpp:
+/root/mfem/fem/lor/../../general/../linalg/dtensor.hpp:
+/root/mfem/fem/lor/../../general/../linalg/../config/config.hpp:
+/root/mfem/fem/lor/../../general/../linalg/../general/error.hpp:
+/root/mfem/fem/lor/../../fem/pbilinearform.hpp:
+/root/mfem/fem/lor/../../fem/../config/config.hpp:

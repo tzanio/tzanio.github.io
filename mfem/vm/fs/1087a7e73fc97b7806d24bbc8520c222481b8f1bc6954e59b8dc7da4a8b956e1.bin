@@ -1,0 +1,8 @@
+general/adios2stream.o: \
+  /root/mfem/general/adios2stream.cpp \
+  /root/mfem/general/adios2stream.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/general/adios2stream.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

@@ -19,7 +19,16 @@ window.WorkbenchLayout = {
     const work = document.querySelector('.work'), upper = document.querySelector('.upper');
     const panes = {editor:document.querySelector('.editor'),terminal:document.querySelector('.console'),viewer:document.querySelector('.viewer')};
     const abort = new AbortController();
-    const compact = matchMedia('(max-width:600px), (max-height:500px) and (max-width:1000px) and (pointer:coarse)');
+    const coarse = matchMedia('(any-pointer:coarse)');
+    function isCompact() {
+      const width=document.documentElement.clientWidth||innerWidth;
+      const touch=coarse.matches||navigator.maxTouchPoints>0;
+      // Some phone browser modes expose a tablet-sized layout viewport. The
+      // screen's short edge remains the device's CSS size, without UA sniffing.
+      const screenEdge=Math.min(screen.width||Infinity,screen.height||Infinity);
+      return width<=600||(touch&&screenEdge<=600);
+    }
+    let compact=isCompact();
     let resizeFrame = 0;
     function resize() {
       cancelAnimationFrame(resizeFrame);
@@ -30,13 +39,15 @@ window.WorkbenchLayout = {
       try {localStorage.setItem(key,JSON.stringify(preferences))} catch {}
     }
     function apply() {
+      compact=isCompact();
+      if(compact&&state.maximized)state.phonePane=state.maximized;
       body.style.setProperty('--files-width',state.files+'px');
       body.style.setProperty('--editor-size',(state.editor*100)+'%');
       body.style.setProperty('--terminal-size',(state.terminal*100)+'%');
       body.classList.toggle('files-hidden',state.filesHidden);
       if (state.maximized) body.dataset.maximized=state.maximized;
       else delete body.dataset.maximized;
-      if (compact.matches) body.dataset.phonePane=state.phonePane;
+      if (compact) body.dataset.phonePane=state.phonePane;
       else {delete body.dataset.phonePane;closeMenu()}
       for(const [name,button] of Object.entries(phoneButtons)) button.setAttribute('aria-pressed',String(name===state.phonePane));
       filesButton.setAttribute('aria-expanded',String(!state.filesHidden));
@@ -54,7 +65,7 @@ window.WorkbenchLayout = {
     filesButton.id='toggle-files';filesButton.textContent='Files';
     filesButton.title='Show or hide files (Alt+Shift+B)';filesButton.setAttribute('aria-controls','tree');
     document.querySelector('header nav').prepend(filesButton);
-    filesButton.addEventListener('click',()=>{if(compact.matches){selectPane('files');return}state.filesHidden=!state.filesHidden;remember();apply()},{signal:abort.signal});
+    filesButton.addEventListener('click',()=>{if(compact){selectPane('files');return}state.filesHidden=!state.filesHidden;remember();apply()},{signal:abort.signal});
     const phoneNav=document.createElement('nav');phoneNav.className='phone-panes';phoneNav.setAttribute('aria-label','Workspace panes');
     const phoneButtons={};
     for(const [name,label] of Object.entries({files:'Files',editor:'Editor',viewer:'GLVis',terminal:'Terminal'})) {
@@ -78,16 +89,20 @@ window.WorkbenchLayout = {
     headerNav.addEventListener('click',event=>{if(event.target.closest('button,.button'))closeMenu()},{signal:abort.signal});
     document.addEventListener('pointerdown',event=>{if(!event.target.closest('header'))closeMenu()},{signal:abort.signal});
     function selectPane(name) {
-      if(!phoneButtons[name]||!compact.matches)return;
+      if(!phoneButtons[name]||!compact)return;
       state.phonePane=name;state.maximized=null;closeMenu();apply();
     }
     function viewportSize() {
       // visualViewport follows the iPhone keyboard and collapsing browser chrome.
-      if(compact.matches&&window.visualViewport&&visualViewport.scale===1)body.style.setProperty('--phone-height',visualViewport.height+'px');
+      const next=isCompact();
+      if(next!==compact){compact=next;apply()}
+      if(compact&&window.visualViewport&&Math.abs(visualViewport.scale-1)<.05)body.style.setProperty('--phone-height',visualViewport.height+'px');
       else body.style.removeProperty('--phone-height');
       resize();
     }
-    compact.addEventListener('change',()=>{apply();viewportSize()},{signal:abort.signal});
+    coarse.addEventListener('change',viewportSize,{signal:abort.signal});
+    window.addEventListener('resize',viewportSize,{signal:abort.signal});
+    window.addEventListener('orientationchange',viewportSize,{signal:abort.signal});
     window.visualViewport?.addEventListener('resize',viewportSize,{signal:abort.signal});
     const maxButtons={};
     for(const [name,pane] of Object.entries(panes)) {
@@ -142,7 +157,7 @@ window.WorkbenchLayout = {
     }
     function maximize(name) {
       if(name!==null&&!panes[name])return;
-      if(compact.matches&&name){state.phonePane=name;state.maximized=state.maximized===name?null:name;apply();return}
+      if(compact&&name){state.phonePane=name;state.maximized=state.maximized===name?null:name;apply();return}
       state.maximized=state.maximized===name?null:name;apply();
       if(state.maximized==='terminal')document.querySelector('.xterm-helper-textarea')?.focus();
       if(state.maximized==='editor')document.querySelector('.CodeMirror textarea')?.focus();

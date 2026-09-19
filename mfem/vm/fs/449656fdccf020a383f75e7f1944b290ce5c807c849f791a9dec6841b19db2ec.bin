@@ -1,0 +1,6 @@
+linalg/ginkgo.o: \
+  /root/mfem/linalg/ginkgo.cpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/linalg/../config/_config.hpp
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/linalg/../config/_config.hpp:

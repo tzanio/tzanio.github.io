@@ -1,0 +1,4 @@
+general/hash_util.o: \
+  /root/mfem/general/hash_util.cpp \
+  /root/mfem/general/hash_util.hpp
+/root/mfem/general/hash_util.hpp:

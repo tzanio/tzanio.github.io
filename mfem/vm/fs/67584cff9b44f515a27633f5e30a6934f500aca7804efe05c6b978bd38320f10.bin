@@ -1,0 +1,6 @@
+fem/plinearform.o: \
+  /root/mfem/fem/plinearform.cpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/fem/../config/_config.hpp
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/fem/../config/_config.hpp:

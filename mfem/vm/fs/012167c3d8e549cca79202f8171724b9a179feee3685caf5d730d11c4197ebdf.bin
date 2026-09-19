@@ -1,0 +1,8 @@
+general/globals.o: \
+  /root/mfem/general/globals.cpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/general/globals.hpp
+/root/mfem/general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/general/globals.hpp:

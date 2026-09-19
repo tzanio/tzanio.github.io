@@ -1,0 +1,8 @@
+linalg/pardiso.o: \
+  /root/mfem/linalg/pardiso.cpp \
+  /root/mfem/linalg/pardiso.hpp \
+  /root/mfem/linalg/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/linalg/pardiso.hpp:
+/root/mfem/linalg/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

@@ -1,0 +1,8 @@
+general/tic_toc.o: \
+  /root/mfem/general/tic_toc.cpp \
+  /root/mfem/general/tic_toc.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/general/tic_toc.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

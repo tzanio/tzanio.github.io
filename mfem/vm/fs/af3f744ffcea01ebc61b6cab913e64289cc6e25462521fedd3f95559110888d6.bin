@@ -1,0 +1,6 @@
+fem/fmsdatacollection.o: \
+  /root/mfem/fem/fmsdatacollection.cpp \
+  /root/mfem/fem/../config/config.hpp \
+  /root/mfem/fem/../config/_config.hpp
+/root/mfem/fem/../config/config.hpp:
+/root/mfem/fem/../config/_config.hpp:

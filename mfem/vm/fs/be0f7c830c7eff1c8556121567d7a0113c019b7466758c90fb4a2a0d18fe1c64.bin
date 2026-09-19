@@ -1,0 +1,16 @@
+general/cuda.o: \
+  /root/mfem/general/cuda.cpp \
+  /root/mfem/general/backends.hpp \
+  /root/mfem/general/../config/config.hpp \
+  /root/mfem/general/../config/_config.hpp \
+  /root/mfem/general/cuda.hpp \
+  /root/mfem/general/error.hpp \
+  /root/mfem/general/hip.hpp \
+  /root/mfem/general/globals.hpp
+/root/mfem/general/backends.hpp:
+/root/mfem/general/../config/config.hpp:
+/root/mfem/general/../config/_config.hpp:
+/root/mfem/general/cuda.hpp:
+/root/mfem/general/error.hpp:
+/root/mfem/general/hip.hpp:
+/root/mfem/general/globals.hpp:

@@ -1,0 +1,306 @@
+fem/qinterp/eval_hdiv.o: \
+  /root/mfem/fem/qinterp/eval_hdiv.cpp \
+  /root/mfem/fem/qinterp/eval_hdiv.hpp \
+  /root/mfem/fem/qinterp/../quadinterpolator.hpp \
+  /root/mfem/fem/qinterp/../fespace.hpp \
+  /root/mfem/fem/qinterp/../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/fem/qinterp/../../general/hash_util.hpp \
+  /root/mfem/fem/qinterp/../../linalg/ordering.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../linalg/vector.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/array.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/mem_manager.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/enzyme.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/globals.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/error.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/device.hpp \
+  /root/mfem/fem/qinterp/../../linalg/sparsemat.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/backends.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/cuda.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/hip.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/mem_alloc.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/table.hpp \
+  /root/mfem/fem/qinterp/../../linalg/densemat.hpp \
+  /root/mfem/fem/qinterp/../../linalg/matrix.hpp \
+  /root/mfem/fem/qinterp/../../linalg/operator.hpp \
+  /root/mfem/fem/qinterp/../../linalg/multivector.hpp \
+  /root/mfem/fem/qinterp/../../mesh/mesh.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/stable3d.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/mem_alloc.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/../general/globals.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/globals.hpp \
+  /root/mfem/fem/qinterp/../../mesh/attribute_sets.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/arrays_by_name.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/array.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/text.hpp \
+  /root/mfem/fem/qinterp/../../mesh/triangle.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../general/array.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/linalg.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/vector.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/multivector.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/operator.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/matrix.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/sparsemat.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/complex_operator.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/complex_densemat.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/blockvector.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/array.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/blockmatrix.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/globals.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/blockoperator.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/sparsesmoothers.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/densemat.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/symmat.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/ode.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/communication.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/solvers.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/handle.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/invariants.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/error.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/constraints.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/hypre.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/auxiliary.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/mma.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/batched.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/../../config/config.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/../densemat.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/gpu_blas.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/../../general/backends.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/solver.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/../operator.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/tensor.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/backends.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/dual.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/filteredsolver.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/ordering.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../linalg/particlevector.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_base.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../intrules.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../../config/config.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/array.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../geom.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../../linalg/densemat.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/hash.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/globals.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/hash_util.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../doftrans.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/../../linalg/linalg.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_fixed_order.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_h1.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_pyramid.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_l2.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_nd.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_rt.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_nurbs.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_pos.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_ser.hpp \
+  /root/mfem/fem/qinterp/../../mesh/element.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/table.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../linalg/densemat.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/geom.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/hash.hpp \
+  /root/mfem/fem/qinterp/../../mesh/tetrahedron.hpp \
+  /root/mfem/fem/qinterp/../../mesh/vertex.hpp \
+  /root/mfem/fem/qinterp/../../mesh/vtk.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/binaryio.hpp \
+  /root/mfem/fem/qinterp/../../mesh/ncmesh.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/sort_pairs.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/eltrans.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/intrules.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/kernel_dispatch.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/kernel_reporter.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../general/globals.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/../general/hash_util.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../fem/coefficient.hpp \
+  /root/mfem/fem/qinterp/../../mesh/../general/zstr.hpp \
+  /root/mfem/fem/qinterp/../fe_coll.hpp \
+  /root/mfem/fem/qinterp/../geom.hpp \
+  /root/mfem/fem/qinterp/../fe.hpp \
+  /root/mfem/fem/qinterp/../doftrans.hpp \
+  /root/mfem/fem/qinterp/../restriction.hpp \
+  /root/mfem/fem/qinterp/../normal_deriv_restriction.hpp \
+  /root/mfem/fem/qinterp/../kernel_dispatch.hpp \
+  /root/mfem/fem/qinterp/../../general/forall.hpp \
+  /root/mfem/fem/qinterp/../../general/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../general/annotation.hpp \
+  /root/mfem/fem/qinterp/../../general/error.hpp \
+  /root/mfem/fem/qinterp/../../general/backends.hpp \
+  /root/mfem/fem/qinterp/../../general/device.hpp \
+  /root/mfem/fem/qinterp/../../general/mem_manager.hpp \
+  /root/mfem/fem/qinterp/../../general/../linalg/dtensor.hpp \
+  /root/mfem/fem/qinterp/../../general/../linalg/../config/config.hpp \
+  /root/mfem/fem/qinterp/../../general/../linalg/../general/error.hpp \
+  /root/mfem/fem/qinterp/../../linalg/dtensor.hpp \
+  /root/mfem/fem/qinterp/../../linalg/kernels.hpp \
+  /root/mfem/fem/qinterp/../../linalg/tmatrix.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../config/tconfig.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/tassign.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../general/../config/tconfig.hpp \
+  /root/mfem/fem/qinterp/../../linalg/tlayout.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../fem/fespace.hpp \
+  /root/mfem/fem/qinterp/../../linalg/ttensor.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../linalg/simd.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../linalg/../config/tconfig.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../linalg/simd/auto.hpp \
+  /root/mfem/fem/qinterp/../../linalg/../linalg/simd/../../config/tconfig.hpp
+/root/mfem/fem/qinterp/eval_hdiv.hpp:
+/root/mfem/fem/qinterp/../quadinterpolator.hpp:
+/root/mfem/fem/qinterp/../fespace.hpp:
+/root/mfem/fem/qinterp/../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/fem/qinterp/../../general/hash_util.hpp:
+/root/mfem/fem/qinterp/../../linalg/ordering.hpp:
+/root/mfem/fem/qinterp/../../linalg/../config/config.hpp:
+/root/mfem/fem/qinterp/../../linalg/vector.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/array.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/../config/config.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/mem_manager.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/enzyme.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/globals.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/error.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/device.hpp:
+/root/mfem/fem/qinterp/../../linalg/sparsemat.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/backends.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/cuda.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/hip.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/mem_alloc.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/table.hpp:
+/root/mfem/fem/qinterp/../../linalg/densemat.hpp:
+/root/mfem/fem/qinterp/../../linalg/matrix.hpp:
+/root/mfem/fem/qinterp/../../linalg/operator.hpp:
+/root/mfem/fem/qinterp/../../linalg/multivector.hpp:
+/root/mfem/fem/qinterp/../../mesh/mesh.hpp:
+/root/mfem/fem/qinterp/../../mesh/../config/config.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/stable3d.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/mem_alloc.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/../general/globals.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/globals.hpp:
+/root/mfem/fem/qinterp/../../mesh/attribute_sets.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/arrays_by_name.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/../config/config.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/array.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/text.hpp:
+/root/mfem/fem/qinterp/../../mesh/triangle.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../config/config.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../general/array.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/linalg.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/vector.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/multivector.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/operator.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/matrix.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/sparsemat.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/complex_operator.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/complex_densemat.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/blockvector.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../config/config.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/array.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/blockmatrix.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/globals.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/blockoperator.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/sparsesmoothers.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/densemat.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/symmat.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/ode.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/communication.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/../config/config.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/solvers.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/handle.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/invariants.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/error.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/constraints.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/hypre.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/auxiliary.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/mma.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/batched.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/../../config/config.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/../densemat.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/gpu_blas.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/../../general/backends.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/solver.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/batched/../operator.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/tensor.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/../general/backends.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/dual.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/filteredsolver.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/ordering.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../linalg/particlevector.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_base.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../intrules.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../../config/config.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/array.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../geom.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../../linalg/densemat.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/hash.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/../config/config.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/globals.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../../general/hash_util.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../doftrans.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/../../linalg/linalg.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_fixed_order.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_h1.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_pyramid.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_l2.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_nd.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_rt.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_nurbs.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_pos.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/fe/fe_ser.hpp:
+/root/mfem/fem/qinterp/../../mesh/element.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/table.hpp:
+/root/mfem/fem/qinterp/../../mesh/../linalg/densemat.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/geom.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/hash.hpp:
+/root/mfem/fem/qinterp/../../mesh/tetrahedron.hpp:
+/root/mfem/fem/qinterp/../../mesh/vertex.hpp:
+/root/mfem/fem/qinterp/../../mesh/vtk.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/binaryio.hpp:
+/root/mfem/fem/qinterp/../../mesh/ncmesh.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/sort_pairs.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/eltrans.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/intrules.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/kernel_dispatch.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/kernel_reporter.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../general/globals.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/../general/hash_util.hpp:
+/root/mfem/fem/qinterp/../../mesh/../fem/coefficient.hpp:
+/root/mfem/fem/qinterp/../../mesh/../general/zstr.hpp:
+/root/mfem/fem/qinterp/../fe_coll.hpp:
+/root/mfem/fem/qinterp/../geom.hpp:
+/root/mfem/fem/qinterp/../fe.hpp:
+/root/mfem/fem/qinterp/../doftrans.hpp:
+/root/mfem/fem/qinterp/../restriction.hpp:
+/root/mfem/fem/qinterp/../normal_deriv_restriction.hpp:
+/root/mfem/fem/qinterp/../kernel_dispatch.hpp:
+/root/mfem/fem/qinterp/../../general/forall.hpp:
+/root/mfem/fem/qinterp/../../general/../config/config.hpp:
+/root/mfem/fem/qinterp/../../general/annotation.hpp:
+/root/mfem/fem/qinterp/../../general/error.hpp:
+/root/mfem/fem/qinterp/../../general/backends.hpp:
+/root/mfem/fem/qinterp/../../general/device.hpp:
+/root/mfem/fem/qinterp/../../general/mem_manager.hpp:
+/root/mfem/fem/qinterp/../../general/../linalg/dtensor.hpp:
+/root/mfem/fem/qinterp/../../general/../linalg/../config/config.hpp:
+/root/mfem/fem/qinterp/../../general/../linalg/../general/error.hpp:
+/root/mfem/fem/qinterp/../../linalg/dtensor.hpp:
+/root/mfem/fem/qinterp/../../linalg/kernels.hpp:
+/root/mfem/fem/qinterp/../../linalg/tmatrix.hpp:
+/root/mfem/fem/qinterp/../../linalg/../config/tconfig.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/tassign.hpp:
+/root/mfem/fem/qinterp/../../linalg/../general/../config/tconfig.hpp:
+/root/mfem/fem/qinterp/../../linalg/tlayout.hpp:
+/root/mfem/fem/qinterp/../../linalg/../fem/fespace.hpp:
+/root/mfem/fem/qinterp/../../linalg/ttensor.hpp:
+/root/mfem/fem/qinterp/../../linalg/../linalg/simd.hpp:
+/root/mfem/fem/qinterp/../../linalg/../linalg/../config/tconfig.hpp:
+/root/mfem/fem/qinterp/../../linalg/../linalg/simd/auto.hpp:
+/root/mfem/fem/qinterp/../../linalg/../linalg/simd/../../config/tconfig.hpp:

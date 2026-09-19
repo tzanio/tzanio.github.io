@@ -1,0 +1,10 @@
+fem/ceed/solvers/full-assembly.o: \
+  /root/mfem/fem/ceed/solvers/full-assembly.cpp \
+  /root/mfem/fem/ceed/solvers/full-assembly.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/ceed.hpp \
+  /root/mfem/fem/ceed/solvers/../interface/../../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp
+/root/mfem/fem/ceed/solvers/full-assembly.hpp:
+/root/mfem/fem/ceed/solvers/../interface/ceed.hpp:
+/root/mfem/fem/ceed/solvers/../interface/../../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:

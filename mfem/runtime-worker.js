@@ -1,8 +1,8 @@
 'use strict';
-let vm;
+let vm,journal;
 const subscribed = new Set();
 const serial = [[], []], timers = [null, null];
-const methods = new Set(['read_file', 'create_file', 'run', 'stop']);
+const methods = new Set(['read_file', 'create_file', 'run', 'stop', 'getWorkspaceWrites', 'ackWorkspaceWrites']);
 function flush(port) {
   clearTimeout(timers[port]); timers[port] = null;
   if (!serial[port].length) return;
@@ -34,8 +34,10 @@ self.onmessage = async event => {
       importScripts(runtimeURL);
       postMessage({type: 'download', value: {url: runtimeURL, loaded: 0, total: 0,
         lengthComputable: false, done: true, error: false, status: 200}});
+      importScripts(message.journalURL || 'fs-journal.js');
       vm = new V86(message.options);
       vm.add_listener('emulator-loaded',()=>{
+        journal=WorkbenchFilesystemJournal.install(vm.fs9p,value=>postMessage({type:'event',name:'workspace-write',value}));
         // Warm the guest's own cache during kernel boot. No bytes cross the UI
         // worker boundary, and ordinary demand reads remain the fallback.
         for(const path of message.preloadFiles || [])vm.read_file(path).catch(()=>{});
@@ -52,7 +54,7 @@ self.onmessage = async event => {
     else if (message.type === 'listen') listen(message.name);
     else if (message.type === 'call') {
       if (!methods.has(message.method)) throw new Error('Unsupported VM method: ' + message.method);
-      const value = await vm[message.method](...message.args);
+      const value = await (message.method==='getWorkspaceWrites'?journal.snapshot():message.method==='ackWorkspaceWrites'?journal.acknowledge(...message.args):vm[message.method](...message.args));
       if (value instanceof Uint8Array) {
         // read_file can expose a slice of the live FS cache: copy before transfer.
         const copy = Uint8Array.from(value);

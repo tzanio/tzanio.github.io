@@ -48,7 +48,7 @@
   function start(title,{label='Working…',detail='',delay=0}={}) {
     mount();
     const row=document.createElement('article');row.className='operation';
-    row.innerHTML='<div class="operation-title"><strong></strong><button class="operation-dismiss" type="button" hidden>×</button></div><div class="operation-stage" role="status"></div><progress></progress><div class="operation-count"></div><div class="operation-detail"></div>';
+    row.innerHTML='<div class="operation-title"><strong></strong><button class="operation-dismiss" type="button" hidden>×</button></div><div class="operation-stage" role="status"></div><progress></progress><div class="operation-count"></div><div class="operation-detail"></div><div class="operation-actions"></div>';
     row.querySelector('strong').textContent=title;
     row.querySelector('progress').setAttribute('aria-label',title+' progress');
     row.querySelector('.operation-dismiss').setAttribute('aria-label','Dismiss '+title);
@@ -58,7 +58,11 @@
       if(visible||task.state!=='running')return;
       visible=true;tasks.add(task);panel.querySelector('.operation-list').append(row);render();windowHandle.open({focus:false});
     }
-    function remove() {clearTimeout(removeTimer);tasks.delete(task);row.remove();render()}
+    function remove() {clearTimeout(removeTimer);task.dispose?.();tasks.delete(task);row.remove();render()}
+    function actions(items=[]) {
+      const container=row.querySelector('.operation-actions');container.replaceChildren();
+      for(const item of items){const action=document.createElement('button');action.type='button';action.textContent=item.label;action.onclick=item.run;container.append(action)}
+    }
     row.querySelector('.operation-dismiss').onclick=remove;
     delay?revealTimer=setTimeout(reveal,delay):reveal();
     return {
@@ -68,17 +72,26 @@
         if(values.stage!==undefined&&values.stage!==task.stage){task.total=null;task.completed=null;task.detail=''}
         Object.assign(task,values);if(visible)renderTask(task);
       },
-      complete(message='Complete') {
+      complete(message='Complete',options={}) {
         if(task.state!=='running')return;
-        clearTimeout(revealTimer);task.state='complete';task.ended=performance.now();task.label=message;task.detail='';
-        if(visible){render();removeTimer=setTimeout(remove,8000)}
+        clearTimeout(revealTimer);if(options.persistent)reveal();task.state='complete';task.ended=performance.now();task.label=message;task.detail=options.detail||'';task.dispose=options.dispose;actions(options.actions);
+        if(visible){render();if(!options.persistent)removeTimer=setTimeout(remove,8000)}
       },
-      fail(error) {
+      fail(error,options={}) {
         if(task.state!=='running')return;
         clearTimeout(revealTimer);reveal();task.state='error';task.ended=performance.now();task.label='Could not finish';task.detail=error?.message||String(error);render();
+        actions(options.retry?[{label:'Retry',run:()=>{remove();options.retry()}}]:[]);
         windowHandle.open({focus:false});
       },
     };
   }
-  window.WorkbenchOperations={start};
+  function download(activity,bytes,filename,{type='application/gzip',auto=true}={}) {
+    const blob=bytes instanceof Blob?bytes:new Blob([bytes],{type}),url=URL.createObjectURL(blob);
+    function save(){const link=document.createElement('a');link.href=url;link.download=filename;document.body.append(link);link.click();link.remove();}
+    activity.complete('Archive ready',{persistent:true,detail:filename+' · '+amount(blob.size,'bytes'),
+      actions:[{label:'Download again',run:save}],dispose:()=>URL.revokeObjectURL(url)});
+    if(auto)save();
+    return {filename,size:blob.size,download:save};
+  }
+  window.WorkbenchOperations={start,download};
 })();

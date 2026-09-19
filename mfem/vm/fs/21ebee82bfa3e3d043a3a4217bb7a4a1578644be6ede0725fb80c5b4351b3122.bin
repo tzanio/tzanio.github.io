@@ -1,0 +1,34 @@
+linalg/batched/solver.o: \
+  /root/mfem/linalg/batched/solver.cpp \
+  /root/mfem/linalg/batched/solver.hpp \
+  /root/mfem/linalg/batched/batched.hpp \
+  /root/mfem/linalg/batched/../../config/config.hpp \
+  /root/mfem/.mfem-build/debug/config/_config.hpp \
+  /root/mfem/linalg/batched/../densemat.hpp \
+  /root/mfem/linalg/batched/../../general/globals.hpp \
+  /root/mfem/linalg/batched/../../general/../config/config.hpp \
+  /root/mfem/linalg/batched/../matrix.hpp \
+  /root/mfem/linalg/batched/../../general/array.hpp \
+  /root/mfem/linalg/batched/../../general/mem_manager.hpp \
+  /root/mfem/linalg/batched/../../general/enzyme.hpp \
+  /root/mfem/linalg/batched/../../general/error.hpp \
+  /root/mfem/linalg/batched/../../general/device.hpp \
+  /root/mfem/linalg/batched/../operator.hpp \
+  /root/mfem/linalg/batched/../vector.hpp \
+  /root/mfem/linalg/batched/../multivector.hpp
+/root/mfem/linalg/batched/solver.hpp:
+/root/mfem/linalg/batched/batched.hpp:
+/root/mfem/linalg/batched/../../config/config.hpp:
+/root/mfem/.mfem-build/debug/config/_config.hpp:
+/root/mfem/linalg/batched/../densemat.hpp:
+/root/mfem/linalg/batched/../../general/globals.hpp:
+/root/mfem/linalg/batched/../../general/../config/config.hpp:
+/root/mfem/linalg/batched/../matrix.hpp:
+/root/mfem/linalg/batched/../../general/array.hpp:
+/root/mfem/linalg/batched/../../general/mem_manager.hpp:
+/root/mfem/linalg/batched/../../general/enzyme.hpp:
+/root/mfem/linalg/batched/../../general/error.hpp:
+/root/mfem/linalg/batched/../../general/device.hpp:
+/root/mfem/linalg/batched/../operator.hpp:
+/root/mfem/linalg/batched/../vector.hpp:
+/root/mfem/linalg/batched/../multivector.hpp:
