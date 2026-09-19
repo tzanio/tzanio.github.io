@@ -4,6 +4,43 @@
   const MiB = 1024 * 1024;
   const decode = new TextDecoder(), encode = new TextEncoder();
   const MAX_VIEWS = 4, MAX_RECORDS = 4096, LIVE_CACHE_LIMIT = 128 * MiB;
+  const SESSION_SCENE_LIMIT = 16 * MiB;
+  const savedCommands = new Set(['keys','view','viewcenter','zoom','shading','subdivisions','valuerange',
+    'autoscale','levellines','palette','palette_repeat','palette_name','camera','plot_caption',
+    'axis_labels','axis_numberformat','colorbar_numberformat','fix_orientations','keep_attributes']);
+  function validateSession(value) {
+    if (!value || value.format !== 1 || !Array.isArray(value.views) || !value.views.length || value.views.length > MAX_VIEWS) {
+      throw new Error('Unsupported saved GLVis session');
+    }
+    let bytes = 0;
+    let lastId=0;
+    const views = value.views.map((view,index) => {
+      if (!view || typeof view.title !== 'string' || view.title.length > 4096 ||
+          (view.data !== null && typeof view.data !== 'string') || !Array.isArray(view.commands) || view.commands.length > 128) {
+        throw new Error('Invalid saved GLVis scene');
+      }
+      const commands = view.commands.map(command => {
+        if (typeof command !== 'string' || command.length > 65536 || /[\r\n\0]/.test(command) ||
+            !savedCommands.has(command.trim().split(/\s/,1)[0])) throw new Error('Invalid saved GLVis command');
+        return command;
+      });
+      bytes += encode.encode(view.data || '').byteLength + encode.encode(view.title + commands.join('\n')).byteLength;
+      if (bytes > SESSION_SCENE_LIMIT) throw new Error('Saved GLVis scenes exceed the 16 MiB session limit');
+      const range = view.range;
+      if (!range || typeof range.enabled !== 'boolean' || !Number.isFinite(range.min) || !Number.isFinite(range.max) || range.min >= range.max) {
+        throw new Error('Invalid saved GLVis color range');
+      }
+      const id=view.id??index+1;
+      if(!Number.isInteger(id)||id<=lastId||id>MAX_VIEWS||(index===0&&id!==1))throw new Error('Invalid saved GLVis pane');
+      lastId=id;
+      return {id,data:view.data,title:view.title,commands,range:{enabled:range.enabled,min:range.min,max:range.max}};
+    });
+    if (!Number.isInteger(value.activeView) || value.activeView < 0 || value.activeView >= views.length ||
+        !Number.isInteger(value.recordingCapMiB) || value.recordingCapMiB < 1 || value.recordingCapMiB > 256 ||
+        typeof value.recordPanel !== 'boolean') throw new Error('Invalid saved GLVis settings');
+    return {format:1,views,activeView:value.activeView,recordPanel:value.recordPanel,recordingCapMiB:value.recordingCapMiB,
+      skippedViews:Number.isInteger(value.skippedViews) ? Math.max(0,Math.min(MAX_VIEWS,value.skippedViews)) : 0};
+  }
   const controlGroups = [
     ['Mesh', [['m','Mesh'],['a','Axes'],['e','Elements'],['o','Resolution']]],
     ['Colors', [['P','← Palette','Previous palette'],['p','Palette →','Next palette'],['c','Colorbar'],['l','Light'],['T','Material'],['g','Background']]],
@@ -18,9 +55,9 @@
       <div class="sim-layout" data-views="1"></div>`;
     const get = id => host.querySelector('#' + id);
     const layout = host.querySelector('.sim-layout');
-    const streams = new Map(), pool = [];
+    const streams = new Map(), pool = [], detachedClients = new Set();
     const recording = {enabled:false,capBytes:32 * MiB,bytes:0,frames:[],dropped:0,nextId:0};
-    let destroyed = false, resizeRequest = 0, guestReady = false;
+    let destroyed = false, resizeRequest = 0, guestReady = false, sessionEpoch = 0, restoringSession = false;
     const activeViews = () => pool.filter(view => view.active);
     const report = error => notice('GLVis: ' + (error?.message || error));
 
@@ -73,7 +110,13 @@
     }
     function updateViewStatus(view) {
       const state = streams.get(view.client), label = view.get('view-status');
-      if (!state) {label.textContent = view.preview ? 'ex1 · saved result' : 'Listening on localhost:19916';return}
+      if (!state) {
+        label.textContent = view.preview ? (view.savedFrame?.title || 'ex1') + ' · saved result' : 'Listening on localhost:19916';
+        label.title = view.savedFrame?.title || '';
+        view.get('sim-range-label').hidden = !view.preview || !view.range.enabled;
+        view.get('sim-range-label').textContent = 'Fixed colors: ' + view.range.min + ' … ' + view.range.max;
+        updateTimeline(view);return;
+      }
       label.textContent = view.mode === 'replay' ? 'Replay · frame ' + view.displayedFrame :
         'Connected · frame ' + view.displayedFrame + (state.paused ? ' · paused' : state.ended ? ' · complete' : ' · live');
       label.title = state.title;
@@ -146,7 +189,8 @@
         viewer.setCanvasSize(Math.max(1,view.visual.clientWidth),Math.max(1,view.visual.clientHeight));
         await viewer.display(saved.data+'\n'+(saved.commands||[]).join('\n')+'\n'+rangeCommands(view));
         if(generation!==view.generation||view.client!==null)return false;
-        view.preview=true;view.savedFrame=saved;view.inspectionFrame={client:null,frame:null,data:saved.data};
+        view.preview=true;view.savedFrame=saved;view.displayedScene=saved;view.rangeDirty=false;
+        view.inspectionFrame={client:null,frame:null,data:saved.data};
         attachControls(view);if(guestReady)attachInspector(view);updateViewStatus(view);return true;
       });
     }
@@ -194,6 +238,7 @@
           view.displayedClient = frame.client;view.rangeDirty = false;
         }
         view.preview = false;
+        view.displayedScene = {data:frame.data,commands:(frame.commands || []).slice(),title:frame.title || streamState(frame.client).title};
         attachControls(view);
         view.controls.setPaused(streamState(view.client).paused, {notify:false});
         view.inspectionFrame = {client:frame.client,frame:frame.frame,data:frame.data};
@@ -341,7 +386,10 @@
         const {command,args = []} = message;
         if (command === 'window_title') {
           state.title = args[0];updateRecordedCommands(state);updateSelectors();
-          for (const view of boundViews(state.client)) updateViewStatus(view);
+          for (const view of boundViews(state.client)) {
+            if(view.mode==='live'&&view.displayedScene)view.displayedScene.title=state.title;
+            updateViewStatus(view);
+          }
           return;
         }
         if (command === 'pause') {
@@ -354,14 +402,27 @@
         state.commands.push(command + ' ' + args.map(arg => quoted ? "'" + String(arg).replaceAll("'",'') + "'" : arg).join(' '));
         if (state.commands.length > 128) state.commands.shift();
         updateRecordedCommands(state);
+        for (const view of boundViews(state.client)) {
+          if(view.mode==='live'&&view.displayedScene)view.displayedScene.commands=state.commands.slice();
+        }
         await Promise.all(boundViews(state.client).filter(view => view.mode === 'live' && view.viewer).map(view =>
           command === 'keys' ? enqueueView(view,() => view.viewer.sendKeyStr(args[0])) :
             render(view,latestFrame(state),{force:true})));
       }
     }
+    function discardMessage(message) {
+      if(message.event==='glvis-end')detachedClients.delete(message.client);
+      if(message.event==='glvis')return rpc('unlink',{path:message.path});
+      if(message.event==='glvis-command'&&message.command==='pause')return rpc('vis-play',{client:message.client});
+      return Promise.resolve();
+    }
     function handle(message) {
+      if(restoringSession)detachedClients.add(message.client);
+      if(detachedClients.has(message.client))return discardMessage(message);
       const state = streamState(message.client);
-      const result = state.queue.then(() => processMessage(state,message));
+      const epoch=sessionEpoch;
+      const result = state.queue.then(() => epoch===sessionEpoch ? processMessage(state,message) :
+        discardMessage(message));
       state.queue = result.catch(report);
       return result;
     }
@@ -458,6 +519,68 @@
         }
       });
     }
+    function exportSession() {
+      let bytes = 0, skippedViews = 0;
+      const views = activeViews().map(view => {
+        const scene = view.displayedScene;
+        const title = String(scene?.title || view.savedFrame?.title || (view.preview ? 'ex1' : 'GLVis')).slice(0,4096);
+        let data = scene?.data || null;
+        let commands = (scene?.commands || []).filter(command => typeof command === 'string' && command.length <= 65536 &&
+          !/[\r\n\0]/.test(command) && savedCommands.has(command.trim().split(/\s/,1)[0])).slice(-128);
+        const size = encode.encode((data || '') + title + commands.join('\n')).byteLength;
+        if (bytes + size > SESSION_SCENE_LIMIT - 65536) {data=null;commands=[];skippedViews++;bytes+=encode.encode(title).byteLength}
+        else bytes += size;
+        return {id:view.id,data,title,commands,range:{...view.range}};
+      });
+      return {format:1,views,activeView:Math.max(0,activeViews().findIndex(view=>view.id===Number(get('sim-phone-views').value))),
+        recordPanel:host.dataset.recordPanel==='open',recordingCapMiB:recording.capBytes/MiB,skippedViews};
+    }
+    async function restoreSession(value) {
+      const saved = validateSession(value);
+      sessionEpoch++;restoringSession=true;
+      try {
+      // Detach old fields and invalidate an unfinished bundled preview before
+      // any WASM work. Imported scenes never run a solver or resume playback.
+      for (const state of streams.values()) {
+        detachedClients.add(state.client);
+        if(state.paused&&!state.ended)await rpc('vis-play',{client:state.client});
+        state.paused=false;state.waiters.splice(0).forEach(resolve=>resolve());
+      }
+      for (const view of activeViews()) {
+        stopPlayback(view);view.generation++;view.client=null;
+      }
+      await Promise.all([...streams.values()].map(state=>state.queue));
+      streams.clear();
+      for (const view of activeViews().slice(1)) removeView(view);
+      const primary = activeViews()[0];
+      primary.savedFrame=null;primary.displayedScene=null;
+      while(activeViews().length<saved.views[saved.views.length-1].id)addView();
+      const savedIds=new Set(saved.views.map(view=>view.id));
+      for(const view of activeViews().slice(1))if(!savedIds.has(view.id))removeView(view);
+      recording.enabled=false;recording.frames.length=0;recording.bytes=0;recording.dropped=0;
+      recording.capBytes=saved.recordingCapMiB*MiB;get('sim-record-cap').value=String(saved.recordingCapMiB);
+      host.dataset.recordPanel=saved.recordPanel?'open':'closed';
+      get('sim-record-toggle').setAttribute('aria-expanded',String(saved.recordPanel));
+      const views = activeViews();
+      for (let index=0;index<views.length;index++) {
+        const view=views[index], scene=saved.views[index];
+        stopPlayback(view);view.generation++;view.client=null;view.mode='live';view.replayId=null;
+        view.preview=false;view.savedFrame=null;view.displayedScene=null;view.displayedClient=null;view.displayedFrame=0;
+        view.inspectionFrame=null;view.inspector?.destroy();view.inspector=null;
+        view.get('vis-inspect').disabled=true;view.get('vis-pause').disabled=true;
+        view.controls?.setPaused(false,{notify:false});
+        view.range={...scene.range};view.rangeDirty=false;
+        view.get('sim-fixed-range').checked=view.range.enabled;
+        view.get('sim-range-min').value=String(view.range.min);view.get('sim-range-max').value=String(view.range.max);
+        if(view.viewer)view.viewer.canvas_.style.display='none';
+        view.get('view-placeholder').hidden=false;
+        updateViewStatus(view);
+      }
+      updateRecording();updateLayout();selectPhoneView(views[saved.activeView].id);
+      await Promise.all(views.map((view,index)=>saved.views[index].data ? displaySaved(view,saved.views[index]) : Promise.resolve()));
+      return saved;
+      } finally {restoringSession=false}
+    }
     get('sim-add-view').onclick = addView;
     get('sim-phone-views').onchange=event=>selectPhoneView(Number(event.target.value));
     get('sim-record-toggle').onclick=event=>{
@@ -487,7 +610,7 @@
     const primary = addView();initializeViewer(primary);updateRecording();
     const previewReady = startupPreview ? showStartupPreview(primary,startupPreview) : Promise.resolve(false);
     return {
-      handle,resize,streams,recording,previewReady,
+      handle,resize,streams,recording,previewReady,exportSession,restoreSession,validateSession,
       setGuestReady(value=true){guestReady=Boolean(value);if(guestReady)for(const view of activeViews())attachInspector(view)},
       get viewer() {return activeViews()[0]?.viewer},
       get controls() {return activeViews()[0]?.controls},
@@ -499,5 +622,5 @@
       },
     };
   }
-  window.SimulationWorkbench = {create};
+  window.SimulationWorkbench = {create,validateSession};
 })();

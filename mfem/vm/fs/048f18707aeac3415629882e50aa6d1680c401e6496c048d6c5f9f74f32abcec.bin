@@ -1,0 +1,956 @@
+#!/usr/bin/python3
+"""Local guest RPC and the standard GLVis TCP listener; no external services."""
+import os, json, threading, socket, termios, tty, fcntl, struct, pathlib, hashlib
+from glvis_socket import Visualizations
+
+port = None
+lock = threading.Lock()
+archive_lock = threading.Lock()
+counter = 0
+
+def emit(message):
+    data = (json.dumps(message) + '\n').encode()
+    with lock:
+        while data:
+            data = data[os.write(port, data):]
+
+def snapshot(data, prefix='view'):
+    global counter
+    with lock:
+        counter += 1
+        name = '/tmp/studio-%s-%d' % (prefix, counter)
+    with open(name, 'wb') as out:
+        out.write(data)
+        out.flush()
+        os.fsync(out.fileno())
+    return name
+
+def rpc(request):
+    op = request['op']
+    path = request.get('path', '/root/mfem')
+    if op == 'browser-build-finish':
+        from browser_compile import dispatch
+        return dispatch(request)
+    if op == 'session-inspect':
+        return inspect_session_archive(request['upload'], operation_progress(request))
+    if op == 'session-shell-capture':
+        return capture_shell_session()
+    if op == 'session-shell-restore':
+        return restore_shell_session(request)
+    if op == 'mesh-inspect':
+        from mesh_inspect import inspect as inspect_mesh
+        return inspect_mesh(request, snapshot)
+    if op == 'list':
+        return directory(path)
+    if op == 'list-many':
+        result = {}
+        for item in request['paths']:
+            try:
+                result[item] = directory(item)
+            except (FileNotFoundError, NotADirectoryError):
+                result[item] = []
+        return result
+    if op == 'read':
+        if os.stat(path).st_size > request.get('max_bytes', 64 * 1024 * 1024):
+            raise ValueError('File is too large for the editor; use the terminal')
+        data = pathlib.Path(path).read_bytes()
+        if request.get('metadata'):
+            revision = hashlib.sha256(data).hexdigest()
+            if request.get('if_revision') == revision:
+                return {'unchanged': True, 'revision': revision}
+            return {'path': snapshot(data, 'read'), 'revision': revision, 'size': len(data)}
+        return snapshot(data, 'read')
+    if op == 'write':
+        if 'expected_hash' in request:
+            return checked_write(path, request['upload'], request['expected_hash'])
+        import shutil
+        with open(request['upload'], 'rb') as src, open(path, 'wb') as dst:
+            shutil.copyfileobj(src, dst)
+            dst.flush()
+            os.fsync(dst.fileno())
+        os.unlink(request['upload'])
+        return True
+    if op == 'unlink':
+        try:
+            os.unlink(path)
+        except FileNotFoundError:
+            pass
+        visualizations.acknowledge(path)
+        return True
+    if op in ('vis-play', 'vis-pause', 'vis-cancel'):
+        return visualizations.control(request['client'], op, request.get('step', False))
+    if op == 'resize':
+        fd = os.open('/dev/ttyS0', os.O_RDWR | os.O_NOCTTY)
+        try:
+            fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack('HHHH', request['rows'], request['cols'], 0, 0))
+        finally:
+            os.close(fd)
+        return True
+    if op in ('export', 'restore'):
+        return workspace_request(request)
+    if op.startswith('workspace-'):
+        from workspace_store import dispatch
+        return dispatch(request, emit, operation_progress(request))
+    if op in ('changes-status', 'changes-diff', 'changes-export', 'reproduction-export'):
+        from workspace_changes import dispatch
+        return dispatch(request, operation_progress(request))
+    raise ValueError('Unknown operation: ' + op)
+
+def operation_progress(request):
+    """Report measured work without flooding the serial link during small-file I/O."""
+    import time
+    previous = [None, 0.0]
+    def progress(stage, completed=0, total=None, unit='bytes', detail='', final=False):
+        now = time.monotonic()
+        if final or stage != previous[0] or now - previous[1] >= 0.25:
+            emit({'event': 'operation-progress', 'id': request['id'], 'stage': stage,
+                  'completed': completed, 'total': total, 'unit': unit, 'detail': detail})
+            previous[:] = [stage, now]
+    return progress
+
+class ProgressReader:
+    """Observe reads while preserving tarfile's seek/tell interface."""
+    def __init__(self, source, on_read):
+        self.source, self.on_read = source, on_read
+
+    def read(self, size=-1):
+        data = self.source.read(size)
+        self.on_read(len(data))
+        return data
+
+    def __getattr__(self, name):
+        return getattr(self.source, name)
+
+def workspace_request(request, workspace='/root/mfem'):
+    progress = operation_progress(request)
+    acquired = archive_lock.acquire(blocking=False)
+    if not acquired:
+        progress('waiting', unit='files')
+        archive_lock.acquire()
+    try:
+        paths = request.get('written_paths', [])
+        if paths:
+            from workspace_store import normalized
+            store = archive_workspace_store(workspace)
+            if store:
+                with store.operation_lock:
+                    for path in paths:
+                        store.mark(normalized(path))
+        if request['op'] == 'export':
+            return workspace_export(workspace, progress, request.get('session_upload'),
+                                    compression=request.get('compression', 'gzip'),
+                                    max_bytes=request.get('max_bytes'))
+        options = {'expected_session_hash': request['expected_session_hash']} if 'expected_session_hash' in request else {}
+        return workspace_restore(request['upload'], workspace, progress, **options)
+    finally:
+        archive_lock.release()
+
+def session_metadata(data):
+    """Validate the portable envelope; the browser validates its component state."""
+    if len(data) > 32 * 1024 * 1024:
+        raise ValueError('Session metadata exceeds the 32 MiB limit')
+    try:
+        value = json.loads(data)
+    except (ValueError, UnicodeError):
+        raise ValueError('Invalid session metadata JSON') from None
+    if not isinstance(value, dict) or value.get('format') != 'mfem-workbench-session' or type(value.get('version')) is not int or value['version'] != 1:
+        raise ValueError('Unsupported workbench session format')
+    return data
+
+def archive_session_metadata(archive, members):
+    markers = [item for item in members if item.name == 'mfem-workbench-session.json']
+    if not markers:
+        return None
+    if len(markers) != 1 or not markers[0].isfile() or markers[0].size > 32 * 1024 * 1024:
+        raise ValueError('Invalid workbench session metadata member')
+    return session_metadata(archive.extractfile(markers[0]).read())
+
+def archive_members(archive, max_members=100000, max_bytes=512 * 1024 * 1024):
+    """Bound metadata and expanded payload before any workspace mutation.
+
+    Iterating instead of getmembers also protects legacy clients that still
+    submit gzip to the guest, without eagerly retaining an unbounded index.
+    """
+    members, total = [], 0
+    for item in archive:
+        if len(members) >= max_members:
+            raise ValueError('Workspace archive contains too many entries (maximum %d)' % max_members)
+        if item.size < 0:
+            raise ValueError('Workspace archive contains an invalid member size')
+        total += item.size
+        if total > max_bytes or archive.offset > max_bytes:
+            raise ValueError('Workspace archive exceeds the %g MiB expanded-size limit' % (max_bytes / (1024 * 1024)))
+        members.append(item)
+    return members
+
+def inspect_session_archive(upload, progress=lambda *args, **kwargs: None, snapshot_fn=None):
+    """Read metadata before the browser approves the source-tree import."""
+    import tarfile
+    with open(upload, 'rb') as source:
+        size, scanned = os.fstat(source.fileno()).st_size, 0
+        progress('validating', 0, size, detail='Reading session metadata')
+        def scanned_bytes(_size):
+            nonlocal scanned
+            scanned = max(scanned, source.tell())
+            progress('validating', scanned, size, detail='Reading session metadata')
+        with tarfile.open(fileobj=ProgressReader(source, scanned_bytes), mode='r:*') as archive:
+            data = archive_session_metadata(archive, archive_members(archive))
+        progress('validating', scanned, size, detail='Reading session metadata', final=True)
+    if data is None:
+        return None
+    return {'session_path': (snapshot_fn or snapshot)(data, 'session'), 'sha256': hashlib.sha256(data).hexdigest()}
+
+def capture_shell_session(state='/run/studio-shell-cwd', history='/root/.bash_history'):
+    """PROMPT_COMMAND flushes history and records the latest prompt directory."""
+    # Re-exporting immediately after import must retain the pending shell state,
+    # even if the user has not requested the next prompt yet.
+    import re
+    pending = pathlib.Path(state).parent / 'studio-shell-restore'
+    if pending.exists():
+        token = pending.read_text().strip()
+        if re.fullmatch(r'studio-shell-[a-zA-Z0-9_-]+', token):
+            staged = pending.parent / token
+            if (staged / 'cwd').is_file() and (staged / 'history').is_file():
+                state, history = str(staged / 'cwd'), str(staged / 'history')
+    cwd = pathlib.Path(state).read_text().rstrip('\n') if os.path.exists(state) else '/root/mfem/examples'
+    path = pathlib.Path(history)
+    # Match Bash's existing bounded history, without eagerly loading a huge file
+    # written by a user. Start on a whole line when truncation is necessary.
+    data = b''
+    if path.exists():
+        with path.open('rb') as source:
+            size = os.fstat(source.fileno()).st_size
+            source.seek(max(0, size - 1024 * 1024))
+            data = source.read()
+            if size > 1024 * 1024:
+                data = data.partition(b'\n')[2]
+    text = data.decode('utf-8', errors='replace')
+    if len(text.encode()) > 1024 * 1024:
+        text = text.encode()[-1024 * 1024:].decode('utf-8', errors='ignore').partition('\n')[2]
+    return {'cwd': cwd, 'history': text}
+
+def restore_shell_session(request, run='/run'):
+    """Stage data for the next prompt; never send imported text to the PTY."""
+    import tempfile
+    cwd, history = request.get('cwd'), request.get('history')
+    if not isinstance(cwd, str) or not cwd.startswith('/') or len(cwd.encode()) > 4096 or any(ord(char) < 32 or ord(char) == 127 for char in cwd):
+        raise ValueError('Invalid saved shell directory')
+    if not isinstance(history, str) or '\0' in history or len(history.encode()) > 1024 * 1024:
+        raise ValueError('Invalid saved shell history (maximum 1 MiB)')
+    restored_cwd = cwd if os.path.isdir(cwd) else '/root/mfem/examples'
+    staged = pathlib.Path(tempfile.mkdtemp(prefix='studio-shell-', dir=run))
+    try:
+        (staged / 'history').write_text(history)
+        (staged / 'cwd').write_text(restored_cwd + '\n')
+        descriptor, marker = tempfile.mkstemp(prefix='studio-shell-request-', dir=run)
+        with os.fdopen(descriptor, 'w') as output:
+            output.write(staged.name + '\n')
+        os.replace(marker, pathlib.Path(run) / 'studio-shell-restore')
+    except Exception:
+        import shutil
+        shutil.rmtree(staged)
+        raise
+    return {'pending': True, 'cwd': restored_cwd}
+
+def workspace_export(workspace, progress, session_upload=None, compression='gzip', max_bytes=None):
+    import tarfile, tempfile, stat, io
+    if compression not in ('gzip', 'none'):
+        raise ValueError('Unsupported workspace archive compression')
+    if max_bytes is not None and (type(max_bytes) is not int or not 0 < max_bytes <= 512 * 1024 * 1024):
+        raise ValueError('Invalid archive size limit')
+    session_data = None
+    if session_upload:
+        with open(session_upload, 'rb') as source:
+            session_data = session_metadata(source.read(32 * 1024 * 1024 + 1))
+    store = archive_workspace_store(workspace)
+    manifest, changed_builds, unchanged_builds, classified = None, set(), set(), set()
+    if store:
+        with store.operation_lock:
+            # This export consumes only checkpoint metadata. Reusing previously
+            # validated hashes avoids creating copies of changed files that we
+            # would immediately delete and then read again for the tar stream.
+            # Dirty inputs still pass checkpoint's ordinary content validation.
+            known = [entry['hash'] for entry in store.cached.values() if entry.get('hash')]
+            checkpoint = store.checkpoint(known=known, progress=progress)
+            classified = {name for name, entry in store.cached.items() if entry.get('kind') == 'file'}
+        manifest = {'format': 'mfem-browser-workspace-v2', 'base_id': store.base['base_id'],
+                    'base_commit': store.base['base_commit'],
+                    'inventory': sorted(store.fingerprints), 'deleted': checkpoint['manifest']['deleted']}
+        changes = checkpoint['manifest']['entries']
+        linked_targets = {entry['target'] for entry in changes.values() if entry.get('kind') == 'hardlink'}
+        changed_builds = {name for name, entry in changes.items() if entry.get('build') or entry.get('kind') == 'hardlink'} | linked_targets
+        unchanged_builds = {name for name, entry in store.base['entries'].items()
+                            if entry.get('build') and name not in changes and name not in linked_targets}
+        for item in checkpoint['files']:
+            os.unlink(item['path'])
+    descriptor, output = tempfile.mkstemp(prefix='mfem-workspace-', suffix='.tar.gz' if compression == 'gzip' else '.tar')
+    os.close(descriptor)
+    try:
+        # Modern browsers compress this tar with their native worker compressor,
+        # avoiding emulated zlib CPU work. Older clients retain gzip level 1.
+        options = {'compresslevel': 1} if compression == 'gzip' else {}
+        with tarfile.open(output, 'w:gz' if compression == 'gzip' else 'w', **options) as archive:
+            entries, total = [], 0
+            raw_size = 2 * tarfile.BLOCKSIZE
+            def reserve(info):
+                nonlocal raw_size
+                if max_bytes is None:
+                    return
+                raw_size += len(info.tobuf(archive.format, archive.encoding, archive.errors))
+                raw_size += ((info.size + tarfile.BLOCKSIZE - 1) // tarfile.BLOCKSIZE) * tarfile.BLOCKSIZE
+                # tarfile pads the final two zero blocks to a complete record.
+                padded = ((raw_size + tarfile.RECORDSIZE - 1) // tarfile.RECORDSIZE) * tarfile.RECORDSIZE
+                if padded > max_bytes:
+                    raise ValueError('Archive exceeds this device\'s %g MiB limit. Remove unneeded generated results and export again.' % (max_bytes / (1024 * 1024)))
+            progress('scanning', unit='files')
+            def scan(path, name):
+                nonlocal total
+                relative = name.removeprefix('mfem/')
+                # The baseline already classifies unchanged binaries. Even a
+                # four-byte probe would download their entire demand-loaded
+                # backing object. Changed files (including binary-to-text edits)
+                # and targets needed by new hard links remain eligible.
+                if relative in unchanged_builds:
+                    return
+                # Exclude before gettarinfo remembers an omitted target's inode.
+                changed = relative in changed_builds
+                if name.endswith(('.o', '.a')) and not changed:
+                    return
+                # The checkpoint already classified current regular contents.
+                # Do not open every source file twice merely to probe ELF magic.
+                if relative not in classified and stat.S_ISREG(os.lstat(path).st_mode):
+                    with open(path, 'rb') as source:
+                        if source.read(4) == b'\x7fELF' and not changed:
+                            return
+                info = archive.gettarinfo(path, arcname=name)
+                if info is None:
+                    return
+                reserve(info)
+                entries.append((path, info))
+                total += info.size if info.isfile() else 0
+                progress('scanning', len(entries), unit='files', detail=name)
+                if info.isdir():
+                    with os.scandir(path) as children:
+                        names = sorted(child.name for child in children)
+                    for child in names:
+                        scan(os.path.join(path, child), name + '/' + child)
+            scan(workspace, 'mfem')
+            manifest_data = json.dumps(manifest, separators=(',', ':')).encode() if manifest else None
+            if manifest_data:
+                total += len(manifest_data)
+            if session_data:
+                total += len(session_data)
+            for name, data in (('.mfem-workspace.json', manifest_data), ('mfem-workbench-session.json', session_data)):
+                if data is not None:
+                    info = tarfile.TarInfo(name)
+                    info.size, info.mode = len(data), 0o600
+                    reserve(info)
+            progress('scanning', len(entries), len(entries), 'files', final=True)
+            completed, current = 0, ''
+            progress('packing', completed, total)
+            def packed(size):
+                nonlocal completed
+                completed += size
+                progress('packing', completed, total, detail=current)
+            if manifest_data:
+                info = tarfile.TarInfo('.mfem-workspace.json')
+                info.size, info.mode = len(manifest_data), 0o600
+                archive.addfile(info, ProgressReader(io.BytesIO(manifest_data), packed))
+            if session_data:
+                current = 'mfem-workbench-session.json'
+                info = tarfile.TarInfo(current)
+                info.size, info.mode = len(session_data), 0o600
+                archive.addfile(info, ProgressReader(io.BytesIO(session_data), packed))
+            for path, info in entries:
+                current = info.name
+                if info.isfile():
+                    with open(path, 'rb') as source:
+                        archive.addfile(info, ProgressReader(source, packed))
+                else:
+                    archive.addfile(info)
+            # gzip writes its footer when the archive is closed below.
+            progress('packing', completed, total, final=True)
+        return output
+    except Exception:
+        os.unlink(output)
+        raise
+
+def archive_workspace_store(workspace):
+    baseline = os.environ.get('MFEM_WORKSPACE_BASE', '/usr/local/share/mfem-workspace-base.json')
+    if not os.path.exists(baseline):
+        return None
+    from workspace_store import get_store
+    return get_store(root=workspace, baseline=baseline, emit=emit)
+
+def validate_workspace_members(members, workspace, destinations=None):
+    """Validate all metadata before overlaying files, with mfem as the boundary.
+
+    Strip the enclosing mfem/ prefix for extraction so the standard data filter
+    protects /root/mfem itself, including links already present in the checkout.
+    A virtual link map additionally validates links introduced by this archive
+    before any real filesystem mutation occurs.
+    """
+    import tarfile, posixpath
+    root = pathlib.Path(workspace).resolve()
+    indexed, virtual, converted = {}, {}, []
+
+    def relative_name(name):
+        if name.startswith('/') or any(part == '..' for part in name.split('/')):
+            raise ValueError('Archive paths must stay inside the mfem directory')
+        normalized = posixpath.normpath(name)
+        if normalized == 'mfem':
+            return '.'
+        if not normalized.startswith('mfem/'):
+            raise ValueError('Archive must contain the mfem directory')
+        return normalized[5:]
+
+    def resolve_virtual(name, follow_final=True):
+        pending, resolved, followed = name.split('/'), [], 0
+        while pending:
+            part = pending.pop(0)
+            if part in ('', '.'):
+                continue
+            if part == '..':
+                if not resolved:
+                    raise ValueError('Archive link leaves the mfem directory: ' + name)
+                resolved.pop()
+                continue
+            resolved.append(part)
+            if not pending and not follow_final:
+                break
+            path = '/'.join(resolved)
+            if path in virtual:
+                target = virtual[path]
+            elif (root / path).is_symlink():
+                target = os.readlink(root / path)
+                if os.path.isabs(target):
+                    target = os.path.relpath(target, root / posixpath.dirname(path))
+            else:
+                target = None
+            if target is not None:
+                followed += 1
+                if followed > 40:
+                    raise ValueError('Archive contains a symlink cycle: ' + name)
+                resolved.pop()
+                pending = target.split('/') + pending
+        return '/'.join(resolved) or '.'
+
+    for item in members:
+        name = relative_name(item.name)
+        if name in indexed:
+            raise ValueError('Archive contains a duplicate path: ' + item.name)
+        if name == '.' and not item.isdir():
+            raise ValueError('The mfem archive root must be a directory')
+        linkname = relative_name(item.linkname) if item.islnk() else item.linkname
+        adapted = item.replace(name=name, linkname=linkname, deep=False)
+        # Checks existing filesystem links, special files and absolute targets.
+        tarfile.data_filter(adapted, str(root))
+        destination = resolve_virtual(name, follow_final=not item.issym())
+        if destinations is not None:
+            destinations.setdefault(name, set()).add(destination)
+        if item.issym():
+            if destination == '.':
+                raise ValueError('The mfem archive root must remain a directory')
+            virtual[destination] = item.linkname
+            resolve_virtual(destination)
+        elif item.islnk():
+            target = indexed.get(linkname)
+            if target is None or not target.isfile():
+                raise ValueError('Archive hard link must reference an earlier regular file')
+            resolve_virtual(linkname)
+            virtual[destination] = None
+        else:
+            virtual[destination] = None
+        indexed[name] = adapted
+        converted.append(adapted)
+    # A later link may complete an earlier dangling chain. Check the final graph,
+    # too, so invalid chains cannot be installed by an otherwise valid archive.
+    for name, target in virtual.items():
+        if target is not None:
+            resolve_virtual(name)
+    if destinations is not None:
+        for item in converted:
+            destinations[item.name].add(resolve_virtual(item.name, follow_final=not item.issym()))
+    return converted
+
+class PortableProtectedNames(set):
+    """Cache normalized protection keys on macOS, without quadratic scans."""
+    def __init__(self, names=()):
+        import sys
+        super().__init__()
+        self.casefold = sys.platform == 'darwin'
+        self.keys = set()
+        self.update(names)
+
+    def key(self, value):
+        import unicodedata
+        return unicodedata.normalize('NFD', value).casefold() if self.casefold else value
+
+    def add(self, value):
+        super().add(value)
+        self.keys.add(self.key(value))
+
+    def update(self, values):
+        for value in values:
+            self.add(value)
+
+    def __contains__(self, value):
+        return self.key(value) in self.keys
+
+def portable_name(name):
+    import posixpath
+    if not isinstance(name, str) or not name or '\0' in name or name.startswith('/') or any(part in ('', '.', '..') for part in name.split('/')):
+        raise ValueError('Invalid portable workspace path')
+    if posixpath.normpath(name) != name:
+        raise ValueError('Invalid portable workspace path')
+    return name
+
+def portable_protected(name, extra=()):
+    """Machine configuration, executable outputs and Git execution controls."""
+    import sys, unicodedata
+    if sys.platform == 'darwin':
+        # Typical macOS volumes are case/normalization insensitive. A browser
+        # archive must not bypass protected native paths by changing their case.
+        fold = lambda value: unicodedata.normalize('NFD', value).casefold()
+        name = fold(name)
+        if not isinstance(extra, PortableProtectedNames):
+            extra = {fold(value) for value in extra}
+    parts = name.split('/')
+    leaf = parts[-1]
+    if any('/'.join(parts[:index]) in extra for index in range(1, len(parts) + 1)):
+        return True
+    if any(part.casefold() in ('.mfem-build', 'cmakefiles') or part.casefold().endswith('.dsym') for part in parts):
+        return True
+    if name in ('config/config.mk', 'config/_config.hpp') or leaf.casefold() in ('cmakecache.txt', 'cmake_install.cmake', 'ctesttestfile.cmake', 'build.ninja', '.ninja_deps', '.ninja_log', 'mfemconfig.cmake', 'mfemconfigversion.cmake', 'mfem.pc'):
+        return True
+    if leaf.endswith(('.o', '.obj', '.a', '.lib', '.gch', '.pch', '.d', '.dylib', '.dll', '.exe', '.wasm', '.bc')) or '.so.' in leaf or leaf.endswith('.so'):
+        return True
+    if '.git' in parts:
+        rest = parts[parts.index('.git') + 1:]
+        if rest and (rest[0] in ('config', 'config.worktree', 'hooks', 'worktrees', 'modules', 'commondir', 'gitdir') or rest[:3] == ['objects', 'info', 'alternates'] or rest[:3] == ['objects', 'info', 'http-alternates']):
+            return True
+    return False
+
+def portable_binary(prefix):
+    return prefix.startswith((b'\x7fELF', b'!<arch>\n', b'gpch', b'\xfe\xed\xfa\xce', b'\xce\xfa\xed\xfe', b'\xfe\xed\xfa\xcf', b'\xcf\xfa\xed\xfe', b'\xca\xfe\xba\xbe', b'\xbe\xba\xfe\xca', b'\xca\xfe\xba\xbf', b'\xbf\xba\xfe\xca', b'MZ'))
+
+def portable_scan(workspace, known_builds=()):
+    """Inventory without following checkout symlinks or loading known binaries."""
+    import stat
+    root = pathlib.Path(workspace).resolve()
+    nodes, protected, inodes = {}, PortableProtectedNames(known_builds), {}
+    def walk(folder, prefix=''):
+        for entry in sorted(os.scandir(folder), key=lambda item: item.name):
+            name = prefix + entry.name
+            info = entry.stat(follow_symlinks=False)
+            nodes[name] = info
+            if entry.name == '.git' and not stat.S_ISDIR(info.st_mode):
+                raise ValueError('Portable archives require a standalone checkout with a .git directory; linked Git worktrees are not supported')
+            if portable_protected(name, protected):
+                protected.add(name)
+                continue
+            if stat.S_ISDIR(info.st_mode):
+                walk(entry.path, name + '/')
+            elif stat.S_ISREG(info.st_mode):
+                inode = (info.st_dev, info.st_ino)
+                inodes.setdefault(inode, []).append(name)
+                with open(entry.path, 'rb') as source:
+                    if portable_binary(source.read(8)):
+                        protected.add(name)
+            elif stat.S_ISLNK(info.st_mode):
+                try:
+                    pathlib.Path(entry.path).resolve().relative_to(root)
+                except (ValueError, RuntimeError):
+                    raise ValueError('Workspace link leaves the checkout: ' + name) from None
+            else:
+                raise ValueError('Portable workspaces support only regular files, directories and internal links: ' + name)
+    walk(root)
+    # Preserve aliases of machine-specific hard links as well as their names.
+    protected_inodes = {(info.st_dev, info.st_ino) for name, info in nodes.items() if name in protected and stat.S_ISREG(info.st_mode)}
+    for inode in protected_inodes:
+        protected.update(inodes.get(inode, ()))
+    return nodes, protected
+
+def portable_inventory(manifest):
+    names = manifest.get('inventory')
+    if not isinstance(names, list) or len(names) > 100000 or not all(isinstance(name, str) for name in names) or len(set(names)) != len(names):
+        raise ValueError('Invalid portable workspace inventory')
+    names = {portable_name(name) for name in names}
+    for name in names:
+        parent = pathlib.PurePosixPath(name).parent
+        while str(parent) != '.':
+            if str(parent) not in names:
+                raise ValueError('Portable workspace inventory is missing a parent directory')
+            parent = parent.parent
+    return names
+
+def restore_portable_archive(archive, members, manifest, workspace, progress, known_builds=(), overlay=False):
+    """Cross-machine source overlay with full validation and protected outputs."""
+    import stat, tempfile, shutil
+    root = pathlib.Path(workspace).resolve()
+    if manifest.get('format') not in ('mfem-portable-workspace-v1', 'mfem-browser-workspace-v2'):
+        raise ValueError('Unsupported portable workspace format')
+    inventory = portable_inventory(manifest)
+    destinations = {}
+    converted = validate_workspace_members(members, workspace, destinations)
+    if any(item.name != '.' and item.name not in inventory for item in converted):
+        raise ValueError('Portable archive content does not match its inventory')
+    nodes, protected = portable_scan(workspace, known_builds)
+    if not any(name == '.git' or name.startswith('.git/') for name in inventory):
+        protected.add('.git')
+    skipped = set()
+    for item in converted:
+        if item.name == '.':
+            continue
+        if portable_protected(item.name, protected) or any(portable_protected(name, protected) for name in destinations[item.name]):
+            skipped.add(item.name)
+        elif item.isfile():
+            with archive.extractfile(item) as source:
+                if portable_binary(source.read(8)):
+                    skipped.add(item.name)
+    # Hard links to excluded outputs/configuration cannot smuggle them back in.
+    for item in converted:
+        if item.islnk() and (item.linkname in skipped or portable_protected(item.linkname, protected)):
+            skipped.add(item.name)
+    protected.update(skipped)
+    for item in converted:
+        if item.name != '.' and any(portable_protected(name, protected) for name in destinations[item.name]):
+            skipped.add(item.name)
+    protected.update(skipped)
+    included = [item for item in converted if item.name not in skipped]
+    # Every listed source must have a payload; browser v2 may intentionally omit
+    # matching baseline executables, which known_builds classifies as protected.
+    present = {item.name for item in converted}
+    missing = {name for name in inventory - present if not portable_protected(name, protected)}
+    if missing and not overlay:
+        raise ValueError('Portable archive is missing source contents: ' + sorted(missing)[0])
+    keep_parents = set()
+    for name in protected:
+        parent = pathlib.PurePosixPath(name).parent
+        while str(parent) != '.':
+            keep_parents.add(str(parent));parent = parent.parent
+    removals = [] if overlay else [name for name in nodes if name not in inventory and not portable_protected(name, protected) and name not in keep_parents]
+    # Preserve root-directory permissions on the selected destination checkout.
+    included = [item.replace(mode=stat.S_IMODE(root.stat().st_mode), deep=False) if item.name == '.' else item for item in included]
+    total = sum(item.size for item in included if item.isfile())
+    completed = 0
+    progress('validating', len(converted), len(converted), 'files', final=True)
+    progress('restoring', 0, total)
+    for name in sorted(removals, key=lambda name: name.count('/'), reverse=True):
+        target = root / name
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+        elif target.is_dir():
+            target.rmdir()
+    # Replacing complete regular files also prevents an existing hard link from
+    # modifying a file outside this checkout, or one of its preserved outputs.
+    original_makefile, original_makelink = archive.makefile, archive.makelink
+    def makefile(item, target):
+        nonlocal completed
+        destination = pathlib.Path(target).resolve()
+        try:
+            destination.relative_to(root)
+        except ValueError:
+            raise ValueError('Workspace path changed during import') from None
+        descriptor, temporary = tempfile.mkstemp(prefix='.mfem-import-', dir=destination.parent)
+        try:
+            with os.fdopen(descriptor, 'wb') as output, archive.extractfile(item) as source:
+                shutil.copyfileobj(source, output)
+            os.replace(temporary, destination)
+        finally:
+            try:os.unlink(temporary)
+            except FileNotFoundError:pass
+        completed += item.size
+        progress('restoring', completed, total, detail=item.name)
+    def makelink(item, target):
+        if item.issym():
+            return original_makelink(item, target)
+        source = pathlib.Path(item._link_target).resolve()
+        destination = pathlib.Path(target).parent.resolve() / pathlib.Path(target).name
+        try:
+            source.relative_to(root);destination.relative_to(root)
+        except ValueError:
+            raise ValueError('Workspace link changed during import') from None
+        descriptor, temporary = tempfile.mkstemp(prefix='.mfem-import-link-', dir=destination.parent)
+        os.close(descriptor);os.unlink(temporary)
+        try:
+            os.link(source, temporary)
+            os.replace(temporary, destination)
+        finally:
+            try:os.unlink(temporary)
+            except FileNotFoundError:pass
+    archive.makefile = makefile
+    archive.makelink = makelink
+    archive.members = included
+    try:
+        archive.extractall(workspace, members=included, filter='data')
+    finally:
+        archive.makefile = original_makefile
+        archive.makelink = original_makelink
+    progress('restoring', completed, total, final=True)
+    return ['Portable import preserved this checkout\'s compiler configuration, build outputs and Git controls. %d incompatible or protected archive entries were skipped; rebuild changed targets before running.' % len(skipped)]
+
+
+def workspace_restore(upload, workspace, progress, **options):
+    from contextlib import nullcontext
+    try:
+        store = archive_workspace_store(workspace)
+        # Prevent an autosave from committing a partly imported tree, including
+        # pauses between individual archive members. Read-only RPCs still run.
+        with store.operation_lock if store else nullcontext():
+            return restore_workspace_archive(upload, workspace, progress, **options)
+    finally:
+        try:
+            os.unlink(upload)
+        except FileNotFoundError:
+            pass
+
+def restore_workspace_archive(upload, workspace, progress, **options):
+    import tarfile
+    try:
+        compressed_size = os.stat(upload).st_size
+        with open(upload, 'rb') as source:
+            scanned, validating = 0, True
+            progress('validating', 0, compressed_size)
+            def scanned_bytes(_size):
+                nonlocal scanned
+                scanned = max(scanned, source.tell())
+                if validating:
+                    progress('validating', scanned, compressed_size)
+            with tarfile.open(fileobj=ProgressReader(source, scanned_bytes), mode='r:*') as archive:
+                members = archive_members(archive)
+                session_data = archive_session_metadata(archive, members)
+                if 'expected_session_hash' in options:
+                    actual = hashlib.sha256(session_data).hexdigest() if session_data is not None else None
+                    if actual != options['expected_session_hash']:
+                        raise ValueError('Session metadata changed after validation; import the archive again')
+                members = [item for item in members if item.name != 'mfem-workbench-session.json']
+                portable = [item for item in members if item.name == '.mfem-portable.json']
+                if portable:
+                    if len(portable) != 1 or not portable[0].isfile() or portable[0].size > 16 * 1024 * 1024 or any(item.name in ('.mfem-workspace.json', '.mfem-checkpoint.json') for item in members):
+                        raise ValueError('Invalid portable workspace metadata')
+                    manifest = json.loads(archive.extractfile(portable[0]).read())
+                    if not isinstance(manifest, dict) or manifest.get('format') != 'mfem-portable-workspace-v1':
+                        raise ValueError('Unsupported portable workspace format')
+                    store = archive_workspace_store(workspace)
+                    known_builds = {name for name, entry in store.base['entries'].items() if entry.get('build')} if store else set()
+                    validating = False
+                    warnings = restore_portable_archive(archive, [item for item in members if item is not portable[0]], manifest, workspace, progress, known_builds)
+                    result = {'restored': True, 'warnings': warnings}
+                    if session_data is not None:
+                        result['session_path'] = snapshot(session_data, 'session')
+                    return result
+                marker = next((item for item in members if item.name == '.mfem-checkpoint.json'), None)
+                if marker:
+                    validating = False
+                    result = restore_checkpoint_archive(archive, members, marker, workspace, progress)
+                    return {'restored': result, 'session_path': snapshot(session_data, 'session')} if session_data is not None else result
+                inventory = None
+                markers = [item for item in members if item.name == '.mfem-workspace.json']
+                if markers:
+                    if len(markers) != 1 or not markers[0].isfile() or markers[0].size > 16 * 1024 * 1024:
+                        raise ValueError('Invalid workspace backup metadata')
+                    manifest = json.loads(archive.extractfile(markers[0]).read())
+                    store = archive_workspace_store(workspace)
+                    if manifest.get('format') != 'mfem-browser-workspace-v2' or not store or manifest.get('base_id') != store.base['base_id']:
+                        raise ValueError('This backup needs its matching MFEM base image. Import an exported changes bundle to migrate source edits.')
+                    from workspace_store import normalized
+                    if not isinstance(manifest.get('inventory'), list) or len(manifest['inventory']) > 100000:
+                        raise ValueError('Invalid workspace backup inventory')
+                    inventory = {normalized(name) for name in manifest['inventory']}
+                    for name in inventory:
+                        parent = pathlib.PurePosixPath(name).parent
+                        while str(parent) != '.':
+                            if str(parent) not in inventory:
+                                raise ValueError('Workspace backup inventory is missing a parent directory')
+                            parent = parent.parent
+                    members = [item for item in members if item.name != '.mfem-workspace.json']
+                members = validate_workspace_members(members, workspace)
+                removals = []
+                if inventory is not None:
+                    if any(item.name != '.' and item.name not in inventory for item in members):
+                        raise ValueError('Workspace backup content does not match its inventory')
+                    from workspace_store import scan
+                    removals = sorted(set(scan(workspace)) - inventory, key=lambda name: name.count('/'), reverse=True)
+                archive.members = members
+                validating = False
+                progress('validating', scanned, compressed_size, final=True)
+                total = sum(item.size for item in members if item.isfile())
+                completed, current, regular = 0, '', False
+                progress('restoring', 0, total)
+                for name in removals:
+                    target = pathlib.Path(workspace) / name
+                    if target.is_symlink() or target.is_file():
+                        target.unlink()
+                    elif target.is_dir():
+                        target.rmdir()
+                def restored_bytes(size):
+                    nonlocal completed
+                    if regular:
+                        completed += size
+                        progress('restoring', completed, total, detail=current)
+                def extract_members():
+                    nonlocal current, regular
+                    for item in members:
+                        current, regular = item.name, item.isfile()
+                        progress('restoring', completed, total, detail=current)
+                        yield item
+                # TarFile reads each regular member's exact payload through this
+                # stream; seek operations and tar padding do not inflate progress.
+                archive.fileobj = ProgressReader(archive.fileobj, restored_bytes)
+                archive.extractall(workspace, members=extract_members(), filter='data')
+                progress('restoring', completed, total, final=True)
+        return {'restored': True, 'session_path': snapshot(session_data, 'session')} if session_data is not None else True
+    finally:
+        try:
+            os.unlink(upload)
+        except FileNotFoundError:
+            pass
+
+def restore_checkpoint_archive(archive, members, marker, workspace, progress):
+    import tempfile
+    from workspace_store import validate_manifest, restore
+    store = archive_workspace_store(workspace)
+    if not store or not marker.isfile() or marker.size > 16 * 1024 * 1024:
+        raise ValueError('Invalid saved-workspace checkpoint')
+    manifest = json.loads(archive.extractfile(marker).read())
+    validate_manifest(manifest, store.base)
+    # A saved layer intentionally omits unchanged base contents. Applying it
+    # over unrelated live edits could leave those edits behind, so portable
+    # checkpoint imports require a fresh matching-base workspace. Startup and
+    # previous-generation recovery already restore into a newly booted guest.
+    with store.operation_lock:
+        current = store.checkpoint(known=[entry['hash'] for entry in store.base['entries'].values() if entry.get('hash')])
+    try:
+        if current['manifest']['entries'] or current['manifest']['deleted']:
+            raise ValueError('Create/open a new workspace before importing a saved checkpoint')
+    finally:
+        for item in current['files']:
+            os.unlink(item['path'])
+    required = {entry['hash'] for entry in manifest['entries'].values() if entry['kind'] == 'file'}
+    found, uploads = set(), []
+    try:
+        for item in members:
+            if item is marker:
+                continue
+            if not item.isfile() or not item.name.startswith('blobs/') or item.name[6:] not in required or item.name[6:] in found:
+                raise ValueError('Unexpected file in saved-workspace checkpoint')
+            digest = item.name[6:]
+            found.add(digest)
+            descriptor, path = tempfile.mkstemp(prefix='workspace-import-')
+            uploads.append({'hash': digest, 'upload': path})
+            with os.fdopen(descriptor, 'wb') as out, archive.extractfile(item) as source:
+                import shutil
+                shutil.copyfileobj(source, out)
+            progress('validating', len(found), len(required), 'files')
+        if found != required:
+            raise ValueError('Saved-workspace checkpoint is missing file contents')
+        progress('restoring', 0, len(manifest['entries']), 'files')
+        with store.operation_lock:
+            restore(store, manifest, uploads)
+        progress('restoring', len(manifest['entries']), len(manifest['entries']), 'files', final=True)
+        return True
+    finally:
+        for item in uploads:
+            try:
+                os.unlink(item['upload'])
+            except FileNotFoundError:
+                pass
+
+def checked_write(path, upload, expected_hash):
+    """Stage a complete save, check the disk content, then atomically replace it.
+
+    A mismatch is a normal conflict result, so the editor keeps its unsaved
+    buffer. Following symlinks matches the previous write operation. Existing
+    permissions survive the replacement. Terminal tools need no lock protocol.
+    """
+    import tempfile, stat
+    target = pathlib.Path(path).resolve()
+    staged = None
+    try:
+        try:
+            original = target.read_bytes()
+            info = target.stat()
+            revision = hashlib.sha256(original).hexdigest()
+        except FileNotFoundError:
+            info, revision = None, None
+        if revision != expected_hash:
+            return {'conflict': True, 'revision': revision}
+        data = pathlib.Path(upload).read_bytes()
+        descriptor, staged = tempfile.mkstemp(prefix='.studio-save-', dir=str(target.parent))
+        with os.fdopen(descriptor, 'wb') as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+            os.fchmod(output.fileno(), stat.S_IMODE(info.st_mode) if info else 0o644)
+        # Include changes made while staging the new file. The RPC request loop
+        # serializes browser saves; replacement itself is atomic for readers.
+        try:
+            current_revision = hashlib.sha256(target.read_bytes()).hexdigest()
+        except FileNotFoundError:
+            current_revision = None
+        if current_revision != expected_hash:
+            return {'conflict': True, 'revision': current_revision}
+        os.replace(staged, target)
+        staged = None
+        return {'revision': hashlib.sha256(data).hexdigest()}
+    finally:
+        for temporary in (staged, upload):
+            if temporary:
+                try:
+                    os.unlink(temporary)
+                except FileNotFoundError:
+                    pass
+
+def directory(path):
+    with os.scandir(path) as entries:
+        return sorted([{'name': entry.name, 'dir': entry.is_dir()} for entry in entries],
+                      key=lambda entry: (not entry['dir'], entry['name']))
+
+def requests():
+    pending = b''
+    while True:
+        pending += os.read(port, 4096)
+        while b'\n' in pending:
+            line, pending = pending.split(b'\n', 1)
+            request = {}
+            try:
+                request = json.loads(line)
+                if request.get('op') in ('mesh-inspect', 'export', 'restore', 'session-inspect', 'workspace-init', 'workspace-checkpoint', 'workspace-restore', 'changes-status', 'changes-diff', 'changes-export', 'reproduction-export'):
+                    # Inspections and archives may take time. Keep
+                    # terminal/file controls and live visualization ACKs moving.
+                    threading.Thread(target=async_request, args=(request,), daemon=True).start()
+                    continue
+                emit({'id': request['id'], 'result': rpc(request)})
+            except Exception as error:
+                emit({'id': request.get('id'), 'error': str(error)})
+
+def async_request(request):
+    try:
+        emit({'id': request['id'], 'result': rpc(request)})
+    except Exception as error:
+        emit({'id': request.get('id'), 'error': str(error)})
+
+def main():
+    """Start guest serial/GLVis services; importing archive helpers starts none."""
+    global port, visualizations
+    port = os.open('/dev/ttyS1', os.O_RDWR | os.O_NOCTTY)
+    tty.setraw(port)
+    from browser_compile import start as start_browser_compiler
+    start_browser_compiler(emit)
+    visualizations = Visualizations(emit, snapshot)
+    listener = socket.socket()
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.bind(('127.0.0.1', 19916))
+    listener.listen(16)
+    pathlib.Path('/run/studio-visualization-ready').touch()
+    threading.Thread(target=requests, daemon=True).start()
+    emit({'event': 'ready'})
+    number = 0
+    while True:
+        connection, _ = listener.accept()
+        number += 1
+        threading.Thread(target=visualizations.serve, args=(connection, number), daemon=True).start()
+
+if __name__ == '__main__':
+    main()

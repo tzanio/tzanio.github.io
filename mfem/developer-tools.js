@@ -1,13 +1,19 @@
 /* Local Git review and portable reproductions. Nothing is submitted online. */
 'use strict';
 (function(){
-  function mount({rpc,readFile,editor,terminal,notice,openFile,isReady,getCwd,getRuntime}) {
+  function mount({rpc,readFile,editor,terminal,notice,openFile,isReady,getCwd,getRuntime,allowBundles=true}) {
     const panel=document.createElement('section');panel.id='developer-tools';
     panel.innerHTML=`<div class="changes-toolbar"><button data-action="refresh">Refresh</button><button data-action="patch">Export changes</button><button data-action="bundle">Reproduction…</button></div>
-      <p class="changes-summary" role="status">Open Changes after Linux is ready.</p>
+      <p class="changes-summary" role="status">Open Changes once compute is ready.</p>
       <div class="changes-content"><div class="changes-files" aria-label="Changed files"></div><pre class="changes-diff" tabindex="0" aria-label="Patch preview"></pre></div>
       <details class="reproduction-fields"><summary>Reproduction bundle</summary><label>Command<input name="command" placeholder="./ex1 -m ../data/star.mesh -o 2"></label><label>Mesh paths (one per line, relative to mfem)<textarea name="meshes" rows="2" placeholder="data/star.mesh"></textarea></label><label>Test selection / result<input name="tests" placeholder='[Vector] · passed'></label><label class="reproduction-log"><input type="checkbox" name="include-log" checked> Include terminal scrollback</label><button data-action="export-bundle">Create bundle</button><p>Includes a patch, base commit, command, selected meshes and terminal output. Review the files before sharing.</p></details>`;
     document.body.append(panel);
+    const exportNote='Use Export workspace to back up this checkout, or Git in the terminal to create a patch.';
+    if(!allowBundles){
+      panel.querySelector('[data-action="patch"]').hidden=true;panel.querySelector('[data-action="bundle"]').hidden=true;
+      panel.querySelector('.reproduction-fields').hidden=true;
+      const note=document.createElement('p');note.className='changes-portability-note';note.textContent=exportNote;panel.querySelector('.changes-toolbar').after(note);
+    }
     const button=document.createElement('button');button.id='changes-toggle';button.textContent='Changes';document.querySelector('header nav').append(button);
     const handle=WorkbenchWindows.attach(panel,{title:'Changes',width:760,anchor:button});
     let busy=false,selected=null,revision=0;
@@ -20,7 +26,7 @@
       catch(error){if(token===revision)diff.textContent=error.message}
     }
     async function refresh() {
-      if(busy)return;if(!isReady()){summary.textContent='Wait for Linux to finish starting.';return}
+      if(busy)return;if(!isReady()){summary.textContent='Wait for compute to become ready.';return}
       setBusy(true);summary.textContent='Reading Git status…';
       try {
         const result=await rpc('changes-status');files.replaceChildren();
@@ -38,6 +44,7 @@
     }
     function terminalLog(){const buffer=terminal.buffer.active,lines=[];for(let i=Math.max(0,buffer.length-3000);i<buffer.length;i++)lines.push(buffer.getLine(i)?.translateToString(true)||'');return lines.join('\n')}
     async function exportChanges(reproduction=false) {
+      if(!allowBundles){notice(exportNote);return}
       if(busy||!isReady())return;setBusy(true);
       const title=reproduction?'Export reproduction':'Export changes',activity=WorkbenchOperations.start(title,{label:'Saving editor changes…'});let path;
       try {
@@ -52,7 +59,7 @@
     button.onclick=()=>{handle.toggle();if(!panel.hidden)refresh()};
     panel.querySelector('[data-action="refresh"]').onclick=refresh;
     panel.querySelector('[data-action="patch"]').onclick=()=>exportChanges(false);
-    panel.querySelector('[data-action="bundle"]').onclick=()=>{const fields=panel.querySelector('details');fields.open=!fields.open;if(fields.open)fields.querySelector('input').focus()};
+    panel.querySelector('[data-action="bundle"]').onclick=()=>{if(!allowBundles)return;const fields=panel.querySelector('details');fields.open=!fields.open;if(fields.open)fields.querySelector('input').focus()};
     panel.querySelector('[data-action="export-bundle"]').onclick=()=>exportChanges(true);
     return {open:()=>{handle.open();return refresh()},refresh,exportChanges};
   }

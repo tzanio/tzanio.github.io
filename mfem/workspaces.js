@@ -27,6 +27,7 @@
   function mount({rpc,readFile,upload,editor,journal,baseRelease,onRestore=async()=>{},onStatus=()=>{},reload=()=>location.reload()}){
     let db,record,base,started=false,restoring=true,busy=null,draftTimer,saveTimer,pollTimer,lastSequence=-1,startChoice,draftPending=false,draftSequence=0,filesystemPending=true;
     let owner=id(),lastStatus='',listSignature='',renderedWorkspaceId,renderedWorkspaceName;
+    let filesystemSuspended=false,filesystemDeferred=false;
     try{
       // Keep ownership across an ordinary reload even if the old page's last
       // lease-release transaction was interrupted by navigation.
@@ -41,6 +42,17 @@
     panel.innerHTML='<p class="workspace-scope">Saved in this browser on this device. Export a backup to move your work elsewhere.</p><p class="workspace-state" role="status">Opening local storage…</p><progress hidden></progress><div class="workspace-controls"><label>Workspace<select aria-label="Saved workspace"></select></label><label>Name<input class="workspace-name" maxlength="80" placeholder="Workspace name"></label><div class="workspace-actions"><button data-action="rename">Rename</button><button data-action="new">New workspace</button></div><label class="workspace-builds"><input type="checkbox" checked>Keep changed build outputs</label><p class="workspace-storage"></p><div class="workspace-actions"><button data-action="save">Save now</button><button data-action="previous">Recover previous checkpoint</button><button data-action="backup">Download saved checkpoint</button><button data-action="retry">Retry</button><button data-action="fresh" hidden>Start a new workspace</button><button data-action="temporary" hidden>Continue temporarily</button></div><p class="workspace-error" hidden></p><p class="workspace-draft-note">Unsaved editor drafts are recovered separately. Terminal changes, Git state, deleted files and renamed files are included in checkpoints.</p></div>';
     document.body.append(panel);
     const maintenance=document.createElement('div');maintenance.className='workspace-actions';maintenance.innerHTML='<button data-action="free-builds">Remove saved build cache</button><button data-action="free-previous">Remove previous checkpoint</button>';panel.querySelector('.workspace-controls').append(maintenance);
+    const pauseNotice=document.createElement('p');pauseNotice.className='workspace-pause';pauseNotice.hidden=true;pauseNotice.setAttribute('role','status');pauseNotice.textContent='Wait for workspace import or export to finish before changing saved workspaces.';panel.prepend(pauseNotice);
+    const pausedControls=new Map();
+    function applySuspendedControls(){
+      if(!filesystemSuspended)return;
+      for(const control of panel.querySelectorAll('button,input,select')){
+        if(control.classList.contains('wb-window-close'))continue;
+        if(!pausedControls.has(control))pausedControls.set(control,control.disabled);
+        control.disabled=true;
+      }
+    }
+    function requireFilesystem(){if(filesystemSuspended)throw new Error(pauseNotice.textContent)}
     const floating=WorkbenchWindows.attach(panel,{title:'Workspaces',width:470,anchor:button});
     const $=selector=>panel.querySelector(selector),action=name=>$('[data-action="'+name+'"]');
     button.onclick=()=>{floating.toggle();refreshList().catch(fail)};
@@ -82,6 +94,7 @@
       action('previous').disabled=!record?.previous;action('backup').disabled=!record?.current;
       const estimate=await navigator.storage?.estimate?.().catch(()=>({}))||{};
       $('.workspace-storage').textContent=estimate.quota?size(estimate.usage||0)+' used · '+size(Math.max(0,estimate.quota-(estimate.usage||0)))+' browser storage available':'';
+      applySuspendedControls();
     }
     async function claim(item){
       return transact(db,['workspaces'],'readwrite',async tx=>{
@@ -98,8 +111,9 @@
       });
     }
     async function create(name){
+      requireFilesystem();
       const item={id:id(),name:(name||'Untitled').trim().slice(0,80)||'Untitled',base_id:base.base_id,base_commit:base.base_commit,keepBuilds:true,current:null,previous:null,created:Date.now(),owner,leaseUntil:Date.now()+30000};
-      await put(db,'workspaces',item);return item;
+      await put(db,'workspaces',item);requireFilesystem();return item;
     }
     async function uploadGeneration(generation){
       const files=[];
@@ -155,7 +169,7 @@
       clearTimeout(draftTimer);
       draftPending=true;const sequence=++draftSequence;
       const write=async()=>{
-        const buffers=[...editor.buffers.values()].filter(buffer=>buffer.dirty||buffer.isNew).map(buffer=>({path:buffer.path,text:buffer.doc.getValue(),baseText:buffer.baseText,revision:buffer.revision,isNew:buffer.isNew}));
+        const buffers=[...editor.buffers.values()].filter(buffer=>buffer.dirty||buffer.isNew||buffer.conflict?.deleted).map(buffer=>({path:buffer.path,text:buffer.doc.getValue(),baseText:buffer.baseText,revision:buffer.revision,isNew:buffer.isNew}));
         await transact(db,['workspaces','drafts'],'readwrite',async tx=>{
           const current=await request(tx.objectStore('workspaces').get(record.id));
           if(current.owner!==owner)throw new Error('Another tab owns this workspace. Open a new workspace to keep these drafts.');
@@ -165,7 +179,28 @@
       if(immediate)return write();
       draftTimer=setTimeout(()=>write().catch(fail),350);
     }
-    function scheduleSave(delay=2000){if(!started||restoring||saveTimer)return;saveTimer=setTimeout(()=>{saveTimer=null;checkpoint().catch(()=>{})},delay)}
+    function scheduleSave(delay=2000){
+      if(!started||restoring)return;
+      if(filesystemSuspended){filesystemDeferred=true;return}
+      if(saveTimer)return;saveTimer=setTimeout(()=>{saveTimer=null;checkpoint().catch(()=>{})},delay);
+    }
+    function suspendFilesystem(){
+      filesystemSuspended=true;
+      pauseNotice.hidden=false;applySuspendedControls();
+      if(saveTimer){clearTimeout(saveTimer);saveTimer=null;filesystemDeferred=true}
+      // Complete an existing transaction before an archive changes/reads files.
+      // A failed autosave must still allow exporting a rescue copy of the work.
+      return Promise.resolve(busy).catch(()=>{});
+    }
+    function resumeFilesystem(){
+      if(!filesystemSuspended)return;
+      filesystemSuspended=false;
+      pauseNotice.hidden=true;
+      for(const [control,disabled] of pausedControls)control.disabled=disabled;
+      pausedControls.clear();refreshList().catch(fail);
+      const pending=filesystemDeferred||filesystemPending;
+      filesystemDeferred=false;if(pending)scheduleSave();
+    }
     function handleGuestEvent(message){
       if(message.event!=='workspace-dirty'||!started||restoring)return;
       lastSequence=message.sequence;filesystemPending=true;if(!busy)status('dirty','Saving soon');scheduleSave(4500);
@@ -176,6 +211,9 @@
       if(!started||restoring)return;
       try{
         record=await claim(record);
+        // Keep the lease alive during a long archive, without guest filesystem
+        // RPCs competing with it. Recheck guest state when the archive finishes.
+        if(filesystemSuspended){filesystemDeferred=true;return}
         const state=await rpc('workspace-status');
         if(state.dirty||state.sequence!==lastSequence){lastSequence=state.sequence;scheduleSave()}
       }catch(error){fail(error)}
@@ -186,6 +224,7 @@
       return {...manifest,entries:Object.fromEntries(Object.entries(manifest.entries).filter(([name,entry])=>!entry.build&&!skip(name)&&!(entry.kind==='hardlink'&&(skip(entry.target)||manifest.entries[entry.target]?.build)))),deleted:manifest.deleted.filter(name=>!skip(name)),build_outputs_omitted:true};
     }
     async function checkpoint({force=false,attempt=0}={}){
+      if(filesystemSuspended){filesystemDeferred=true;return null}
       if(busy){let result;try{result=await busy}catch(error){if(!force)throw error}if(force)return checkpoint({force:true});return result}if(!started||restoring||!db)return;
       busy=(async()=>{
         let response,writes;
@@ -244,6 +283,7 @@
           busy=null;
         }
       })();const result=await busy;
+      if(filesystemSuspended){filesystemDeferred=true;return result}
       if(force&&!result){
         if(attempt>=2){const error=new Error('Files are still changing. Wait for the command to finish, then save again.');fail(error);throw error}
         await new Promise(resolve=>setTimeout(resolve,500));return checkpoint({force:true,attempt:attempt+1});
@@ -252,17 +292,24 @@
     }
     async function release(){if(!db||!record)return;await transact(db,['workspaces'],'readwrite',async tx=>{const store=tx.objectStore('workspaces'),latest=await request(store.get(record.id));if(latest?.owner===owner)await request(store.put({...latest,owner:null,leaseUntil:0}))})}
     async function switchWorkspace(next){
+      requireFilesystem();
       if(started){await checkpoint({force:true});await captureDrafts({immediate:true})}
+      requireFilesystem();
       await release();
+      requireFilesystem();
       await put(db,'settings',{key:'active',value:next.id});reload();
     }
     async function previous(){
+      requireFilesystem();
       if(!record?.previous)return;
       if(busy)await busy.catch(()=>{});
+      requireFilesystem();
       await captureDrafts({immediate:true});
+      requireFilesystem();
       restoring=true;clearTimeout(saveTimer);saveTimer=null;
       try{
         record=await updateRecord(latest=>{
+          requireFilesystem();
           if(!latest.previous)throw new Error('There is no previous checkpoint to recover.');
           return {...latest,current:latest.previous,previous:latest.current,owner:null,leaseUntil:0};
         });reload();
@@ -288,9 +335,12 @@
       }catch(error){activity.fail(error,{retry:downloadCheckpoint});throw error}
     }
     async function freeStorage(kind){
+      requireFilesystem();
       if(!db||!record)return;if(busy)await busy.catch(()=>{});
+      requireFilesystem();
       record=await transact(db,['workspaces','blobs'],'readwrite',async tx=>{
         const store=tx.objectStore('workspaces'),latest=await request(store.get(record.id));
+        requireFilesystem();
         if(latest.owner&&latest.owner!==owner&&latest.leaseUntil>Date.now())throw new Error('Close the other workspace tab before removing saved data.');
         if(kind==='previous')latest.previous=null;
         else{
@@ -312,20 +362,21 @@
     action('free-previous').onclick=()=>freeStorage('previous').catch(fail);
     action('save').onclick=()=>checkpoint({force:true}).catch(()=>{});
     action('retry').onclick=async()=>{
+      if(filesystemSuspended){fail(new Error(pauseNotice.textContent));return}
       if(started){await checkpoint({force:true}).catch(()=>{});return}
       const resolve=startChoice;startChoice=null;const result=await start();resolve?.(result);
     };
     action('backup').onclick=()=>downloadCheckpoint().catch(fail);
     action('previous').onclick=()=>previous().catch(fail);
-    action('rename').onclick=async()=>{try{if(!record)return;const name=$('.workspace-name').value.trim().slice(0,80)||record.name;record=await updateRecord(latest=>({...latest,name}));const [,label,detail]=JSON.parse(lastStatus);status(button.dataset.state,label,detail);await refreshList()}catch(error){fail(error)}};
-    action('new').onclick=async()=>{try{const name=$('.workspace-name').value.trim()||'Workspace';if(started)await checkpoint();await switchWorkspace(await create(name))}catch(error){fail(error)}};
-    action('fresh').onclick=async()=>{try{if(!db)db=await openDatabase();if(!base)base=await rpc('workspace-init');const next=await create($('.workspace-name').value.trim()||'New workspace');await switchWorkspace(next)}catch(error){fail(error)}};
-    action('temporary').onclick=async()=>{restoring=false;started=false;await rpc('workspace-ready');status('error','Temporary session','Files in this session require export; automatic workspace saving is unavailable.');floating.close();startChoice?.(false);startChoice=null};
-    $('select').onchange=async event=>{try{const next=await read(db,'workspaces',event.target.value);if(next&&next.id!==record?.id)await switchWorkspace(next)}catch(error){fail(error)}};
-    $('.workspace-builds input').onchange=async event=>{if(!record)return;const keepBuilds=event.target.checked;try{record=await updateRecord(latest=>({...latest,keepBuilds}));await checkpoint({force:true})}catch(error){fail(error)}};
+    action('rename').onclick=async()=>{try{requireFilesystem();if(!record)return;const name=$('.workspace-name').value.trim().slice(0,80)||record.name;record=await updateRecord(latest=>{requireFilesystem();return {...latest,name}});const [,label,detail]=JSON.parse(lastStatus);status(button.dataset.state,label,detail);await refreshList()}catch(error){fail(error)}};
+    action('new').onclick=async()=>{try{requireFilesystem();const name=$('.workspace-name').value.trim()||'Workspace';if(started)await checkpoint();requireFilesystem();await switchWorkspace(await create(name))}catch(error){fail(error)}};
+    action('fresh').onclick=async()=>{try{requireFilesystem();if(!db)db=await openDatabase();if(!base)base=await rpc('workspace-init');requireFilesystem();const next=await create($('.workspace-name').value.trim()||'New workspace');await switchWorkspace(next)}catch(error){fail(error)}};
+    action('temporary').onclick=async()=>{try{requireFilesystem();restoring=false;started=false;await rpc('workspace-ready');status('error','Temporary session','Files in this session require export; automatic workspace saving is unavailable.');floating.close();startChoice?.(false);startChoice=null}catch(error){fail(error)}};
+    $('select').onchange=async event=>{try{requireFilesystem();const next=await read(db,'workspaces',event.target.value);requireFilesystem();if(next&&next.id!==record?.id)await switchWorkspace(next)}catch(error){fail(error)}};
+    $('.workspace-builds input').onchange=async event=>{if(!record)return;const keepBuilds=event.target.checked;try{requireFilesystem();record=await updateRecord(latest=>{requireFilesystem();return {...latest,keepBuilds}});await checkpoint({force:true})}catch(error){fail(error)}};
     document.addEventListener('visibilitychange',()=>{if(document.hidden){captureDrafts({immediate:true}).catch(fail);if(started)checkpoint().catch(()=>{})}});
     window.addEventListener('pagehide',()=>release().catch(()=>{}));
-    return {start,checkpoint,captureDrafts,handleGuestEvent,markPending,downloadCheckpoint,hasPendingChanges:()=>!started||restoring||!!busy||draftPending||filesystemPending,open:()=>{floating.open();refreshList().catch(fail)},get ready(){return started&&!restoring},get current(){return record},get database(){return db},destroy(){clearInterval(pollTimer);clearTimeout(saveTimer);clearTimeout(draftTimer);floating.destroy();button.remove();db?.close()}};
+    return {start,checkpoint,captureDrafts,suspendFilesystem,resumeFilesystem,handleGuestEvent,markPending,downloadCheckpoint,hasPendingChanges:()=>!started||restoring||!!busy||draftPending||filesystemPending,open:()=>{floating.open();refreshList().catch(fail)},get ready(){return started&&!restoring},get current(){return record},get database(){return db},destroy(){clearInterval(pollTimer);clearTimeout(saveTimer);clearTimeout(draftTimer);floating.destroy();button.remove();db?.close()}};
   }
   window.WorkbenchWorkspaces={mount,databaseName:DATABASE};
 })();

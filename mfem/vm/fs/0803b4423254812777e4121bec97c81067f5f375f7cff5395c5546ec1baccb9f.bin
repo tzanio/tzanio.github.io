@@ -13,6 +13,25 @@ alias ..='cd ..'
 alias g='git'
 __studio_prompt() {
     local result=$?
+    # Portable backups restore shell data at a prompt, never by typing saved
+    # commands into the PTY. A running program is therefore left undisturbed.
+    local request='' current='' restored_cwd=''
+    if [[ -r /run/studio-shell-restore ]]; then
+        IFS= read -r request < /run/studio-shell-restore
+        if [[ "$request" =~ ^studio-shell-[a-zA-Z0-9_-]+$ && -f "/run/$request/history" ]]; then
+            builtin history -c
+            builtin history -r "/run/$request/history"
+            builtin history -w
+            IFS= read -r restored_cwd < "/run/$request/cwd"
+            [[ -d "$restored_cwd" ]] && builtin cd -- "$restored_cwd"
+            rm -f -- "/run/$request/history" "/run/$request/cwd"
+            rmdir -- "/run/$request" 2>/dev/null
+            IFS= read -r current < /run/studio-shell-restore
+            [[ "$current" == "$request" ]] && rm -f -- /run/studio-shell-restore
+        fi
+    fi
+    builtin history -a
+    printf '%s\n' "$PWD" > /run/studio-shell-cwd
     # Let the browser resolve compiler file:line links in this working directory.
     printf '\033]7;file://mfem%s\007' "$PWD"
     PS1='\n\[\e[1;38;5;114m\]mfem\[\e[0m\] \[\e[38;5;245m\]•\[\e[0m\] \[\e[38;5;117m\]\w\[\e[0m\]'

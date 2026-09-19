@@ -10,6 +10,10 @@
   }
   function attach(element, {title, width = 420, anchor, initialFocus, returnFocus, onClose,
     heading, closeButton} = {}) {
+    // Only stable informational windows can be reopened from an archive.
+    // File creation, search/replace, workspace actions and in-flight operation
+    // dialogs deliberately have no session identity.
+    const sessionId=['Editor shortcuts','GLVis controls','GLVis keyboard help'].includes(title)?(element.id||title):null;
     const originalParent = element.parentNode;
     const nativeDialog = element instanceof HTMLDialogElement;
     const abort = new AbortController();
@@ -68,6 +72,7 @@
       if (destroyed) return;
       if (!opened) previousFocus = document.activeElement;
       opened = true;portal();element.hidden = false;
+      if(sessionId&&(title==='Editor shortcuts'||title==='GLVis controls'))anchor?.setAttribute('aria-expanded','true');
       if (nativeDialog && !element.open) element.show();
       raise();
       if (position) constrain();
@@ -126,7 +131,13 @@
     });
     if (nativeDialog) listen(element, 'close', () => {if (opened && !element.open) hide();});
     const resizeObserver = new ResizeObserver(constrain);resizeObserver.observe(element);
-    const api = {element,body,titlebar:headingElement,open,close:hide,raise,constrain,
+    const api = {element,body,titlebar:headingElement,open,close:hide,raise,constrain,sessionId,
+      exportSession:()=>({id:sessionId,open:opened,position:position?{...position}:null}),
+      restoreSession(value) {
+        if(!sessionId||value?.id!==sessionId)return;
+        position=Number.isFinite(value.position?.x)&&Number.isFinite(value.position?.y)?{x:value.position.x,y:value.position.y}:null;
+        if(value.open===true)open({focus:false});else hide({restoreFocus:false});
+      },
       toggle() {opened ? hide() : open();}, get isOpen() {return opened;},
       relocate() {portal();constrain();},
       destroy() {
@@ -149,5 +160,14 @@
   window.visualViewport?.addEventListener('resize', constrain);
   window.visualViewport?.addEventListener('scroll', constrain);
   document.addEventListener('fullscreenchange', () => windows.forEach(item => item.relocate()));
-  window.WorkbenchWindows = {attach, get openCount() {return [...windows].filter(item => item.isOpen).length;}};
+  window.WorkbenchWindows = {attach,
+    exportSession:()=>[...windows].filter(item=>item.sessionId).sort((a,b)=>Number(a.element.style.zIndex)-Number(b.element.style.zIndex)).map(item=>item.exportSession()),
+    restoreSession(values) {
+      if(!Array.isArray(values)||values.length>20)return;
+      for(const value of values) {
+        const item=[...windows].find(item=>item.sessionId&&item.sessionId===value?.id);
+        item?.restoreSession(value);
+      }
+    },
+    get openCount() {return [...windows].filter(item => item.isOpen).length;}};
 })();

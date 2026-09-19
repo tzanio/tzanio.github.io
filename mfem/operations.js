@@ -86,10 +86,10 @@
       },
     };
   }
-  function download(activity,bytes,filename,{type='application/gzip',auto=true}={}) {
+  function download(activity,bytes,filename,{type='application/gzip',auto=true,detail=''}={}) {
     const blob=bytes instanceof Blob?bytes:new Blob([bytes],{type}),url=URL.createObjectURL(blob);
     function save(){const link=document.createElement('a');link.href=url;link.download=filename;document.body.append(link);link.click();link.remove();}
-    activity.complete('Archive ready',{persistent:true,detail:filename+' · '+amount(blob.size,'bytes'),
+    activity.complete('Archive ready',{persistent:true,detail:filename+' · '+amount(blob.size,'bytes')+(detail?' · '+detail:''),
       actions:[{label:'Download again',run:save}],dispose:()=>URL.revokeObjectURL(url)});
     if(auto)save();
     return {filename,size:blob.size,download:save};

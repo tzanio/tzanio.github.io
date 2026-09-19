@@ -303,7 +303,7 @@
       dismissPanels(false);
       newPath.value='';newPath.removeAttribute('aria-invalid');
       const error=newForm.querySelector('.wb-editor-new-error');error.hidden=true;error.textContent='';
-      newForm.querySelector('.wb-editor-new-directory').textContent='Relative paths use '+getDefaultDirectory()+'. Parent folders must already exist. Save creates the file in Linux.';
+      newForm.querySelector('.wb-editor-new-directory').textContent='Relative paths use '+getDefaultDirectory()+'. Parent folders must already exist. Save creates the file in the workspace.';
       newWindow.open();
     }
     function showKeybindings() {
@@ -323,7 +323,7 @@
       buffer.checking=(async()=>{
         try {
           const result = await readFile(buffer.path,{ifRevision:expected});
-          if (!buffer.saving && buffer.revision === expected && buffers.has(buffer.path)) {
+          if (!buffer.saving && buffer.revision === expected && buffers.get(buffer.path) === buffer) {
             if(result.unchanged){if(buffer.conflict){buffer.conflict=null;publish();}}
             else await observeDisk(buffer,await normalize(result));
           }
@@ -349,7 +349,7 @@
     }
     async function saveBuffer(buffer, overwrite = false) {
       if (!buffer) return false;
-      if (!isReady()) {onNotice('Linux is still starting; your editor changes are kept until you can save.');return false;}
+      if (!isReady()) {onNotice('Compute is not ready; your editor changes are kept until you can save.');return false;}
       if (buffer.saving) return buffer.saving;
       if (buffer.conflict && !overwrite) {activate(buffer);onNotice('Resolve the disk change before saving '+basename(buffer.path)+'.');return false;}
       const text=buffer.doc.getValue(), expectedHash=overwrite ? buffer.conflict.revision : buffer.revision;
@@ -379,6 +379,103 @@
     async function saveAll() {
       for(const buffer of buffers.values())if(buffer.dirty && !(await saveBuffer(buffer)))return false;
       return true;
+    }
+    function sessionPath(path) {
+      return typeof path==='string'&&path.length<=4096&&path.startsWith('/root/mfem/')&&!/[\x00-\x1f\x7f]/.test(path)&&path.split('/').slice(1).every(part=>part&&part!=='.'&&part!=='..');
+    }
+    // A terminal deletion leaves the last file contents visible in the editor.
+    // Even without edits, that document is now its only recoverable copy.
+    function hasRetainedText(buffer) {return buffer.dirty||buffer.conflict?.deleted;}
+    function validateSession(value) {
+      if(!value||value.version!==1||!Array.isArray(value.tabs)||value.tabs.length>200)throw new Error('Unsupported editor session.');
+      const seen=new Set();let size=0;
+      for(const tab of value.tabs) {
+        if(!tab||!sessionPath(tab.path)||seen.has(tab.path))throw new Error('Invalid editor session path.');
+        seen.add(tab.path);
+        if(tab.draft!==undefined) {
+          if(!tab.draft||typeof tab.draft.text!=='string'||typeof tab.draft.baseText!=='string')throw new Error('Invalid editor draft.');
+          size+=tab.draft.text.length+tab.draft.baseText.length;
+          if(size>32*1024*1024)throw new Error('Editor session exceeds the 32 MiB draft limit.');
+        }
+      }
+      return value;
+    }
+    function exportSession() {
+      const items=[],warnings=[];
+      for(const buffer of buffers.values()) {
+        if(!sessionPath(buffer.path)) {
+          if(hasRetainedText(buffer))throw new Error('Save or close unsaved files outside /root/mfem before exporting the editor session: '+buffer.path);
+          warnings.push('Skipped editor tab outside the exported workspace: '+buffer.path);continue;
+        }
+        const scroll=buffer===active?cm.getScrollInfo():{left:buffer.doc.scrollLeft,top:buffer.doc.scrollTop};
+        items.push({path:buffer.path,selections:buffer.doc.listSelections().map(({anchor,head})=>({anchor:{line:anchor.line,ch:anchor.ch},head:{line:head.line,ch:head.ch}})),
+          scroll:{left:scroll.left||0,top:scroll.top||0},
+          ...(hasRetainedText(buffer)?{draft:{text:buffer.doc.getValue(),baseText:buffer.baseText,isNew:buffer.isNew}}:{})});
+      }
+      return validateSession({version:1,activePath:active?.path||'',tabs:items,...(warnings.length?{warnings}:{})});
+    }
+    async function restoreSession(value,{preserveDirty=true}={}) {
+      validateSession(value);
+      const warnings=[],prepared=[];
+      // Resolve all clean tab contents before replacing anything. Drafts remain
+      // separate from files: importing a session never saves editor text.
+      for(const tab of value.tabs) {
+        let remote=null;
+        try {remote=await normalize(await readFile(tab.path));}
+        catch(error) {
+          if(!/No such file|not found|ENOENT/i.test(error?.message||String(error)))throw error;
+          if(!tab.draft){warnings.push('Could not reopen missing file '+tab.path+'.');continue;}
+        }
+        prepared.push({tab,remote});
+      }
+      ++opening;closeRequest=null;dismissPanels(false);
+      for(const item of [...searchWindows])item.close();
+      for(const buffer of [...buffers.values()])if(!(preserveDirty&&hasRetainedText(buffer))) {
+        buffer.doc.off('change',buffer.onChange);buffer.tab.remove();buffers.delete(buffer.path);
+        if(active===buffer)active=null;
+      }
+      const ordered=[],restored=new Map();
+      const sessionPosition=value=>({line:Number.isFinite(value?.line)?Math.max(0,Math.floor(value.line)):0,ch:Number.isFinite(value?.ch)?Math.max(0,Math.floor(value.ch)):0});
+      const scrollValue=value=>Number.isFinite(value)?Math.min(1e7,Math.max(0,value)):0;
+      for(const {tab,remote} of prepared) {
+        let path=tab.path,buffer=buffers.get(path);
+        if(buffer) {
+          ordered.push(buffer);restored.set(tab.path,buffer);
+          if(!tab.draft||tab.draft.text===buffer.doc.getValue())continue;
+          // A receiving session's unsaved text must not be overwritten. Give
+          // the imported draft an unsaved recovery tab without touching disk.
+          const dot=path.lastIndexOf('.'),slash=path.lastIndexOf('/');
+          const stem=dot>slash?path.slice(0,dot):path,extension=dot>slash?path.slice(dot):'';
+          for(let index=1;;index++) {
+            path=stem+'.imported-draft-'+index+extension;
+            if(buffers.has(path)||value.tabs.some(item=>item.path===path))continue;
+            try {await readFile(path);}
+            catch(error) {if(/No such file|not found|ENOENT/i.test(error?.message||String(error)))break;throw error;}
+          }
+          buffer=makeBuffer(path,{text:tab.draft.text,revision:null},true);
+          warnings.push('Kept your unsaved '+tab.path+'; imported draft opened as '+path+'.');
+        } else if(tab.draft) {
+          const draft=tab.draft;
+          buffer=makeBuffer(path,{text:draft.baseText,revision:remote?await contentHash(draft.baseText):null},!remote||draft.isNew===true);
+          buffer.doc.setValue(draft.text);
+          buffer.dirty=buffer.isNew||draft.text!==buffer.baseText;
+          if(remote&&remote.text===draft.text)acceptDisk(buffer,remote);
+          else if(remote&&(buffer.isNew||remote.text!==draft.baseText))buffer.conflict=remote;
+          else if(!remote&&!draft.isNew)buffer.conflict={deleted:true,revision:null};
+        } else buffer=makeBuffer(path,remote);
+        if(Array.isArray(tab.selections)&&tab.selections.length&&tab.selections.length<=100)buffer.doc.setSelections(tab.selections.map(range=>({anchor:sessionPosition(range?.anchor),head:sessionPosition(range?.head)})));
+        buffer.doc.scrollLeft=scrollValue(tab.scroll?.left);buffer.doc.scrollTop=scrollValue(tab.scroll?.top);
+        ordered.push(buffer);restored.set(tab.path,buffer);
+      }
+      for(const buffer of buffers.values())if(!ordered.includes(buffer))ordered.push(buffer);
+      buffers.clear();for(const buffer of ordered){buffers.set(buffer.path,buffer);tabs.append(buffer.tab);}
+      const selected=restored.get(value.activePath)||ordered[0];
+      if(selected) {
+        const left=selected.doc.scrollLeft,top=selected.doc.scrollTop;
+        activate(selected,false);cm.scrollTo(left,top);
+      } else {active=null;cm.swapDoc(new CodeMirror.Doc(''));publish();position();}
+      await checkExternal();
+      return warnings;
     }
     async function goTo(path,line=1,column=1) {
       await open(path);
@@ -428,7 +525,7 @@
     const api = {open,newFile,showNewFile,showKeybindings,nextTab,closeActive:()=>{if(active)requestClose(active);},save,saveAll,checkExternal,goTo,focus:()=>{if(active)cm.focus();else host.querySelector('[data-action="new"]').focus();},cm,buffers,
       get path(){return active?.path||'';},get dirty(){return [...buffers.values()].some(buffer=>buffer.dirty);},
       get activeDirty(){return Boolean(active?.dirty);},getText:()=>active?.doc.getValue()||'',
-      getState:state,
+      getState:state,exportSession,restoreSession,validateSession,
       destroy(){destroyed=true;navigation?.destroy();observer.disconnect();newWindow.destroy();keysWindow.destroy();for(const item of [...searchWindows])item.close();for(const buffer of buffers.values())buffer.doc.off('change',buffer.onChange);host.replaceChildren();},
     };
     navigation=window.WorkbenchCppNavigation?.create(api,{host,onNotice});

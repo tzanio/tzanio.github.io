@@ -193,6 +193,16 @@ window.WorkbenchLayout = {
       if(event.code==='KeyB'){event.preventDefault();event.stopPropagation();filesButton.click()}
     },{capture:true,signal:abort.signal});
     apply();viewportSize();
-    return {get state(){return {...state}},maximize,selectPane,resize,destroy(){abort.abort();activityObserver.disconnect();cancelAnimationFrame(resizeFrame);handles.forEach(({element})=>element.remove());Object.values(maxButtons).forEach(button=>button.remove());filesButton.remove();phoneNav.remove();menuButton.remove();delete body.dataset.phonePane;body.style.removeProperty('--phone-height')}};
+    function restoreSession(value) {
+      if(!value||typeof value!=='object')return;
+      state.files=clamp(value.files,140,480,defaults.files);
+      state.editor=clamp(value.editor,.2,.8,defaults.editor);
+      state.terminal=clamp(value.terminal,.15,.75,defaults.terminal);
+      state.filesHidden=value.filesHidden===true;
+      state.maximized=['editor','terminal','viewer'].includes(value.maximized)?value.maximized:null;
+      state.phonePane=['files','editor','terminal','viewer'].includes(value.phonePane)?value.phonePane:'viewer';
+      closeMenu();remember();apply();
+    }
+    return {get state(){return {...state}},exportSession:()=>({...state}),restoreSession,maximize,selectPane,resize,destroy(){abort.abort();activityObserver.disconnect();cancelAnimationFrame(resizeFrame);handles.forEach(({element})=>element.remove());Object.values(maxButtons).forEach(button=>button.remove());filesButton.remove();phoneNav.remove();menuButton.remove();delete body.dataset.phonePane;body.style.removeProperty('--phone-height')}};
   }
 };

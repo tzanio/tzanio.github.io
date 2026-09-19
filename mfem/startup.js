@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const base = new URL('.', document.currentScript.src);
+  const local=!!window.WorkbenchLocalConfig;
   const panel = document.getElementById('startup-progress');
   const heading = document.getElementById('startup-heading');
   const detail = document.getElementById('startup-detail');
@@ -42,13 +43,13 @@
     const remaining = Math.max(0,total-loaded);
     const elapsed = Math.floor(performance.now()/1000);
     const time = elapsed < 60 ? elapsed+'s' : Math.floor(elapsed/60)+'m '+elapsed%60+'s';
-    heading.textContent = problem ? 'Startup needs attention' : workspaceStage ? 'Opening workspace' : linux ? 'Linux ready · preparing GLVis' : 'Starting Linux';
+    heading.textContent = problem ? 'Startup needs attention' : workspaceStage ? 'Opening workspace' : linux ? (local?'Local compute ready':'Linux ready')+' · preparing GLVis' : local?'Connecting to local compute':'Starting Linux';
     retry.hidden = !problem;
     panel.dataset.state = problem ? 'error' : 'loading';
     if (inventory && total) {
       meter.value = 100 * loaded / total;
       meter.setAttribute('aria-valuetext',`${mb(loaded)} of about ${mb(total)} MB of startup files ready`);
-      detail.textContent = problem || (remaining > 50000 ? `${mb(loaded)} / ~${mb(total)} MB ready · ~${mb(remaining)} MB left` : linux ? 'Downloads ready · preparing GLVis' : 'Downloads ready · booting Linux');
+      detail.textContent = problem || (remaining > 50000 ? `${mb(loaded)} / ~${mb(total)} MB ready · ~${mb(remaining)} MB left` : linux ? 'Downloads ready · preparing GLVis' : local?'Opening native terminal…':'Downloads ready · booting Linux');
     } else {
       meter.removeAttribute('value');meter.removeAttribute('aria-valuetext');
       detail.textContent = problem || (loaded ? mb(loaded)+' MB ready · '+(inventoryUnavailable ? 'total size unavailable' : 'calculating remaining download') : 'Downloading startup files…');
@@ -81,7 +82,7 @@
     observer?.disconnect();window.removeEventListener('error',scriptError);window.WorkbenchDownloadMonitor?.stop();
     window.workstation?.vm.finishDownloads?.();
     panel.dataset.state='ready';heading.textContent='Ready';
-    detail.textContent='Linux and GLVis are ready';meter.value=100;retry.hidden=true;
+    detail.textContent=(local?'Local compute':'Linux')+' and GLVis are ready';meter.value=100;retry.hidden=true;
     meter.setAttribute('aria-valuetext','Startup complete');
     setTimeout(()=>{panel.hidden=true},1800);
   }
@@ -119,7 +120,8 @@
   function scriptError(event){if(!finished && event.message)error('Could not start the workstation: '+event.message+'. Reload to try again.')}
   window.addEventListener('error',scriptError);
   const asset=name=>{const url=new URL(name,base);if(window.WorkbenchAssets?.[name])url.searchParams.set('v',WorkbenchAssets[name]);return url.href};
-  fetch(asset('startup-downloads.json')).then(response=>{
+  if(local){inventory=true;const placeholder=document.querySelector('#terminal .startup-placeholder');if(placeholder)placeholder.textContent='Connecting to local compute'}
+  else fetch(asset('startup-downloads.json')).then(response=>{
     if(!response.ok)throw new Error('Startup size unavailable');return response.json();
   }).then(manifest=>{
     if(manifest.schema!==1 || !Array.isArray(manifest.assets))throw new Error('Unsupported startup inventory');
@@ -137,7 +139,7 @@
   }
   async function load() {
     const scripts=[...document.querySelectorAll('script[type="application/x-workbench"]')]
-      .filter(script=>!script.dataset.mainOnly || new URLSearchParams(location.search).get('runtime')==='main');
+      .filter(script=>(!script.dataset.browserOnly||!local)&&(!script.dataset.localOnly||local)&&(!script.dataset.mainOnly || new URLSearchParams(location.search).get('runtime')==='main'));
     // Fetch concurrently, then execute in dependency order. Original URLs are
     // retained for relative assets, diagnostics and source-map tooling.
     const pending=scripts.map(script=>{
