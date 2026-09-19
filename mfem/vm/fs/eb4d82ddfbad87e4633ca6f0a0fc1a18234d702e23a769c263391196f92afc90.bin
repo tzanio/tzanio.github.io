@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""Build GCC's optional MFEM header cache inside the browser's Linux guest."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import tempfile
+
+parser = argparse.ArgumentParser(description='Rebuild the guarded MFEM header cache for a compilation profile.')
+profile = parser.add_mutually_exclusive_group()
+profile.add_argument('--fast', action='store_true', help='Build the -O0 iteration cache')
+profile.add_argument('--optimized', action='store_true', help='Build the default -O2 cache')
+options = parser.parse_args()
+optimization = '-O0' if options.fast else '-O2'
+cache = Path('/usr/local/lib/mfem-pch-fast' if options.fast else '/usr/local/lib/mfem-pch')
+if any(os.environ.get(key) for key in ('CPATH', 'CPLUS_INCLUDE_PATH',
+                                     'C_INCLUDE_PATH', 'GCC_EXEC_PREFIX',
+                                     'COMPILER_PATH')):
+    raise SystemExit('Unset custom include/compiler environment variables before building the default MFEM header cache.')
+cache.mkdir(parents=True, exist_ok=True)
+with tempfile.TemporaryDirectory(prefix='mfem-pch-', dir=cache.parent) as work:
+    work = Path(work)
+    header = work / 'mfem.hpp'
+    header.write_bytes(Path('/root/mfem/mfem.hpp').read_bytes())
+    preprocess = ['/usr/bin/g++', optimization, '-std=c++17', '-I/root/mfem',
+                  '-E', '-dD', '-x', 'c++', '/root/mfem/mfem.hpp']
+    before = subprocess.check_output(preprocess + ['-MD', '-MF', str(work / 'dependencies.d')])
+    dependency_text = (work / 'dependencies.d').read_text().replace('\\\n', ' ')
+    dependencies = shlex.split(dependency_text.split(':', 1)[1])
+    fingerprints = {filename: hashlib.sha256(Path(filename).read_bytes()).hexdigest()
+                    for filename in dict.fromkeys(dependencies)}
+    subprocess.run(['/usr/bin/g++', optimization, '-std=c++17', '-I/root/mfem',
+                    '-x', 'c++-header', '/root/mfem/mfem.hpp', '-o',
+                    str(work / 'mfem.hpp.gch'), '-MD', '-MF',
+                    str(work / 'dependencies.d')], check=True)
+    after = subprocess.check_output(preprocess)
+    if (before != after or any(hashlib.sha256(Path(filename).read_bytes()).hexdigest() != digest
+                               for filename, digest in fingerprints.items())):
+        raise SystemExit('Headers changed during the build. Cache was not replaced; run mfem-pch-build again.')
+    manifest = {'version': 2, 'compiler': subprocess.check_output(
+        ['/usr/bin/g++', '--version'], text=True).splitlines()[0],
+        'flags': [optimization, '-std=c++17', '-I/root/mfem'],
+        'sha256': fingerprints, 'preprocessed_sha256': hashlib.sha256(before).hexdigest()}
+    # Removing the manifest keeps concurrent compilers on normal GCC until all
+    # three files have been replaced successfully.
+    (cache / 'dependencies.json').unlink(missing_ok=True)
+    for filename in ('mfem.hpp', 'mfem.hpp.gch'):
+        os.replace(work / filename, cache / filename)
+    (cache / 'dependencies.json').write_text(json.dumps(manifest, indent=2) + '\n')
+print('MFEM precompiled headers ready (' + optimization + '). Matching builds use them automatically.')

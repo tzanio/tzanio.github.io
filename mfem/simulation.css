@@ -4,3 +4,37 @@
 .sim-range{margin:12px 0 0;padding-top:10px;border-top:1px solid #334252;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px}.sim-range>label:first-child{flex-basis:100%;display:flex;align-items:center;gap:6px}.sim-range input[type=number]{width:75px;min-width:0;padding:4px;background:#101923;border:1px solid #3d5265;border-radius:4px;color:#d9e1ec;font:inherit}.sim-range button{font-size:11px;padding:4px 7px}.sim-range small{font-size:10px;color:#8798aa;line-height:1.5}
 .sim-recording{min-height:35px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:5px 8px;border-bottom:1px solid #29313d;font-size:10px;background:#131d28}.sim-recording button{font-size:10px;padding:4px 6px}.sim-recording button[aria-pressed=true]{color:#ffd0c7;border-color:#b96f67;background:#422c2c}.sim-recording label{display:flex;gap:4px;align-items:center;color:#93a4b7}.sim-recording input{width:50px;background:#101923;color:#d9e1ec;border:1px solid #354b5c;border-radius:3px;padding:3px;font:inherit}.sim-record-status{margin-left:auto;color:#91a6b9;white-space:nowrap}.sim-timeline{border-top:1px solid #2c3b4b;background:#151f2b;padding:5px 7px;display:grid;grid-template-columns:auto minmax(30px,1fr) auto;gap:5px;align-items:center;font-size:10px;flex-shrink:0}.sim-timeline button{font-size:10px;white-space:nowrap;padding:4px 6px}.sim-timeline input[type=range]{width:100%;min-width:20px;accent-color:#90cfa8}.sim-replay-status{grid-column:1/-1;color:#9aafc2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.sim-replay-status[data-replay=true]{color:#efcd89}.sim-view:fullscreen{width:100vw;height:100dvh}.sim-view:fullscreen .sim-visual{min-height:0}.sim-help{width:min(740px,90vw);max-height:85dvh;padding:0;border:1px solid #455869;border-radius:8px;background:#111b26;color:#d9e1ec}.sim-help::backdrop{background:#07101bbb}.sim-help pre{margin:0;background:transparent;border:0;white-space:pre-wrap;overflow:auto;max-height:70dvh;font-size:11px}.sim-range-label{font-size:10px;color:#b4d9c0;padding:2px 7px;position:absolute;bottom:5px;left:5px;pointer-events:none;background:#14281dc9;border-radius:3px}
 @media(max-width:1050px){.sim-layout[data-views="2"]{grid-template-columns:1fr;grid-template-rows:repeat(2,minmax(190px,1fr))}.sim-layout[data-views="3"],.sim-layout[data-views="4"]{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(190px,1fr))}.sim-record-status{flex-basis:100%;margin-left:0}}
+
+.sim-record-toggle,.sim-phone-views{display:none}
+:root body[data-phone-pane] .sim-heading{height:48px;min-height:48px;padding:2px 7px;gap:6px}
+:root body[data-phone-pane] .sim-heading button{min-height:44px;min-width:44px;padding:4px 8px;font-size:11px}
+:root body[data-phone-pane] .sim-record-toggle{display:inline-block}
+:root body[data-phone-pane] .sim-recording{display:none;flex-shrink:0;max-height:35%;overflow:auto}
+:root body[data-phone-pane] .simulation-workbench[data-record-panel="open"] .sim-recording{display:flex}
+:root body[data-phone-pane] .sim-recording button,:root body[data-phone-pane] .sim-recording input{min-height:44px}
+:root body[data-phone-pane] .sim-recording input{font-size:16px}
+:root body[data-phone-pane] .sim-layout{display:flex;overflow:hidden;min-height:0;flex:1}
+:root body[data-phone-pane] .sim-view{display:none;flex:1;min-height:0;min-width:0}
+:root body[data-phone-pane] .sim-view[data-phone-active="true"]{display:flex}
+:root body[data-phone-pane] .sim-phone-views{display:block;min-height:44px;max-width:94px;min-width:0;font:16px ui-sans-serif,system-ui,sans-serif;color:var(--wb-text,#c6d1df);background:var(--wb-input,#202936);border:1px solid var(--wb-border,#354150);border-radius:5px}
+:root body[data-phone-pane] .sim-view>.bar{height:44px;min-height:44px;padding:0 7px;gap:5px}
+:root body[data-phone-pane] .sim-view>.bar>span:first-child{display:none}
+:root body[data-phone-pane] .sim-view .sim-field{height:44px;max-width:72%;padding:3px 6px;font-size:16px;border-width:0;background:transparent}
+:root body[data-phone-pane] .sim-view .sim-remove{min-height:44px;min-width:44px}
+:root body[data-phone-pane] .sim-view .sim-status{font-size:10px}
+:root body[data-phone-pane] .sim-view .vis-toolbar{flex-wrap:nowrap;overflow-x:auto;min-height:52px;padding:4px;gap:4px}
+:root body[data-phone-pane] .sim-view .vis-toolbar button{min-height:44px;min-width:44px;flex-shrink:0;font-size:11px;padding:4px 7px}
+:root body[data-phone-pane] .sim-view .vis-tool-spacer{display:none}
+:root body[data-phone-pane] .sim-view .sim-visual{min-height:0;touch-action:none;overscroll-behavior:contain}
+:root body[data-phone-pane] .sim-visual canvas{touch-action:none}
+:root body[data-phone-pane] .sim-timeline button{min-height:44px}
+/* iPhone does not expose element fullscreen: expand within the browser instead. */
+:root body .sim-view.glvis-full-window{position:fixed!important;inset:0;display:flex!important;width:auto;height:var(--phone-height,100dvh);z-index:40;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+:root body .sim-view.glvis-full-window .sim-visual{min-height:0}
+@media(max-height:500px) and (min-width:601px){
+  :root body[data-phone-pane] .sim-view[data-phone-active="true"]{display:grid;grid-template-columns:minmax(170px,35%) minmax(0,1fr);grid-template-rows:52px minmax(0,1fr) auto}
+  :root body[data-phone-pane] .sim-view>.bar{height:52px;grid-column:1;grid-row:1}
+  :root body[data-phone-pane] .sim-view .vis-toolbar{grid-column:2;grid-row:1}
+  :root body[data-phone-pane] .sim-view .sim-visual{grid-column:1/-1;grid-row:2}
+  :root body[data-phone-pane] .sim-view .sim-timeline{grid-column:1/-1;grid-row:3}
+}

@@ -13,8 +13,8 @@
   function create(host, {rpc, readFile, upload, startupPreview, notice = console.warn, diagnostics = {}}) {
     for (const name of ['frames','updates','commands']) diagnostics[name] ??= 0;
     host.classList.add('simulation-workbench');
-    host.innerHTML = `<div class="bar sim-heading"><strong>GLVis</strong><button id="sim-add-view" title="Add an independent GLVis camera">+ View</button><button data-maximize="viewer" title="Maximize visualization" aria-label="Maximize visualization">□</button></div>
-      <div class="sim-recording"><button id="sim-record" aria-pressed="false" title="Keep incoming frames in this browser tab">● Record</button><label>Cap <input id="sim-record-cap" aria-label="Recording storage cap in MiB" type="number" min="1" max="256" step="1" value="32"> MiB</label><button id="sim-record-clear" disabled>Clear</button><span id="sim-record-status" class="sim-record-status">Recording off · memory only</span></div>
+    host.innerHTML = `<div class="bar sim-heading"><strong>GLVis</strong><select id="sim-phone-views" class="sim-phone-views" aria-label="Visualization camera" hidden></select><button class="sim-record-toggle" id="sim-record-toggle" aria-expanded="false" aria-controls="sim-recording">Record</button><button id="sim-add-view" title="Add an independent GLVis camera">+ View</button><button data-maximize="viewer" title="Maximize visualization" aria-label="Maximize visualization">□</button></div>
+      <div id="sim-recording" class="sim-recording"><button id="sim-record" aria-pressed="false" title="Keep incoming frames in this browser tab">● Record</button><label>Cap <input id="sim-record-cap" aria-label="Recording storage cap in MiB" type="number" min="1" max="256" step="1" value="32"> MiB</label><button id="sim-record-clear" disabled>Clear</button><span id="sim-record-status" class="sim-record-status">Recording off · memory only</span></div>
       <div class="sim-layout" data-views="1"></div>`;
     const get = id => host.querySelector('#' + id);
     const layout = host.querySelector('.sim-layout');
@@ -404,7 +404,7 @@
       }
       const first = activeViews()[0];
       if (first !== view && first.client !== null) bindView(view,first.client).catch(report);
-      updateLayout();return view;
+      updateLayout();selectPhoneView(view.id);return view;
     }
     function removeView(view) {
       if (view.id === 1) return;
@@ -419,7 +419,16 @@
     function updateLayout() {
       layout.dataset.views = String(activeViews().length);
       get('sim-add-view').disabled = activeViews().length >= MAX_VIEWS;
+      const picker=get('sim-phone-views'),previous=Number(picker.value);
+      picker.replaceChildren(...activeViews().map(view=>new Option('View '+view.id,String(view.id))));
+      picker.hidden=activeViews().length<2;
+      selectPhoneView(activeViews().some(view=>view.id===previous)?previous:activeViews()[0].id);
       updateSelectors();resize();
+    }
+    function selectPhoneView(id) {
+      get('sim-phone-views').value=String(id);
+      for(const view of activeViews())view.element.dataset.phoneActive=String(view.id===id);
+      resize();
     }
     function resize() {
       if (resizeRequest || destroyed) return;
@@ -434,6 +443,11 @@
       });
     }
     get('sim-add-view').onclick = addView;
+    get('sim-phone-views').onchange=event=>selectPhoneView(Number(event.target.value));
+    get('sim-record-toggle').onclick=event=>{
+      const open=host.dataset.recordPanel!=='open';host.dataset.recordPanel=open?'open':'closed';
+      event.currentTarget.setAttribute('aria-expanded',String(open));resize();
+    };
     get('sim-record').onclick = () => {
       recording.enabled = !recording.enabled;
       if (recording.enabled) for (const state of streams.values()) {

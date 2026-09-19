@@ -14,3 +14,47 @@ body[data-maximized="editor"] .upper,body[data-maximized="viewer"] .upper{displa
 body[data-maximized="editor"] .viewer,body[data-maximized="viewer"] .editor{display:none}
 body[data-maximized="editor"] .editor,body[data-maximized="viewer"] .viewer{flex:1;width:100%;min-height:0}
 @media(max-width:850px){main{grid-template-columns:150px minmax(0,1fr)}.files-separator,.editor-separator{display:none}.upper{display:flex;flex-direction:column;overflow:auto}.editor,.viewer{min-height:280px;width:100%;flex-shrink:0}.editor{height:330px}.work{grid-template-rows:minmax(0,1fr) 6px var(--terminal-size,36%)}.console>.bar small,#boot-progress{display:none}header{flex-wrap:wrap;height:auto;min-height:62px;padding:8px 10px;gap:7px}header nav{flex-wrap:wrap}body[data-maximized] .upper{overflow:hidden}body[data-maximized] .editor,body[data-maximized] .viewer{height:auto;min-height:0}.pane-maximize{display:inline-block}}
+
+.phone-panes,.phone-menu{display:none}
+/* Phone panes share the viewport; there is no nested desktop-sized split. */
+:root body[data-phone-pane]{height:var(--phone-height,100dvh);overflow:hidden;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+:root body[data-phone-pane] header{position:relative;flex-shrink:0;min-height:54px;height:54px;padding:5px 10px;gap:8px;flex-wrap:nowrap}
+:root body[data-phone-pane] .brand{font-size:14px;gap:8px;min-width:0}
+:root body[data-phone-pane] .mfem-logo{width:32px;height:32px}
+:root body[data-phone-pane] .brand-title{white-space:nowrap}
+:root body[data-phone-pane] .phone-menu{display:block;min-height:44px;min-width:44px;margin-left:auto;font-size:23px;padding:0 10px;line-height:1}
+:root body[data-phone-pane] .phone-menu[data-busy="true"]{position:relative}
+:root body[data-phone-pane] .phone-menu[data-busy="true"]::after{content:'';position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--wb-accent,#a4ce83)}
+:root body[data-phone-pane] header nav{display:none;position:absolute;top:100%;left:6px;right:6px;width:auto;margin:0;padding:10px;gap:8px;z-index:30;border:1px solid var(--wb-border,#455869);border-radius:8px;background:var(--wb-panel,#20231e);box-shadow:0 10px 25px #0007}
+:root body[data-phone-pane].phone-menu-open header nav{display:flex;flex-wrap:wrap}
+:root body[data-phone-pane] header nav>button,:root body[data-phone-pane] header nav>.button,:root body[data-phone-pane] header nav select{min-height:44px;font-size:12px}
+:root body[data-phone-pane] #toggle-files{display:none}
+:root body[data-phone-pane] .wb-theme-picker{margin-left:0}
+:root body[data-phone-pane] main{display:flex;overflow:hidden;min-height:0}
+:root body[data-phone-pane] .work,:root body[data-phone-pane] .upper{display:flex;flex:1;width:100%;height:100%;min-height:0;padding:0;gap:0;overflow:hidden}
+:root body[data-phone-pane] .pane-separator,:root body[data-phone-pane] aside,:root body[data-phone-pane] .editor,:root body[data-phone-pane] .viewer,:root body[data-phone-pane] .console{display:none}
+:root body[data-phone-pane] .editor,:root body[data-phone-pane] .viewer,:root body[data-phone-pane] .console{flex:1;width:100%;height:100%;min-height:0;border-radius:0;border:0}
+:root body[data-phone-pane="viewer"] .viewer,:root body[data-phone-pane="editor"] .editor,:root body[data-phone-pane="terminal"] .console{display:flex}
+:root body[data-phone-pane="terminal"] .upper,:root body[data-phone-pane="files"] .work{display:none}
+:root body[data-phone-pane="files"] aside{display:flex;flex:1;width:100%;min-width:0}
+:root body[data-phone-pane] #tree button{min-height:44px;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+:root body[data-phone-pane] .phone-panes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;flex-shrink:0;margin:0;padding:4px 5px calc(4px + env(safe-area-inset-bottom));gap:4px;border-top:1px solid var(--wb-border,#455869);background:var(--wb-panel,#20231e)}
+:root body[data-phone-pane] .phone-panes button{min-height:44px;padding:6px 3px;font-size:12px;border-color:transparent;background:transparent;color:var(--wb-muted,#a4b099)}
+:root body[data-phone-pane] .phone-panes button[aria-pressed="true"]{background:var(--wb-accent-bg,#34452c);border-color:var(--wb-accent-border,#7c9962);color:var(--wb-accent,#c2e49e)}
+:root body[data-phone-pane] .pane-maximize{display:none}
+:root body[data-phone-pane][data-maximized] header,:root body[data-phone-pane][data-maximized] .phone-panes{display:none}
+:root body[data-phone-pane] .editor>.bar,:root body[data-phone-pane] .console>.bar{height:48px;min-height:48px}
+:root body[data-phone-pane] .editor>.bar button{min-width:44px;min-height:44px}
+:root body[data-phone-pane] .wb-editor-actions{flex-wrap:nowrap;overflow-x:auto;min-height:50px;padding:3px 5px}
+:root body[data-phone-pane] .wb-editor-actions button{flex-shrink:0;min-height:44px;padding:6px 9px;font-size:11px;white-space:nowrap}
+:root body[data-phone-pane] .wb-editor-tab button{min-height:44px}
+:root body[data-phone-pane] .wb-editor-tab .wb-editor-close{min-width:44px}
+:root body[data-phone-pane] #terminal{padding:6px}
+:root body[data-phone-pane] .CodeMirror textarea,:root body[data-phone-pane] .xterm-helper-textarea{font-size:16px!important}
+:root body[data-phone-pane] #notice{bottom:calc(64px + env(safe-area-inset-bottom))}
+:root body[data-phone-pane] .wb-window button{min-height:44px;min-width:44px}
+:root body[data-phone-pane] .wb-window input:not([type="checkbox"]):not([type="range"]),:root body[data-phone-pane] .wb-window select{min-height:44px;font-size:16px}
+@media(max-height:500px) and (min-width:601px){
+  :root body[data-phone-pane] header{height:44px;min-height:44px;padding-top:0;padding-bottom:0}
+  :root body[data-phone-pane] .phone-panes{padding-top:0;padding-bottom:env(safe-area-inset-bottom)}
+}

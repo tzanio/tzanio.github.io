@@ -15,6 +15,8 @@
     const stepButton = get('vis-step');
     const toggleButton = get('vis-toggle');
     const help = get('vis-help');
+    const fullscreenButton=get('vis-fullscreen');
+    const fullscreenTarget=visual.closest('.sim-view') || visual.closest('.viewer');
     let paused = false;
     let releasedSteps = 0;
     const frameWaiters = [];
@@ -34,6 +36,14 @@
     function focusViewer() {
       visual.focus({preventScroll: true});
     }
+    function updateFullscreen() {
+      const expanded=fullscreenTarget.classList.contains('glvis-full-window')||document.fullscreenElement===fullscreenTarget;
+      fullscreenButton.textContent=expanded?'↙':'⛶';
+      fullscreenButton.setAttribute('aria-label',expanded?'Restore visualization':'Expand visualization');
+      fullscreenButton.setAttribute('aria-pressed',String(expanded));
+      window.dispatchEvent(new Event('resize'));
+    }
+    function restoreWindow() {fullscreenTarget.classList.remove('glvis-full-window');updateFullscreen()}
     function setPanel(open) {
       if (open) controlsWindow.open();else controlsWindow.close();
       toggleButton.setAttribute('aria-expanded', String(open));
@@ -81,8 +91,18 @@
       } else if (command === 'screenshot') {
         await enqueue(() => viewer.saveScreenshot('glvis.png'));
       } else if (command === 'fullscreen') {
-        if (document.fullscreenElement) await document.exitFullscreen();
-        else await (visual.closest('.sim-view') || visual.closest('.viewer')).requestFullscreen();
+        if(fullscreenTarget.classList.contains('glvis-full-window'))restoreWindow();
+        else if (document.fullscreenElement) await document.exitFullscreen();
+        else {
+          // iPhone browsers lack element fullscreen. The same control expands
+          // inside the visible viewport; blocked fullscreen also falls back.
+          let native=false;
+          if(document.fullscreenEnabled&&fullscreenTarget.requestFullscreen) {
+            try {await fullscreenTarget.requestFullscreen();native=true} catch {}
+          }
+          if(!native)fullscreenTarget.classList.add('glvis-full-window');
+        }
+        updateFullscreen();
         focusViewer();
       } else if (command === 'help') {
         get('vis-help-text').textContent = await enqueue(() => viewer.getHelpString());
@@ -97,6 +117,9 @@
       });
     }
     listen(visual, 'keydown', event => {
+      if(event.key==='Escape'&&fullscreenTarget.classList.contains('glvis-full-window')) {
+        event.preventDefault();event.stopImmediatePropagation();restoreWindow();return;
+      }
       if (event.code === 'Space' && !event.ctrlKey && !event.metaKey && !event.altKey) {
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -104,13 +127,15 @@
       }
     }, {capture: true});
     toolbar.querySelectorAll('button').forEach(button => { button.disabled = false; });
-    if (!document.fullscreenEnabled) get('vis-fullscreen').hidden = true;
+    listen(document,'fullscreenchange',updateFullscreen);
+    updateFullscreen();
     updatePauseButton();
     return {
       get paused() { return paused; },
       setPaused, beforeFrame, step,
       closeWindows() {controlsWindow.close({restoreFocus:false});helpWindow.close({restoreFocus:false});},
       destroy() {
+        restoreWindow();
         abort.abort();
         setPaused(false, {notify:false});
         setPanel(false);

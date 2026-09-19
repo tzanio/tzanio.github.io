@@ -8,7 +8,7 @@ $('terminal').replaceChildren();
 terminal.open($('terminal'));
 WorkbenchThemes.bindTerminal(terminal);
 terminal.writeln('\x1b[38;5;114mStarting Linux\x1b[0m');
-let ready=false,currentPath='',dirty=false,sequence=0,serialBuffer='',terminalCwd=sourceRoot+'/examples';
+let ready=false,currentPath='',dirty=false,sequence=0,serialBuffer='',terminalCwd=sourceRoot+'/examples',workspaceBusy=false,restoringWorkspace=false;
 let editor,simulation,layout,offline;
 const waiting=new Map(),directories=new Map(),fileMetadata=new Map(),expanded=new Set();
 const diagnostics={frames:0,updates:0,commands:0,filesIndexed:false,bootMs:null,filesOpenMs:null,firstRenderMs:null};
@@ -25,16 +25,20 @@ diagnostics.runtimeMode=vm.mode;
 window.workstation={vm,terminal,diagnostics,get ready(){return ready},get editor(){return editor},get simulation(){return simulation},get layout(){return layout},get offline(){return offline},get viewer(){return simulation?.viewer},get controls(){return simulation?.controls},get streams(){return simulation?.streams},openFile,openDiagnostic,rpc};
 Object.defineProperty(window,'viewer',{get:()=>simulation?.viewer});
 vm.add_listener('serial0-output-bytes',bytes=>terminal.write(bytes));
-vm.add_listener('runtime-error',error=>{systemStatus('error','Alpine Linux stopped');window.WorkbenchStartup?.error(error.message);notice(error.message)});
+vm.add_listener('runtime-error',error=>{
+  ready=false;systemStatus('error','Alpine Linux stopped');window.WorkbenchStartup?.error(error.message);notice(error.message);
+  for(const task of waiting.values()){clearTimeout(task.timer);task.reject(error)}waiting.clear();
+});
 vm.ready.catch(error=>notice(error.message));
 terminal.onData(data=>vm.serial0_send(data));
 terminal.parser.registerOscHandler(7,data=>{try{const url=new URL(data);if(url.protocol==='file:')terminalCwd=decodeURIComponent(url.pathname)}catch{}return true});
-function rpc(op,values={}) {
+function rpc(op,values={},onProgress) {
   return new Promise((resolve,reject)=>{
     if(!ready){reject(new Error('Linux is still starting; you can save once it is ready.'));return}
     const id=++sequence;
-    const timer=setTimeout(()=>{waiting.delete(id);reject(new Error(op+' timed out; check the terminal'))},180000);
-    waiting.set(id,{resolve,reject,timer});
+    const task={resolve,reject,onProgress,timer:null};
+    task.touch=()=>{clearTimeout(task.timer);task.timer=setTimeout(()=>{waiting.delete(id);reject(new Error(op+' timed out; check the terminal'))},180000)};
+    task.touch();waiting.set(id,task);
     vm.serial_send_bytes(1,encoder.encode(JSON.stringify({id,op,...values})+'\n'));
   });
 }
@@ -48,6 +52,7 @@ async function upload(bytes) {
   await vm.create_file(path.slice(1),bytes);return path;
 }
 async function readEditorFile(path,{ifRevision}={}) {
+  if(restoringWorkspace)throw new Error('Workspace import is in progress. Open the file again when it finishes.');
   let bytes,revision;
   if(ready) {
     const snapshot=await rpc('read',{path,max_bytes:editorLimit,metadata:true,if_revision:ifRevision});revision=snapshot.revision;
@@ -67,8 +72,11 @@ async function readEditorFile(path,{ifRevision}={}) {
   return {text:decoder.decode(bytes),revision};
 }
 async function writeEditorFile(path,text,{expectedHash}={}) {
+  if(restoringWorkspace)throw new Error('Wait for workspace import to finish before saving. Your changes remain in the editor.');
   if(!ready)throw new Error('Linux is still starting. Your changes remain in the editor.');
-  return rpc('write',{path,upload:await upload(encoder.encode(text)),expected_hash:expectedHash});
+  const uploaded=await upload(encoder.encode(text));
+  if(restoringWorkspace){rpc('unlink',{path:uploaded}).catch(()=>{});throw new Error('Wait for workspace import to finish before saving. Your changes remain in the editor.')}
+  return rpc('write',{path,upload:uploaded,expected_hash:expectedHash});
 }
 function syncEditor(state) {
   currentPath=state.path||'';dirty=state.dirty;
@@ -98,6 +106,8 @@ vm.add_listener('serial1-output-bytes',bytes=>{
         if(!diagnostics.filesIndexed)refresh();fit();editor.checkExternal().catch(error=>notice(error.message));
       } else if(['glvis','glvis-command','glvis-end'].includes(message.event)) {
         simulation.handle(message).then(()=>{if(diagnostics.firstRenderMs===null&&diagnostics.frames){diagnostics.firstRenderMs=performance.now();window.WorkbenchStartup?.visualReady()}}).catch(error=>{window.WorkbenchStartup?.error('GLVis: '+(error.message||error));notice('GLVis: '+(error.message||error))});
+      } else if(message.event==='operation-progress') {
+        const task=waiting.get(message.id);if(task){task.touch();task.onProgress?.(message)}
       } else if(message.event==='error')notice(message.error);
       else if(waiting.has(message.id)) {
         const task=waiting.get(message.id);waiting.delete(message.id);clearTimeout(task.timer);
@@ -171,17 +181,18 @@ async function renderDirectory(path,container,depth) {
     };
   }
 }
-async function refresh() {
+async function refresh(rethrow=false) {
   if(!ready){await indexReady;return}
   $('refresh').disabled=true;
   try {
     const listing=await rpc('list-many',{paths:[sourceRoot,...expanded]});
     for(const [path,files] of Object.entries(listing))cacheDirectory(path,files);
     await renderDirectory(sourceRoot,$('tree'),0);await editor.checkExternal();
-  } catch(error){notice(error.message)}finally{$('refresh').disabled=false}
+  } catch(error){if(rethrow)throw error;notice(error.message)}finally{$('refresh').disabled=false}
 }
 async function openFile(path) {
   await editor.open(path);
+  layout?.selectPane('editor');
   if(diagnostics.filesOpenMs===null)diagnostics.filesOpenMs=performance.now();
 }
 async function openDiagnostic(file,line,column=1,cwd=terminalCwd) {
@@ -192,7 +203,7 @@ async function openDiagnostic(file,line,column=1,cwd=terminalCwd) {
       const result=await readEditorFile(path);
       await editor.open(path,result.text,result.revision);await editor.goTo(path,Number(line),Number(column));
       if(layout.state.maximized==='terminal'||layout.state.maximized==='viewer')layout.maximize(null);
-      editor.focus();return true;
+      layout?.selectPane('editor');editor.focus();return true;
     } catch(error){failure=error}
   }
   notice('Cannot open '+file+': '+failure.message);return false;
@@ -215,27 +226,68 @@ terminal.registerLinkProvider({provideLinks(row,callback){
   }
   callback(links);
 }});
-$('save').onclick=()=>editor.save();$('refresh').onclick=refresh;
+$('save').onclick=()=>editor.save();
+$('refresh').onclick=async()=>{
+  const activity=WorkbenchOperations.start('Refresh files',{label:'Reading workspace folders…',delay:700});
+  try{await refresh(true);activity.complete('Files refreshed')}catch(error){activity.fail(error)}
+};
+function setWorkspaceBusy(value) {
+  workspaceBusy=value;$('backup').disabled=value||!ready;$('import').disabled=value;
+  $('import').closest('label').setAttribute('aria-disabled',String(value));
+}
+function archiveProgress(activity) {
+  const labels={waiting:'Waiting for the other workspace operation…',scanning:'Finding source, data and results…',packing:'Compressing workspace…',validating:'Checking the archive…',restoring:'Restoring workspace files…'};
+  return ({stage,completed,total,unit,detail})=>activity.update({stage,label:labels[stage]||'Working…',completed,total,unit,detail});
+}
+function readImport(file,activity) {
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    activity.update({stage:'reading',label:'Reading '+file.name+'…',completed:0,total:file.size,unit:'bytes'});
+    reader.onprogress=event=>activity.update({completed:event.loaded,total:event.lengthComputable?event.total:null});
+    reader.onload=()=>resolve(new Uint8Array(reader.result));
+    reader.onerror=()=>reject(reader.error||new Error('Unable to read the archive'));
+    reader.onabort=()=>reject(new Error('Reading the archive was interrupted'));
+    reader.readAsArrayBuffer(file);
+  });
+}
 $('backup').onclick=async()=>{
+  if(workspaceBusy)return;
+  setWorkspaceBusy(true);
+  const activity=WorkbenchOperations.start('Export workspace',{label:'Saving editor files…'});
+  let path;
   try {
     if(!(await editor.saveAll()))throw new Error('Resolve editor conflicts before exporting.');
-    $('backup').disabled=true;notice('Packing source, Git history, data and results…');
-    const path=await rpc('export'),bytes=await vm.read_file(path.slice(1));
+    activity.update({stage:'scanning',label:'Finding source, data and results…'});
+    path=await rpc('export',{},archiveProgress(activity));
+    activity.update({stage:'download',label:'Preparing the browser download…'});
+    const bytes=await vm.read_file(path.slice(1));
     const url=URL.createObjectURL(new Blob([bytes],{type:'application/gzip'}));
     const link=document.createElement('a');link.href=url;link.download='mfem-workspace-'+new Date().toISOString().slice(0,10)+'.tar.gz';link.click();
-    setTimeout(()=>URL.revokeObjectURL(url),60000);notice('Workspace exported. Import this archive in a later session.');
-  } catch(error){notice(error.message)}finally{$('backup').disabled=false}
+    setTimeout(()=>URL.revokeObjectURL(url),60000);activity.complete('Archive ready · browser download started');notice('Workspace archive ready. Keep the downloaded archive to import in a later session.');
+  } catch(error){activity.fail(error);notice(error.message)}
+  finally{if(path)rpc('unlink',{path}).catch(()=>{});setWorkspaceBusy(false)}
 };
 $('import').onchange=async event=>{
   const file=event.target.files[0];if(!file)return;
+  if(workspaceBusy){event.target.value='';return}
+  let activity,uploaded,started=false;
   try {
     if(!ready)throw new Error('Wait for Linux to finish starting');
     if(!confirm('Import overlays files in /root/mfem. Unsaved editor tabs are kept. Continue?'))return;
-    notice('Restoring workspace…');await rpc('restore',{upload:await upload(new Uint8Array(await file.arrayBuffer()))});
-    directories.clear();expanded.clear();await refresh();notice('Workspace restored. Run make in the terminal to rebuild changed code.');
-  } catch(error){notice(error.message)}finally{event.target.value=''}
+    setWorkspaceBusy(true);restoringWorkspace=true;started=true;activity=WorkbenchOperations.start('Import workspace',{label:'Reading archive…'});
+    await Promise.allSettled([...editor.buffers.values()].flatMap(buffer=>[buffer.saving,buffer.checking]).filter(Boolean));
+    const bytes=await readImport(file,activity);
+    activity.update({stage:'upload',label:'Copying the archive into Linux…'});
+    uploaded=await upload(bytes);
+    activity.update({stage:'validating',label:'Checking the archive…'});
+    await rpc('restore',{upload:uploaded},archiveProgress(activity));uploaded=null;restoringWorkspace=false;
+    activity.update({stage:'refreshing',label:'Refreshing files and editor tabs…'});
+    directories.clear();expanded.clear();await refresh(true);
+    activity.complete('Workspace restored');notice('Workspace restored. Run make in the terminal to rebuild changed code.');
+  } catch(error){activity?.fail(error);notice(error.message)}
+  finally{if(uploaded)rpc('unlink',{path:uploaded}).catch(()=>{});if(started){restoringWorkspace=false;setWorkspaceBusy(false)}event.target.value=''}
 };
-const checkEditor=()=>{if(ready&&!document.hidden)editor.checkExternal().catch(error=>console.warn(error.message))};
+const checkEditor=()=>{if(ready&&!restoringWorkspace&&!document.hidden)editor.checkExternal().catch(error=>console.warn(error.message))};
 setInterval(checkEditor,4000);window.addEventListener('focus',checkEditor);
 window.addEventListener('beforeunload',event=>{if(ready||dirty){event.preventDefault();event.returnValue='Export your workspace to preserve changes.'}});
 window.addEventListener('unhandledrejection',event=>notice(event.reason?.message||String(event.reason)));

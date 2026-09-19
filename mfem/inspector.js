@@ -109,14 +109,18 @@
       if(busy || destroyed)return;
       const frame=getFrame();if(!frame?.data){status.textContent='No rendered frame to inspect.';return}
       setBusy(true);status.textContent='Reading the displayed mesh with MFEM…';
+      const activity=window.WorkbenchOperations?.start('Inspect mesh',{label:'Reading the displayed mesh with MFEM…',delay:700});
       let path;
       try {
         path=await upload(encoder.encode(frame.data));
+        activity?.update({stage:'inspect',label:'Evaluating mesh quality and attributes…'});
         const data=await request(path);
-        if(destroyed){await discard(path);return}
+        if(destroyed){await discard(path);activity?.complete('Inspection finished');return}
         await discard(snapshot?.path);snapshot={path,frame:frame.frame};path=null;
         showReport(data,frame);
+        activity?.complete('Mesh inspection complete');
       } catch(error) {
+        activity?.fail(error);
         status.textContent=error.message || String(error);
         if(!report)content.hidden=true;
       } finally {await discard(path);if(!destroyed)setBusy(false)}
@@ -125,14 +129,15 @@
       if(busy || !snapshot || destroyed)return;
       if(point.some(value=>!Number.isFinite(value))){result.textContent='Enter finite coordinates.';return}
       setBusy(true);result.textContent='Locating the point and evaluating the field with MFEM…';
+      const activity=window.WorkbenchOperations?.start('Probe solution',{label:'Locating the point and evaluating the field…',delay:700});
       try {
-        const data=await request(snapshot.path,point);if(destroyed)return;
+        const data=await request(snapshot.path,point);activity?.complete('Point evaluated');if(destroyed)return;
         selected=data;draw();
         const where='('+point.map(format).join(', ')+')';
         result.textContent=data.found ? `${where} · element ${data.element}, attribute ${data.attribute}`+
           (data.values?` · value${data.values.length===1?'':'s'}: ${data.values.map(format).join(', ')}`:` · ${data.unsupported}`) :
           `${where}: no containing element found. Check the domain and, for a surface mesh, the surface coordinates.`;
-      } catch(error) {result.textContent=error.message || String(error)}
+      } catch(error) {activity?.fail(error);result.textContent=error.message || String(error)}
       finally {if(!destroyed)setBusy(false)}
     }
     listen(button,'click',()=>{inspectorWindow.open();if(!snapshot)refresh()});
