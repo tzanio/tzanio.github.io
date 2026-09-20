@@ -184,13 +184,14 @@
       if(filesystemSuspended){filesystemDeferred=true;return}
       if(saveTimer)return;saveTimer=setTimeout(()=>{saveTimer=null;checkpoint().catch(()=>{})},delay);
     }
-    function suspendFilesystem(){
+    function suspendFilesystem({drain=true}={}){
       filesystemSuspended=true;
       pauseNotice.hidden=false;applySuspendedControls();
       if(saveTimer){clearTimeout(saveTimer);saveTimer=null;filesystemDeferred=true}
       // Complete an existing transaction before an archive changes/reads files.
       // A failed autosave must still allow exporting a rescue copy of the work.
-      return Promise.resolve(busy).catch(()=>{});
+      // Read-only source patches need not wait for a large existing checkpoint.
+      return drain?Promise.resolve(busy).catch(()=>{}):Promise.resolve();
     }
     function resumeFilesystem(){
       if(!filesystemSuspended)return;

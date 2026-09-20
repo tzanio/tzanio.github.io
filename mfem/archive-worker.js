@@ -5,7 +5,7 @@ class UnsupportedArchive extends Error {}
 async function inspectSession(bytes,maximum){
   const decoder=new TextDecoder('utf-8',{fatal:true}),name='mfem-workbench-session.json';
   const block=512,sessionLimit=32*1024*1024;
-  let offset=0,count=0,extensions=0,last=0,session=null,pax=null;
+  let offset=0,count=0,extensions=0,last=0,session=null,pax=null,changesPatch=false,changesMetadata=false;
   let globals=Object.create(null);
   const bad=message=>{throw new Error('Invalid workspace archive: '+message)};
   function progress(final=false){
@@ -52,7 +52,7 @@ async function inspectSession(bytes,maximum){
   progress();
   while(offset+block<=bytes.length){
     let nonzero=false;for(let i=offset;i<offset+block;i++)if(bytes[i]){nonzero=true;break}
-    if(!nonzero){if(pax)bad('PAX header has no following member');progress(true);return {supported:true,session}}
+    if(!nonzero){if(pax)bad('PAX header has no following member');progress(true);return {supported:true,session,...(changesPatch&&changesMetadata?{kind:'changes'}:{})}}
     const checksum=octal(offset+148,8);let unsigned=256,signed=256;
     for(let i=0;i<block;i++)if(i<148||i>=156){const value=bytes[offset+i];unsigned+=value;signed+=value<128?value:value-256}
     if(checksum!==unsigned&&checksum!==signed)bad('header checksum mismatch');
@@ -88,6 +88,10 @@ async function inspectSession(bytes,maximum){
     if(!regular&&size)throw new UnsupportedArchive('Non-regular tar payload');
     if(!regular)memberName=memberName.replace(/\/+$/,'');
     if(size>maximum||dataOffset+size>bytes.length)bad('truncated or oversized member');
+    // A scheduling hint only. The compute backend validates the complete patch,
+    // metadata, base commit and destination conflicts before making changes.
+    if(regular&&memberName==='changes.patch')changesPatch=true;
+    if(regular&&memberName==='reproduction.json')changesMetadata=true;
     if(memberName===name){
       if(session)bad('duplicate session metadata');
       if(!regular||size>sessionLimit)bad('invalid session metadata member');

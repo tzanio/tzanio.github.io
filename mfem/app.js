@@ -163,8 +163,9 @@ workspaces=localCompute?WorkbenchLocalWorkspace.mount({editor,runtime:vm,notice,
   onStatus:state=>{diagnostics.workspace=state;if(!ready&&['restoring','error'].includes(state.state))WorkbenchStartup?.workspace(state.label+(state.detail?' · '+state.detail:''))},
 });
 browserCompiler=localCompute?null:WorkbenchBrowserCompiler.mount({rpc,readFile:path=>vm.read_file(path.replace(/^\//,'')),upload,notice});
-developerTools=WorkbenchDeveloperTools.mount({rpc,readFile:path=>vm.read_file(path.replace(/^\//,'')),editor,terminal,notice,allowBundles:!localCompute,
-  openFile,isReady:()=>ready,getCwd:()=>terminalCwd,getRuntime:()=>({mfem:'4.10',mode:vm.mode,...(localCompute?{platform:vm.info?.platform}:{memoryMiB:768}),userAgent:navigator.userAgent}),
+developerTools=WorkbenchDeveloperTools.mount({rpc,readFile:path=>vm.read_file(path.replace(/^\//,'')),editor,terminal,notice,
+  openFile,isReady:()=>ready&&!workspaceBusy,getCwd:()=>terminalCwd,getRuntime:()=>({mfem:'4.10',mode:vm.mode,...(localCompute?{platform:vm.info?.platform}:{memoryMiB:768}),userAgent:navigator.userAgent}),
+  beginExport:async()=>{if(workspaceBusy)throw new Error('Wait for the current workspace operation.');setWorkspaceBusy(true);await workspaces?.suspendFilesystem?.({drain:false});return()=>setWorkspaceBusy(false)},
 });
 session=WorkbenchSession.create({editor,layout,simulation,terminal,rpc,getCwd:()=>terminalCwd,
   getFiles:()=>({expanded:[...expanded],scrollTop:$('tree').scrollTop}),
@@ -283,7 +284,7 @@ $('refresh').onclick=async()=>{
 function setWorkspaceBusy(value) {
   workspaceBusy=value;
   if(!value)workspaces?.resumeFilesystem?.();
-  for(const id of ['backup','import','import-open'])$(id).disabled=value||!ready;
+  for(const id of ['backup','import','import-open','export-changes','export-workspace'])if($(id))$(id).disabled=value||!ready;
 }
 function archiveProgress(activity) {
   const labels={waiting:'Waiting for the other workspace operation…',checkpoint:'Checking changed files…',scanning:'Finding source, data and results…',packing:'Preparing workspace archive…',compressing:'Compressing archive in the browser…',unpacking:'Opening compressed archive…',reading:'Reading archive…',validating:'Checking the archive…',restoring:'Restoring workspace files…'};
@@ -301,7 +302,7 @@ function readImport(file,activity) {
     reader.readAsArrayBuffer(file);
   });
 }
-$('backup').onclick=async()=>{
+async function exportWorkspace(){
   if(workspaceBusy)return;
   setWorkspaceBusy(true);
   const activity=WorkbenchOperations.start('Export workspace',{label:'Capturing open tabs and session…'});
@@ -328,23 +329,25 @@ $('backup').onclick=async()=>{
     WorkbenchOperations.download(activity,bytes,'mfem-workspace-'+new Date().toISOString().slice(0,10)+'.tar.gz',{
       detail:['Includes files, layout, editor tabs/drafts, terminal and displayed GLVis data. Exact cameras and animation history are not included.',...saved.warnings].join(' '),
     });notice(saved.warnings.length?saved.warnings.join(' '):'Workspace and session archive ready. Download it again from Activity.');
-  } catch(error){activity.fail(error,{retry:()=>$('backup').onclick()});notice(error.message)}
+  } catch(error){activity.fail(error,{retry:exportWorkspace});notice(error.message)}
   finally{for(const temporary of [path,sessionUpload])if(temporary)rpc('unlink',{path:temporary}).catch(()=>{});setWorkspaceBusy(false)}
-};
+}
+WorkbenchDeveloperTools.mountExportMenu({isReady:()=>ready&&!workspaceBusy,onChanges:()=>developerTools.exportChanges(),onWorkspace:exportWorkspace});
 async function importArchive(file,confirmed=false) {
   if(!file||workspaceBusy)return;
   let activity,uploaded,sessionPath,started=false;
   try {
     if(!ready)throw new Error(localCompute?'Connect to local compute before importing.':'Wait for Linux to finish starting');
-    if(!confirmed&&!confirm('Import restores workspace files, including recorded deletions, and any saved layout, tabs, terminal output and GLVis data. Older archives restore files only. Your current unsaved editor text is kept. Continue?'))return;
+    if(!confirmed&&!confirm('Import applies source changes after conflict checks, or restores a full workspace and its saved session. Recorded deletions are included. Your current unsaved editor text is kept. Continue?'))return;
     setWorkspaceBusy(true);restoringWorkspace=true;started=true;activity=WorkbenchOperations.start('Import workspace',{label:'Reading archive…'});
-    await workspaces?.suspendFilesystem?.();
+    await workspaces?.suspendFilesystem?.({drain:false});
     await Promise.allSettled([...editor.buffers.values()].flatMap(buffer=>[buffer.saving,buffer.checking]).filter(Boolean));
     if(file.size>archiveLimit())throw new Error('This archive exceeds this device’s '+archiveLimit()/1048576+' MiB import limit.');
     const bytes=localCompute?file:window.WorkbenchArchive?.supported?
       await WorkbenchArchive.unpack(file,{maxBytes:archiveLimit(),onProgress:archiveProgress(activity)}):await readImport(file,activity);
     activity.update({stage:'validating',label:'Checking the archive…'});
     const nativeInspection=localCompute?null:await window.WorkbenchArchive?.inspectSession?.(bytes,{maxBytes:archiveLimit(),onProgress:archiveProgress(activity)});
+    if(nativeInspection?.kind!=='changes')await workspaces?.suspendFilesystem?.();
     let savedSession=null;
     if(nativeInspection?.supported&&nativeInspection.session)savedSession=session.validate(JSON.parse(decoder.decode(nativeInspection.session.bytes)));
     activity.update({stage:'upload',label:localCompute?'Sending the archive to local compute…':'Copying the archive into Linux…'});
@@ -363,9 +366,10 @@ async function importArchive(file,confirmed=false) {
     if(savedSession){
       activity.update({stage:'refreshing',label:'Restoring layout, tabs, terminal and saved visualization…'});
       warnings.push(...await session.restore(savedSession));workspaces?.captureDrafts();fit();
-    }else{directories.clear();expanded.clear();await refresh(true)}
-    const detail=savedSession?'Session restored. At the shell prompt, press Ctrl+C to clear current input and apply its history and directory. No saved commands are executed.':'Workspace files restored.';
-    activity.complete('Workspace restored',{detail:[detail,...warnings].join(' '),persistent:warnings.length>0});notice(warnings.length?warnings.join(' '):detail);
+    }else{directories.clear();if(restored?.kind!=='changes')expanded.clear();await refresh(true)}
+    const changesOnly=restored?.kind==='changes';
+    const detail=savedSession?'Session restored. At the shell prompt, press Ctrl+C to clear current input and apply its history and directory. No saved commands are executed.':changesOnly?'Source changes applied. Layout, terminal and unsaved editor text are retained.':'Workspace files restored.';
+    activity.complete(changesOnly?'Changes applied':'Workspace restored',{detail:[detail,...warnings].join(' '),persistent:warnings.length>0});notice(warnings.length?warnings.join(' '):detail);
   } catch(error){activity?.fail(error,{retry:()=>importArchive(file,true)});notice(error.message)}
   finally{for(const temporary of [uploaded,sessionPath])if(temporary)rpc('unlink',{path:temporary}).catch(()=>{});if(started){restoringWorkspace=false;setWorkspaceBusy(false)}}
 }

@@ -725,6 +725,12 @@ def restore_workspace_archive(upload, workspace, progress, **options):
                     if actual != options['expected_session_hash']:
                         raise ValueError('Session metadata changed after validation; import the archive again')
                 members = [item for item in members if item.name != 'mfem-workbench-session.json']
+                if any(item.name == 'changes.patch' for item in members):
+                    if session_data is not None:
+                        raise ValueError('Changes archives contain source changes only; session metadata is not supported')
+                    from workspace_changes import restore_archive
+                    validating = False
+                    return restore_archive(archive, members, workspace, progress)
                 portable = [item for item in members if item.name == '.mfem-portable.json']
                 if portable:
                     if len(portable) != 1 or not portable[0].isfile() or portable[0].size > 16 * 1024 * 1024 or any(item.name in ('.mfem-workspace.json', '.mfem-checkpoint.json') for item in members):

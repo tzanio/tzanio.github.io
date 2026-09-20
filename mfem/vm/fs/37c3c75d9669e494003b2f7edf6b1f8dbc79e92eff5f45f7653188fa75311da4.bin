@@ -1,0 +1,351 @@
+#!/usr/bin/python3
+"""Review and export MFEM working-tree changes without touching the user's index."""
+import contextlib
+import datetime
+import io
+import json
+import os
+from pathlib import Path
+import shutil
+import stat
+import subprocess
+import sys
+import tarfile
+import tempfile
+import unicodedata
+
+ROOT = Path('/root/mfem')
+BASE = 'd964264cdb9a13e94a201b6c236c7721e0c8765f'
+MAX_PREVIEW = 1024 * 1024
+MAX_PATCH = 128 * 1024 * 1024
+
+
+def git(root, *args, env=None, data=None):
+    result = subprocess.run(['git', '-c', 'core.quotepath=false', '-C', str(root), *args],
+                            env=env if env is not None else dict(os.environ, GIT_OPTIONAL_LOCKS='0'),
+                            input=data, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.returncode:
+        raise ValueError(result.stderr.decode('utf-8', 'replace').strip() or 'Git failed')
+    return result.stdout
+
+
+def base_commit(root):
+    # The shipped release, not HEAD: local commits must remain in the export.
+    candidate = BASE
+    return git(root, 'rev-parse', '--verify', candidate + '^{commit}').decode().strip()
+
+
+def relative_path(value):
+    if not isinstance(value, str) or not value or '\x00' in value:
+        raise ValueError('Choose a workspace file')
+    path = Path(value)
+    if path.is_absolute():
+        try:
+            path = path.relative_to(ROOT)
+        except ValueError:
+            raise ValueError('Files must be inside /root/mfem')
+    if '..' in path.parts or not path.parts or path.parts[0] == '.git':
+        raise ValueError('Files must be inside the MFEM working tree')
+    return path.as_posix()
+
+
+def checkout_head(root):
+    checkout = Path(root) / '.git'
+    head = (checkout / 'HEAD').read_text().strip()
+    branch = 'HEAD'
+    if head.startswith('ref: '):
+        reference = head[5:]
+        if not reference.startswith('refs/') or any(part in ('', '.', '..') for part in reference.split('/')):
+            raise ValueError('Invalid Git HEAD reference')
+        branch = reference.removeprefix('refs/heads/')
+        target = checkout / reference
+        if target.is_file():
+            head = target.read_text().strip()
+        else:
+            head = None
+            packed = checkout / 'packed-refs'
+            for line in packed.read_text().splitlines() if packed.is_file() else []:
+                if line.endswith(' ' + reference):
+                    head = line.split(' ', 1)[0]
+                    break
+    if not isinstance(head, str) or len(head) != 40 or any(c not in '0123456789abcdef' for c in head):
+        raise ValueError('Changes archives require an existing Git commit')
+    return head, branch
+
+
+def status(root):
+    with isolated_git(root) as env:
+        base = git(root, 'rev-parse', '--verify', BASE + '^{commit}', env=env).decode().strip()
+        head, branch = checkout_head(root)
+        Path(env['GIT_DIR'], 'HEAD').write_text(head + '\n')
+        index = Path(root) / '.git/index'
+        if index.is_file():
+            shutil.copyfile(index, env['GIT_INDEX_FILE'])
+        else:
+            git(root, 'read-tree', head, env=env)
+        fields = git(root, 'status', '--porcelain=v1', '-z', '--untracked-files=all', env=env).split(b'\x00')
+    entries = []
+    index = 0
+    while index < len(fields) and fields[index]:
+        field = fields[index]
+        index += 1
+        code, name = field[:2].decode('ascii'), os.fsdecode(field[3:])
+        item = {'status': code, 'path': name}
+        if 'R' in code or 'C' in code:
+            item['from'] = os.fsdecode(fields[index])
+            index += 1
+        entries.append(item)
+    return {'base_commit': base, 'head': head,
+            'branch': branch,
+            'entries': entries}
+
+
+@contextlib.contextmanager
+def isolated_git(root):
+    """Read local objects without loading checkout configuration or executing filters.
+
+    The temporary object store also keeps exports from adding blobs to the user's
+    repository. Its highest-priority attributes preserve raw file bytes.
+    """
+    root = Path(root).resolve()
+    checkout = root / '.git'
+    if checkout.is_symlink() or not checkout.is_dir() or not (checkout / 'objects').is_dir():
+        raise ValueError('Changes archives require a standalone MFEM Git checkout')
+    with tempfile.TemporaryDirectory(prefix='mfem-changes-') as temporary:
+        directory = Path(temporary)
+        for name in ('objects', 'refs', 'info'):
+            (directory / name).mkdir()
+        (directory / 'HEAD').write_text('ref: refs/heads/workbench\n')
+        (directory / 'config').write_text('[core]\nrepositoryformatversion = 0\nfilemode = true\nignorecase = false\nbare = false\n')
+        (directory / 'info/attributes').write_text('* -filter -text -ident -working-tree-encoding\n')
+        (directory / 'info/exclude').write_text('.mfem-build/\nconfig/config.mk\nconfig/_config.hpp\nCMakeFiles/\nCMakeCache.txt\n*.o\n*.a\n*.gch\n*.pch\n*.so\n*.dylib\n*.dSYM/\n')
+        env = {key: value for key, value in os.environ.items() if not key.startswith('GIT_')}
+        env.update(GIT_DIR=str(directory), GIT_WORK_TREE=str(root), GIT_INDEX_FILE=str(directory / 'index'),
+                   GIT_ALTERNATE_OBJECT_DIRECTORIES=json.dumps(str(checkout / 'objects'), ensure_ascii=False), GIT_OPTIONAL_LOCKS='0', GIT_LITERAL_PATHSPECS='1',
+                   GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull, GIT_ATTR_NOSYSTEM='1', GIT_NO_LAZY_FETCH='1')
+        yield env
+
+
+@contextlib.contextmanager
+def private_index(root, base):
+    with isolated_git(root) as env:
+        # Start from a copy when available; the checkout's index is never written.
+        index = Path(root) / '.git/index'
+        if index.is_file():
+            shutil.copyfile(index, env['GIT_INDEX_FILE'])
+        git(root, 'read-tree', base, env=env)
+        # Include untracked non-ignored files, deletions, modes, symlinks and binary
+        # changes. The actual staging index and the work tree are never written.
+        git(root, 'add', '--all', '--', '.', env=env)
+        for name in index_entries(root, env):
+            source_path(name)
+        yield env
+
+
+def patch(root, selected=None):
+    # Resolve the fixed release through isolated metadata as well: promisor,
+    # fsmonitor, include directives and global Git settings are never consulted.
+    with isolated_git(root) as env:
+        base = git(root, 'rev-parse', '--verify', BASE + '^{commit}', env=env).decode().strip()
+    with private_index(root, base) as env:
+        args = ['diff', '--cached', '--binary', '--full-index', '--no-ext-diff', '--no-textconv', base, '--']
+        if selected:
+            args.extend(relative_path(item) for item in selected)
+        content = git(root, *args, env=env)
+        if len(content) > MAX_PATCH:
+            raise ValueError('Changes exceed the 128 MiB patch limit; select fewer files or use Export workspace')
+        return base, content
+
+
+def add_bytes(archive, name, content):
+    info = tarfile.TarInfo(name)
+    info.size, info.mode = len(content), 0o644
+    archive.addfile(info, io.BytesIO(content))
+
+
+def source_path(name):
+    """Patch imports never replace checkout controls or machine build settings."""
+    if not isinstance(name, str) or not name or '\0' in name or name.startswith('/') or any(part in ('', '.', '..') for part in name.split('/')):
+        raise ValueError('Invalid changes path: ' + repr(name))
+    folded = unicodedata.normalize('NFD', name).casefold()
+    parts = folded.split('/')
+    if any(part in ('.git', '.mfem-build', 'cmakefiles') for part in parts) or folded in ('config/config.mk', 'config/_config.hpp'):
+        raise ValueError('Changes archive contains a protected path: ' + name)
+    return name
+
+
+def index_entries(root, env, names=None):
+    args = ['ls-files', '--stage', '-z']
+    if names:
+        args.extend(['--', *names])
+    result = {}
+    for record in git(root, *args, env=env).split(b'\0'):
+        if not record:
+            continue
+        metadata, raw_name = record.split(b'\t', 1)
+        mode, oid, stage = metadata.decode().split()
+        if stage != '0' or mode not in ('100644', '100755', '120000'):
+            raise ValueError('Changes archives do not support unmerged files or submodules')
+        result[os.fsdecode(raw_name)] = (mode, oid)
+    return result
+
+
+def restore_archive(archive, members, root, progress=lambda *a, **k: None):
+    """Validate a small patch completely, then apply without changing Git staging.
+
+    Only affected files are read. A destination edit to any affected file aborts
+    the entire import; unrelated files and their edits are preserved.
+    """
+    root = Path(root).resolve()
+    by_name = {}
+    for item in members:
+        if item.name in by_name or not item.isfile() or item.name not in ('changes.patch', 'reproduction.json', 'README.txt', 'terminal.log'):
+            # Reproduction mesh copies are informational; they must still have
+            # safe names and never get extracted automatically.
+            if item.name in by_name or not item.isfile() or not item.name.startswith('inputs/'):
+                raise ValueError('Invalid changes archive member: ' + item.name)
+            source_path(item.name[7:])
+        by_name[item.name] = item
+    if 'changes.patch' not in by_name or 'reproduction.json' not in by_name:
+        raise ValueError('Changes archive requires changes.patch and reproduction.json')
+    if by_name['changes.patch'].size > MAX_PATCH or by_name['reproduction.json'].size > 1024 * 1024:
+        raise ValueError('Changes archive metadata or patch exceeds its size limit')
+    metadata = json.loads(archive.extractfile(by_name['reproduction.json']).read())
+    if not isinstance(metadata, dict) or type(metadata.get('format')) is not int or metadata['format'] != 1 or metadata.get('mfem') != '4.10' or metadata.get('base_commit') != BASE:
+        raise ValueError('Changes archive must use the shipped MFEM 4.10 base commit')
+    content = archive.extractfile(by_name['changes.patch']).read()
+    progress('validating', 0, len(content), detail='Checking MFEM base and patch conflicts')
+    if not content.strip():
+        return {'restored': True, 'kind': 'changes', 'changed_files': 0, 'warnings': ['The changes archive is empty; no files were changed.']}
+    with isolated_git(root) as env:
+        base = git(root, 'rev-parse', '--verify', BASE + '^{commit}', env=env).decode().strip()
+        git(root, 'read-tree', base, env=env)
+        # Applying only to a temporary index first proves the patch describes
+        # the named release, and produces unambiguous paths/modes/blob contents.
+        git(root, 'apply', '--cached', '--binary', '--whitespace=nowarn', '-', env=env, data=content)
+        names = [source_path(os.fsdecode(name)) for name in git(root, 'diff', '--cached', '--name-only', '--no-renames', '-z', base, '--', env=env).split(b'\0') if name]
+        if len(names) > 100000:
+            raise ValueError('Changes archive contains too many paths')
+        folded_names = set()
+        for name in names:
+            key = unicodedata.normalize('NFD', name).casefold() if sys.platform == 'darwin' else name
+            if key in folded_names:
+                raise ValueError('Changes paths collide by case or Unicode normalization')
+            folded_names.add(key)
+            parent = root
+            for part in Path(name).parts[:-1]:
+                parent /= part
+                if parent.is_symlink():
+                    raise ValueError('Changes path passes through a symlink: ' + name)
+        after = index_entries(root, env, names)
+        for name, (mode, oid) in after.items():
+            if mode == '120000':
+                target = os.fsdecode(git(root, 'cat-file', 'blob', oid, env=env))
+                if not target or '\0' in target or Path(target).is_absolute() or not (root / name).parent.joinpath(target).resolve().is_relative_to(root):
+                    raise ValueError('Changes symlink leaves the MFEM workspace: ' + name)
+        git(root, 'read-tree', base, env=env)
+        before = index_entries(root, env, names)
+        for index, name in enumerate(names):
+            path = root / name
+            entry = before.get(name)
+            try:
+                current = path.lstat()
+            except FileNotFoundError:
+                current = None
+            mismatch = False
+            if entry is None:
+                mismatch = current is not None
+            elif current is None:
+                mismatch = True
+            else:
+                mode, oid = entry
+                if mode == '120000':
+                    mismatch = not stat.S_ISLNK(current.st_mode) or os.fsencode(os.readlink(path)) != git(root, 'cat-file', 'blob', oid, env=env)
+                elif not stat.S_ISREG(current.st_mode) or bool(current.st_mode & 0o111) != (mode == '100755'):
+                    mismatch = True
+                else:
+                    # hash-object without --path / --filters hashes raw bytes.
+                    actual = git(root, 'hash-object', '--no-filters', '--', str(path), env=env).decode().strip()
+                    mismatch = actual != oid
+            if mismatch:
+                raise ValueError('Changes conflict with an existing edit or file: ' + name + '. Import into a clean MFEM 4.10 workspace, or save/revert that file first.')
+            progress('validating', index + 1, len(names), unit='files', detail=name)
+        # Git's own worktree validation also rejects unsafe paths and symlink
+        # traversal. No --reject / --3way: validation failure applies nothing.
+        git(root, 'apply', '--check', '--binary', '--whitespace=nowarn', '-', env=env, data=content)
+        progress('restoring', 0, len(names), unit='files', detail='Applying source changes')
+        git(root, 'apply', '--binary', '--whitespace=nowarn', '-', env=env, data=content)
+        progress('restoring', len(names), len(names), unit='files', final=True)
+    return {'restored': True, 'kind': 'changes', 'changed_files': len(names), 'warnings': ['Source changes applied; Git staging, builds, layout, terminal history and unsaved editor drafts were not imported. Rebuild changed targets before running.']}
+
+
+def export(request, root, progress, temp_dir=None):
+    progress('changes', unit='files', detail='Comparing with the shipped MFEM commit')
+    base, content = patch(root, request.get('paths'))
+    compression = request.get('compression', 'gzip')
+    if compression not in ('gzip', 'none'):
+        raise ValueError('Unsupported changes archive compression')
+    descriptor, filename = tempfile.mkstemp(prefix='mfem-reproduction-' if request['op'] == 'reproduction-export' else 'mfem-changes-', suffix='.tar.gz' if compression == 'gzip' else '.tar', dir=temp_dir)
+    os.close(descriptor)
+    try:
+        options = {'compresslevel': 1} if compression == 'gzip' else {}
+        with tarfile.open(filename, 'w:gz' if compression == 'gzip' else 'w', **options) as archive:
+            add_bytes(archive, 'changes.patch', content)
+            # No second Git status traversal after the snapshot has been made.
+            metadata = {'format': 1, 'mfem': '4.10', 'base_commit': base,
+                             'created': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                             'scope': request.get('paths') or 'all non-ignored working-tree changes'}
+            if request['op'] == 'reproduction-export':
+                metadata['command'] = str(request.get('command', ''))[:16384]
+                metadata['cwd'] = str(request.get('cwd', '/root/mfem/examples'))[:4096]
+                metadata['tests'] = str(request.get('tests', ''))[:16384]
+                metadata['runtime'] = request.get('runtime', {})
+                log = str(request.get('log', '')).encode('utf-8')[-1024 * 1024:]
+                add_bytes(archive, 'terminal.log', log)
+                metadata['meshes'] = []
+                for value in request.get('meshes', []):
+                    relative = relative_path(value)
+                    target = root / relative
+                    if not target.resolve().is_relative_to(root.resolve()):
+                        raise ValueError('Mesh link leaves the workspace: ' + relative)
+                    info = target.stat()
+                    if not stat.S_ISREG(info.st_mode) or info.st_size > 128 * 1024 * 1024:
+                        raise ValueError('Choose a regular mesh file smaller than 128 MiB')
+                    progress('packing', unit='files', detail=relative)
+                    archive.add(target.resolve(), arcname='inputs/' + relative, recursive=False)
+                    metadata['meshes'].append({'path': relative, 'bundle_path': 'inputs/' + relative})
+            add_bytes(archive, 'reproduction.json', json.dumps(metadata, indent=2, ensure_ascii=True).encode() + b'\n')
+            add_bytes(archive, 'README.txt', (
+                'MFEM browser working-tree changes\n\n'
+                'Base commit: ' + base + '\n'
+                'On a clean checkout of this base, review and apply:\n'
+                '  git apply --check /path/to/changes.patch\n'
+                '  git apply --binary /path/to/changes.patch\n\n'
+                'The patch includes committed, staged, unstaged and untracked non-ignored\n'
+                'working-tree content relative to the shipped base. Git history/staging,\n'
+                'ignored outputs and browser editor drafts are not in the patch.\n'
+                'Use Export workspace for a full portable workspace archive.\n'
+                'The workbench Import button accepts this archive directly. Changed paths\n'
+                'must still match the base; unrelated destination files are preserved.\n'
+                'Reproduction bundles also include the entered command, terminal log,\n'
+                'runtime/test metadata and any explicitly selected mesh files.\n'
+            ).encode())
+        progress('packing', 1, 1, unit='archives', final=True)
+        return {'path': filename, 'size': os.path.getsize(filename), 'base_commit': base}
+    except Exception:
+        os.unlink(filename)
+        raise
+
+
+def dispatch(request, progress=lambda *a, **k: None, root=None, temp_dir=None):
+    root = Path(root or ROOT)
+    op = request['op']
+    if op == 'changes-status':
+        return status(root)
+    if op == 'changes-diff':
+        base, content = patch(root, request.get('paths'))
+        return {'base_commit': base, 'text': content[:MAX_PREVIEW].decode('utf-8', 'replace'),
+                'bytes': len(content), 'truncated': len(content) > MAX_PREVIEW}
+    if op in ('changes-export', 'reproduction-export'):
+        return export(request, root, progress, temp_dir=temp_dir)
+    raise ValueError('Unknown changes operation: ' + op)

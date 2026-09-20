@@ -2,6 +2,10 @@
 #compute-window .compute-command{margin:8px 0;white-space:pre-wrap;overflow-wrap:anywhere;padding:10px;font:12px/1.55 ui-monospace,monospace;color:var(--wb-text,#d9e1ec);background:var(--wb-input,#101923);border-color:var(--wb-border,#455869)}
 #compute-window .compute-workspace,#local-workspace-window .local-workspace-path{overflow-wrap:anywhere;font-family:ui-monospace,monospace;color:var(--wb-text,#d9e1ec)}
 #compute-window a{display:inline-block;max-width:100%;white-space:normal}
+#compute-window .compute-steps{margin:14px 0;padding-left:23px;color:var(--wb-text,#d9e1ec)}
+#compute-window .compute-steps li{margin:12px 0;padding-left:3px;line-height:1.6}
+#compute-window .compute-steps p{margin:5px 0}
+#compute-window .compute-steps a{margin-top:5px}
 #compute-window .compute-error,#local-workspace-window .local-workspace-error{color:var(--wb-danger,#f2a8a8);overflow-wrap:anywhere}
 #local-workspace-open{white-space:nowrap}
 #local-workspace-open::before{content:'';display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:var(--wb-accent,#92c8aa);vertical-align:middle}
