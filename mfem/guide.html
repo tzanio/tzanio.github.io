@@ -18,12 +18,13 @@
 <li><a href="downloads/mfem-local.zip" download="mfem-local.zip">Download the local companion</a> and unzip it.</li>
 <li>Open your computer’s terminal and change into the extracted folder containing <code>companion/</code> and <code>site/</code>.</li>
 <li>Replace the path below with the absolute path to your native MFEM checkout, then run:
-<pre>python3.12 companion/serve.py --workspace /absolute/path/to/mfem</pre></li>
+<pre>python3.12 companion/serve.py --workspace /absolute/path/to/mfem --port 0</pre><p><code>--port 0</code> chooses an available port automatically.</p></li>
 <li>Open the localhost link printed by the companion. In that page’s <b>Terminal</b> pane, build and run normally:
 <pre>make ex1
 ./ex1</pre></li>
 </ol>
 <p>The browser terminal is already connected to the native process. No separate <code>xterm</code>, X11 server or <code>DISPLAY</code> setting is needed. GLVis renders results in the browser. Keep the companion running while you work; closing or hiding the page leaves native jobs running. Reload the localhost page to reconnect. Terminal commands run with your local account’s permissions.</p>
+<p>Browser drafts, layout and preferences belong to the localhost port. After a restart, <code>--port 0</code> can choose a new port with fresh browser storage. Reuse the printed port with <code>--port NUMBER</code> to retain that state, or export a <b>Full workspace</b> before stopping and import it on the new page. Saved files stay in your checkout.</p>
 <p>To create a fresh checkout, run the following in a parent directory of your choosing, then use the resulting absolute path with the companion:</p>
 <pre>git clone --branch v4.10 --depth 1 https://github.com/mfem/mfem.git mfem-local
 cd mfem-local

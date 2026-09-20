@@ -1,7 +1,7 @@
 /* Native compute uses the same UI served by the explicit local companion. */
 'use strict';
 (function(){
-  const command='python3.12 companion/serve.py --workspace /path/to/mfem';
+  const command='python3.12 companion/serve.py --workspace /path/to/mfem --port 0';
   function mount({runtime,notice=()=>{}}={}){
     const local=runtime?.mode==='local';
     const button=document.createElement('button');button.id='compute-open';button.type='button';button.textContent=local?'Compute':'Local compute';button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','compute-window');
@@ -42,9 +42,10 @@
         const step=title=>{const li=document.createElement('li'),label=document.createElement('strong');label.textContent=title;li.append(label);steps.append(li);return li};
         const download=link('Download local companion','downloads/mfem-local.zip',step('Download. '));download.download='mfem-local.zip';
         paragraph('Unzip the download. Open your computer’s terminal and change into the extracted folder containing companion/ and site/.',null,step('Extract.'));
-        const launch=step('Launch.');paragraph('Replace /path/to/mfem with the absolute path to your native MFEM checkout, then run:',null,launch);instructions(launch);
+        const launch=step('Launch.');paragraph('Replace /path/to/mfem with the absolute path to your native MFEM checkout, then run. --port 0 chooses an available port automatically:',null,launch);instructions(launch);
         paragraph('Open the localhost link printed by the companion. Use that page’s Terminal pane for make ex1 and ./ex1. GLVis displays the result in the browser; no separate xterm, X11 server or DISPLAY setting is needed.',null,step('Open and work.'));
         paragraph('Keep the companion process running while you work. Starting it is a one-time manual step for each session; this website cannot launch it for you.');
+        paragraph('To retain browser drafts and layout across companion restarts, reuse the printed port with --port NUMBER, or export a Full workspace. Saved files stay in your checkout.');
         paragraph('To move your current work, choose Export → Save & export changes here, then Import in the local page. Choose Full workspace to include layout, tabs, terminal output and displayed GLVis data. Native files save directly to your checkout. Rebuild imported code on the destination.');
         const guide=link('Setup details and a fresh MFEM checkout','guide.html#local-compute');guide.target='_blank';guide.rel='noopener';
         paragraph('Local compute is for a laptop or desktop. Phones and tablets can continue using browser-only compute.');

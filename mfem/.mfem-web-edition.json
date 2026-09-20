@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "a9b0c33ec600263c9353fd07",
+  "version": "68c72607a408745b806c5772",
   "files": {
     "app.js": "a06970e258df8708142f8b5f54d04850a7968e2bf3bd08a1f1353821b803d661",
     "archive-worker.js": "c1e68dc55cee0f5d536af47f57d244368dc92b2f821074a64f49f219926bc4c8",
@@ -9,7 +9,7 @@
     "browser-compiler-worker.js": "3dba69071bbcfad2dfd2c981a32f6b2150d0f199dbff981cac68fe59f7954115",
     "browser-compiler.js": "305b6b5077335723d1ede17ee4e94d03db7cfc41f093f6ab9b5532e2920c6b2d",
     "compute.css": "73f975c108d66d7b9addc34fc10b4a01fd7fdbeb8fdf5923f0685fe597967f75",
-    "compute.js": "3ad4373ce1ed6fb0c58318033ae18c3c5f2d25d0c72e015fadccfbbc47f52d74",
+    "compute.js": "e98d55056499ac378ac853e2af7e349d60f8f5b02ea1444b7499be071759c415",
     "cpp-index.js": "1aee549b29e123636eb803c7ae32374dd3e9f8c8b6d39a8f29aa70e32bd508b8",
     "cpp-navigation.css": "4901b2767a186adb9f1bc3cc35b1b9b397b1234f30c857088de658b4ae70f43b",
     "cpp-navigation.js": "4939bbb893ac66e29c63467c471bcc296b9e40f40e13e99fd3e715b184831d8a",
@@ -19,8 +19,8 @@
     "editor.css": "2820606d5cdf69b6d361bf174436d20123cfd9abbf4ee7eecf34049eba097cfd",
     "editor.js": "bd92bb3bf64164d0b7acf69b506603ed71e4bcd8a53e8a72ee04acaf725b0918",
     "fs-journal.js": "8a29342230035e82c906689bc2693fb0c4ab37031f6b297d61c0dc7a6d612118",
-    "guide.html": "8719c50be5d839a82ecddea6be69c8fe0eac3c0f5e2a7fdd80b95794cd1000d2",
-    "index.html": "2484b411cc0768826b564fea9f5f72458874a6c1563de71d03f75e75cf6d63f7",
+    "guide.html": "4e325342744e3d38f8df3870e5eaa116cdce733ebc96bbc3719967ce7f901b58",
+    "index.html": "62c86f24cc10cf1aa8b9e622bce7bd50e99aad1f49f21179f3a66e020a4209ac",
     "inspector.css": "e8f6386678f9c9a8e5d745573fed5607dde974a9fb187d601cc9d16933b71503",
     "inspector.js": "7e3b5a0348a5ddcb4c3b0f324e5f4c7a811ee4eac21657190411f2e4c2e898d9",
     "layout.css": "4e251c0a4371b55c916173a3a978406116d391a93ca5e9adbd071812f9cd1e99",
@@ -47,7 +47,7 @@
     "session.js": "1789a11234f7c9d6f62144eb1f07622d04c0f3b52b9138ad3acee8713af47f67",
     "simulation.css": "d2bc250b2eb6e0137b83b762c904dd4cb39a57665a0618c1235623c62fc5b426",
     "simulation.js": "bf981df2c7f6d1c15259d10057356be2f30bdce1b5219bbaa067a8555920a0c6",
-    "startup-downloads.json": "ae0f039d79038415a2a9598eb808a2f931da5dbc031ddfd122485a85a853909c",
+    "startup-downloads.json": "9cf7750e1acb6b49253dfa14b97d5fbc1b4bbb2b1f204c6b85876c92f46f4ebd",
     "startup-ex1.json": "106c1f015d43156cafc193574c65a23c0bb7ce8a9057ad76f1de20c54214e5ae",
     "startup.js": "10cc8b45bf2fe91ca5254dc20f6083d63e4b19a0fd1cc762f52199322c2eb4ca",
     "style.css": "89e78ef970cb6c6d89d4f74d142460b260221ca039f27fc0fdcf2d65f234edf7",
@@ -8595,9 +8595,9 @@
     "windows.js": "33ffbec07fc27636b85d221d328845b154bca8dc5706eba11a85bd8b65e5e821",
     "workspaces.css": "e24c9248289d17a555b7b636338d9ac7ab6211d418b54bf0a138c2e7d5144bd3",
     "workspaces.js": "56e3ddd20ed8281d6f7ef035c18a17061ddff902ddace9be9d7b4c7c8a0c4fc0",
-    "downloads/mfem-local.zip": "196edb17c88de7824faceafb02949e757a0e5f41bd0b6c3024f84b48c20d562b",
-    "offline-manifest.json": "f7c4b04ca7b189ddadb32e6ce106215de49635778aac608b7b47dbeb9206750f",
+    "downloads/mfem-local.zip": "a9e4d4bbbc6407b13a36da67f136c4b62af4f9d12968a898a2a43586a0b19922",
+    "offline-manifest.json": "b4d50273b325a4f42409e6f92bb8a248be13b1d6ba940cbe0cc5bb131d6429f7",
     ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "provenance/SHA256SUMS.json": "c85955b6bc2ff635152fcc424f2266402852b33122acd4e701684985d6746ded"
+    "provenance/SHA256SUMS.json": "ac7e0072f93473c430cd2f9ab0fc94cccd8c4ccc45a339b38fae8219237ac1f5"
   }
 }
