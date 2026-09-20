@@ -3,14 +3,14 @@
 (function(){
   function mount({rpc,readFile,editor,terminal,notice,openFile,isReady,getCwd,getRuntime,allowBundles=true,beginExport}) {
     const panel=document.createElement('section');panel.id='developer-tools';
-    panel.innerHTML=`<div class="changes-toolbar"><button data-action="refresh">Refresh</button><button data-action="patch">Export changes</button><button data-action="bundle">Reproduction…</button></div>
+    panel.innerHTML=`<div class="changes-toolbar"><button data-action="refresh">Refresh</button><button data-action="bundle">Reproduction…</button></div>
       <p class="changes-summary" role="status">Open Changes once compute is ready.</p>
       <div class="changes-content"><div class="changes-files" aria-label="Changed files"></div><pre class="changes-diff" tabindex="0" aria-label="Patch preview"></pre></div>
       <details class="reproduction-fields"><summary>Reproduction bundle</summary><label>Command<input name="command" placeholder="./ex1 -m ../data/star.mesh -o 2"></label><label>Mesh paths (one per line, relative to mfem)<textarea name="meshes" rows="2" placeholder="data/star.mesh"></textarea></label><label>Test selection / result<input name="tests" placeholder='[Vector] · passed'></label><label class="reproduction-log"><input type="checkbox" name="include-log" checked> Include terminal scrollback</label><button data-action="export-bundle">Create bundle</button><p>Includes a patch, base commit, command, selected meshes and terminal output. Review the files before sharing.</p></details>`;
     document.body.append(panel);
     const exportNote='Use Export → Full workspace to back up this checkout, or Git in the terminal to create a patch.';
     if(!allowBundles){
-      panel.querySelector('[data-action="patch"]').hidden=true;panel.querySelector('[data-action="bundle"]').hidden=true;
+      panel.querySelector('[data-action="bundle"]').hidden=true;
       panel.querySelector('.reproduction-fields').hidden=true;
       const note=document.createElement('p');note.className='changes-portability-note';note.textContent=exportNote;panel.querySelector('.changes-toolbar').after(note);
     }
@@ -22,7 +22,7 @@
     async function preview(path) {
       selected=path;const token=++revision;diff.textContent='Reading changes…';
       for(const row of files.children)row.classList.toggle('selected',row.dataset.path===path);
-      try {const result=await rpc('changes-diff',path?{paths:[path]}:{});if(token!==revision)return;diff.textContent=result.text||'No working-tree difference from the shipped release.';if(result.truncated)diff.textContent+='\n\nPreview truncated. Export changes contains the full patch.'}
+      try {const result=await rpc('changes-diff',path?{paths:[path]}:{});if(token!==revision)return;diff.textContent=result.text||'No working-tree difference from the shipped release.';if(result.truncated)diff.textContent+='\n\nPreview truncated. Export → Save & export changes contains the full patch.'}
       catch(error){if(token===revision)diff.textContent=error.message}
     }
     async function refresh() {
@@ -61,7 +61,6 @@
     }
     button.onclick=()=>{handle.toggle();if(!panel.hidden)refresh()};
     panel.querySelector('[data-action="refresh"]').onclick=refresh;
-    panel.querySelector('[data-action="patch"]').onclick=()=>exportChanges(false);
     panel.querySelector('[data-action="bundle"]').onclick=()=>{if(!allowBundles)return;const fields=panel.querySelector('details');fields.open=!fields.open;if(fields.open)fields.querySelector('input').focus()};
     panel.querySelector('[data-action="export-bundle"]').onclick=()=>exportChanges(true);
     return {open:()=>{handle.open();return refresh()},refresh,exportChanges};

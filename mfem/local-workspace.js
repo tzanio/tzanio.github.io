@@ -21,12 +21,15 @@
     const button=document.createElement('button');button.id='local-workspace-open';button.type='button';button.textContent='Local files';button.dataset.state='starting';
     document.querySelector('header nav').append(button);
     const panel=document.createElement('section');panel.id='local-workspace-window';
-    panel.innerHTML='<p class="local-workspace-path"></p><p>Saved files are stored directly in your local checkout. Unsaved editor drafts are recovered separately in this browser.</p><p class="local-workspace-state" role="status"></p><p class="local-workspace-error" role="alert" hidden></p><button type="button" class="local-workspace-retry">Retry saving drafts</button>';
+    panel.innerHTML='<p class="local-workspace-path"></p><p>Saved files are stored directly in your local checkout. Unsaved editor drafts are recovered separately in this browser.</p><p class="local-workspace-state" role="status" tabindex="-1"></p><p class="local-workspace-error" role="alert" hidden></p><button type="button" class="local-workspace-retry" hidden>Retry saving drafts</button>';
     const floating=WorkbenchWindows.attach(panel,{title:'Local files',width:470,anchor:button});
     const $=selector=>panel.querySelector(selector);
     button.onclick=()=>floating.toggle();
     let lastStatus='';
     function status(state,label,detail=''){
+      const retry=$('.local-workspace-retry');
+      if(state!=='error'&&document.activeElement===retry)$('.local-workspace-state').focus({preventScroll:true});
+      retry.hidden=state!=='error';
       const signature=JSON.stringify([state,label,detail]);if(signature===lastStatus)return;lastStatus=signature;
       button.dataset.state=state;button.title=label+(detail?' · '+detail:'');button.setAttribute('aria-label',button.textContent+': '+button.title);
       $('.local-workspace-state').textContent=label;$('.local-workspace-error').textContent=detail;$('.local-workspace-error').hidden=!detail;
@@ -77,6 +80,7 @@
       if(startPromise)return startPromise;
       startPromise=(async()=>{
         restoring=true;restoreFailed=true;
+        status('starting','Opening editor draft storage…');
         try{
           await runtime.ready;
           const info=runtime.info||{};
@@ -99,7 +103,7 @@
         finally{startPromise=null}
       })();return startPromise;
     }
-    $('.local-workspace-retry').onclick=()=>{if(restoreFailed)start();else captureDrafts({immediate:true}).catch(()=>{})};
+    $('.local-workspace-retry').onclick=()=>{if(button.dataset.state!=='error')return;if(restoreFailed)start();else captureDrafts({immediate:true}).catch(()=>{})};
     document.addEventListener('visibilitychange',()=>{if(document.hidden)captureDrafts({immediate:true}).catch(()=>{})},{signal:abort.signal});
     window.addEventListener('pagehide',()=>{captureDrafts({immediate:true}).catch(()=>{})},{signal:abort.signal});
     status('starting','Opening editor draft storage…');

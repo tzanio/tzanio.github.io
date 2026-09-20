@@ -39,9 +39,9 @@
     button.title='Workspace files and drafts are saved in this browser on this device.';
     document.querySelector('header nav').append(button);
     const panel=document.createElement('section');panel.id='workspace-window';
-    panel.innerHTML='<p class="workspace-scope">Saved in this browser on this device. Export a backup to move your work elsewhere.</p><p class="workspace-state" role="status">Opening local storage…</p><progress hidden></progress><div class="workspace-controls"><label>Workspace<select aria-label="Saved workspace"></select></label><label>Name<input class="workspace-name" maxlength="80" placeholder="Workspace name"></label><div class="workspace-actions"><button data-action="rename">Rename</button><button data-action="new">New workspace</button></div><label class="workspace-builds"><input type="checkbox" checked>Keep changed build outputs</label><p class="workspace-storage"></p><div class="workspace-actions"><button data-action="save">Save now</button><button data-action="previous">Recover previous checkpoint</button><button data-action="backup">Download saved checkpoint</button><button data-action="retry">Retry</button><button data-action="fresh" hidden>Start a new workspace</button><button data-action="temporary" hidden>Continue temporarily</button></div><p class="workspace-error" hidden></p><p class="workspace-draft-note">Unsaved editor drafts are recovered separately. Terminal changes, Git state, deleted files and renamed files are included in checkpoints.</p></div>';
+    panel.innerHTML='<p class="workspace-scope">Saved in this browser on this device. Export a backup to move your work elsewhere.</p><p class="workspace-state" role="status">Opening local storage…</p><progress hidden></progress><div class="workspace-controls"><label>Workspace<select aria-label="Saved workspace"></select></label><label>Name<input class="workspace-name" maxlength="80" placeholder="Workspace name"></label><div class="workspace-actions"><button data-action="rename">Rename</button><button data-action="new">New workspace</button></div><p class="workspace-error" role="alert" hidden></p><details class="workspace-recovery"><summary>Advanced / Recovery</summary><div class="workspace-recovery-controls"><div class="workspace-actions"><button data-action="save">Save checkpoint</button><button data-action="previous">Recover previous checkpoint</button><button data-action="backup">Download saved checkpoint</button><button data-action="retry" hidden>Retry</button><button data-action="fresh" hidden>Start a new workspace</button><button data-action="temporary" hidden>Continue temporarily</button></div><label class="workspace-builds"><input type="checkbox" checked>Keep changed build outputs</label><p class="workspace-storage"></p><p class="workspace-draft-note">Unsaved editor drafts are recovered separately. Terminal changes, Git state, deleted files and renamed files are included in checkpoints.</p></div></details></div>';
     document.body.append(panel);
-    const maintenance=document.createElement('div');maintenance.className='workspace-actions';maintenance.innerHTML='<button data-action="free-builds">Remove saved build cache</button><button data-action="free-previous">Remove previous checkpoint</button>';panel.querySelector('.workspace-controls').append(maintenance);
+    const maintenance=document.createElement('div');maintenance.className='workspace-actions';maintenance.innerHTML='<button data-action="free-builds">Remove saved build cache</button><button data-action="free-previous">Remove previous checkpoint</button>';panel.querySelector('.workspace-recovery-controls').append(maintenance);
     const pauseNotice=document.createElement('p');pauseNotice.className='workspace-pause';pauseNotice.hidden=true;pauseNotice.setAttribute('role','status');pauseNotice.textContent='Wait for workspace import or export to finish before changing saved workspaces.';panel.prepend(pauseNotice);
     const pausedControls=new Map();
     function applySuspendedControls(){
@@ -57,6 +57,13 @@
     const $=selector=>panel.querySelector(selector),action=name=>$('[data-action="'+name+'"]');
     button.onclick=()=>{floating.toggle();refreshList().catch(fail)};
     function status(state,label,detail=''){
+      const recovery=$('.workspace-recovery');
+      if(state==='error')recovery.open=true;
+      for(const name of ['retry','fresh','temporary']){
+        const control=action(name),visible=state==='error'&&(name==='retry'||(!started&&restoring));
+        if(!visible&&document.activeElement===control)recovery.querySelector('summary').focus({preventScroll:true});
+        control.hidden=!visible;
+      }
       const name=record?.name||'Workspace',signature=JSON.stringify([state,label,detail,name]);
       if(signature===lastStatus)return;lastStatus=signature;
       // Saving state must not resize the navigation row every time a checkpoint
@@ -140,6 +147,8 @@
       await editor.checkExternal();
     }
     async function start(){
+      restoring=true;
+      status('starting','Opening saved workspace…');
       try{
         db=await openDatabase();base=await rpc('workspace-init');
         const setting=await read(db,'settings','active');record=setting?await read(db,'workspaces',setting.value):null;
@@ -158,7 +167,7 @@
         status('saved',record.current?'Saved · '+time(record.current.created):'Ready to save');
         pollTimer=setInterval(poll,5000);scheduleSave(1000);return true;
       }catch(error){
-        fail(error);floating.open({focus:false});action('fresh').hidden=false;action('temporary').hidden=false;
+        fail(error);floating.open({focus:false});
         // A checkpoint or a quota failure never silently replaces an existing
         // workspace. The user can retry, recover, download, or use a new one.
         return new Promise(resolve=>{startChoice=resolve});
@@ -363,16 +372,17 @@
     action('free-previous').onclick=()=>freeStorage('previous').catch(fail);
     action('save').onclick=()=>checkpoint({force:true}).catch(()=>{});
     action('retry').onclick=async()=>{
+      if(button.dataset.state!=='error')return;
       if(filesystemSuspended){fail(new Error(pauseNotice.textContent));return}
-      if(started){await checkpoint({force:true}).catch(()=>{});return}
+      if(started){status('saving','Retrying checkpoint save');await checkpoint({force:true}).catch(()=>{});return}
       const resolve=startChoice;startChoice=null;const result=await start();resolve?.(result);
     };
     action('backup').onclick=()=>downloadCheckpoint().catch(fail);
     action('previous').onclick=()=>previous().catch(fail);
     action('rename').onclick=async()=>{try{requireFilesystem();if(!record)return;const name=$('.workspace-name').value.trim().slice(0,80)||record.name;record=await updateRecord(latest=>{requireFilesystem();return {...latest,name}});const [,label,detail]=JSON.parse(lastStatus);status(button.dataset.state,label,detail);await refreshList()}catch(error){fail(error)}};
     action('new').onclick=async()=>{try{requireFilesystem();const name=$('.workspace-name').value.trim()||'Workspace';if(started)await checkpoint();requireFilesystem();await switchWorkspace(await create(name))}catch(error){fail(error)}};
-    action('fresh').onclick=async()=>{try{requireFilesystem();if(!db)db=await openDatabase();if(!base)base=await rpc('workspace-init');requireFilesystem();const next=await create($('.workspace-name').value.trim()||'New workspace');await switchWorkspace(next)}catch(error){fail(error)}};
-    action('temporary').onclick=async()=>{try{requireFilesystem();restoring=false;started=false;await rpc('workspace-ready');status('error','Temporary session','Files in this session require export; automatic workspace saving is unavailable.');floating.close();startChoice?.(false);startChoice=null}catch(error){fail(error)}};
+    action('fresh').onclick=async()=>{try{requireFilesystem();status('starting','Creating a new workspace…');if(!db)db=await openDatabase();if(!base)base=await rpc('workspace-init');requireFilesystem();const next=await create($('.workspace-name').value.trim()||'New workspace');await switchWorkspace(next)}catch(error){fail(error)}};
+    action('temporary').onclick=async()=>{try{requireFilesystem();status('starting','Opening temporary session…');await rpc('workspace-ready');restoring=false;started=false;status('error','Temporary session','Files in this session require export; automatic workspace saving is unavailable.');floating.close();startChoice?.(false);startChoice=null}catch(error){fail(error)}};
     $('select').onchange=async event=>{try{requireFilesystem();const next=await read(db,'workspaces',event.target.value);requireFilesystem();if(next&&next.id!==record?.id)await switchWorkspace(next)}catch(error){fail(error)}};
     $('.workspace-builds input').onchange=async event=>{if(!record)return;const keepBuilds=event.target.checked;try{requireFilesystem();record=await updateRecord(latest=>{requireFilesystem();return {...latest,keepBuilds}});await checkpoint({force:true})}catch(error){fail(error)}};
     document.addEventListener('visibilitychange',()=>{if(document.hidden){captureDrafts({immediate:true}).catch(fail);if(started)checkpoint().catch(()=>{})}});

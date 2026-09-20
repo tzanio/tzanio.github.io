@@ -130,7 +130,11 @@
       event.preventDefault();event.stopPropagation();
     });
     if (nativeDialog) listen(element, 'close', () => {if (opened && !element.open) hide();});
-    const resizeObserver = new ResizeObserver(constrain);resizeObserver.observe(element);
+    // Reposition after resize delivery, since clamping can change the layout.
+    let resizeFrame = 0;
+    const resizeObserver = new ResizeObserver(() => {
+      if (!resizeFrame) resizeFrame = requestAnimationFrame(() => {resizeFrame = 0;if (!destroyed) constrain();});
+    });resizeObserver.observe(element);
     const api = {element,body,titlebar:headingElement,open,close:hide,raise,constrain,sessionId,
       exportSession:()=>({id:sessionId,open:opened,position:position?{...position}:null}),
       restoreSession(value) {
@@ -142,7 +146,7 @@
       relocate() {portal();constrain();},
       destroy() {
         if (destroyed) return;
-        hide({restoreFocus:false});destroyed = true;abort.abort();resizeObserver.disconnect();windows.delete(api);
+        hide({restoreFocus:false});destroyed = true;abort.abort();resizeObserver.disconnect();cancelAnimationFrame(resizeFrame);windows.delete(api);
         element.remove();
       },
     };

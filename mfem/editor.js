@@ -519,14 +519,18 @@
     });
     cm.on('cursorActivity',position);
     cm.on('focus',()=>{if(active&&isReady())checkBuffer(active).catch(report);});
-    const observer=new ResizeObserver(()=>cm.refresh());observer.observe(host);
+    // Refresh outside resize delivery: CodeMirror can change layout itself.
+    let refreshFrame=0;
+    const observer=new ResizeObserver(()=>{
+      if(!refreshFrame)refreshFrame=requestAnimationFrame(()=>{refreshFrame=0;if(!destroyed)cm.refresh()});
+    });observer.observe(host);
     publish();
     let navigation;
     const api = {open,newFile,showNewFile,showKeybindings,nextTab,closeActive:()=>{if(active)requestClose(active);},save,saveAll,checkExternal,goTo,focus:()=>{if(active)cm.focus();else host.querySelector('[data-action="new"]').focus();},cm,buffers,
       get path(){return active?.path||'';},get dirty(){return [...buffers.values()].some(buffer=>buffer.dirty);},
       get activeDirty(){return Boolean(active?.dirty);},getText:()=>active?.doc.getValue()||'',
       getState:state,exportSession,restoreSession,validateSession,
-      destroy(){destroyed=true;navigation?.destroy();observer.disconnect();newWindow.destroy();keysWindow.destroy();for(const item of [...searchWindows])item.close();for(const buffer of buffers.values())buffer.doc.off('change',buffer.onChange);host.replaceChildren();},
+      destroy(){destroyed=true;navigation?.destroy();observer.disconnect();cancelAnimationFrame(refreshFrame);newWindow.destroy();keysWindow.destroy();for(const item of [...searchWindows])item.close();for(const buffer of buffers.values())buffer.doc.off('change',buffer.onChange);host.replaceChildren();},
     };
     navigation=window.WorkbenchCppNavigation?.create(api,{host,onNotice});
     api.navigation=navigation;
