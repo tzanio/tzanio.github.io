@@ -9,6 +9,9 @@ h2 { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; font
 body {
   margin: 0;
   min-width: 250px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Include the padding and border in an element's total width and height */
@@ -28,7 +31,7 @@ li, p {
 
 /* Style the list items */
 ul li {
-  cursor: pointer;
+  cursor: grab;
   position: relative;
   padding: 12px 8px 12px 40px;
   list-style-type: none;
@@ -54,6 +57,12 @@ ul li:hover {
   background: #ddd;
 }
 
+ul li.dragging {
+  opacity: 0.4;
+  outline: 2px dashed #3498DB;
+  outline-offset: -2px;
+}
+
 /* When clicked on, add a background color and strike out text */
 ul li.checked {
   color: #111;
@@ -76,6 +85,7 @@ ul li.checked::before {
 
 /* Style the close button */
 .close {
+  cursor: pointer;
   position: absolute;
   right: 0;
   top: 0;
@@ -104,10 +114,12 @@ ul li.checked::before {
 
 /* Style the footer */
 .footer {
-  position: fixed;
+  /* Keep the controls visible while reserving their space below the list. */
+  position: sticky;
   left: 0;
   bottom: 0;
   width: 100%;
+  margin-top: auto;
   background-color: #3498DB;
   padding: 32px 20px;
   color: white;
@@ -197,6 +209,7 @@ function loadList() {
     var ul = document.getElementById("myUL");
     for (var i = 0; i < items.length; i++) {
       var li = document.createElement("li");
+      li.draggable = true;
       li.textContent = items[i].text;
       if (items[i].checked) {
         li.classList.add("checked");
@@ -249,8 +262,64 @@ for (i = 0; i < close.length; i++) {
   }
 }
 
-// Add a "checked" symbol when clicking on a list item
 var list = document.querySelector('ul');
+var draggedItem = null;
+var originalNextSibling = null;
+var droppedInList = false;
+
+// Move the actual list item so its checked state and close button stay with it.
+list.addEventListener('dragstart', function(ev) {
+  var item = ev.target.closest('li');
+  if (!item || ev.target.closest('.close')) {
+    ev.preventDefault();
+    return;
+  }
+  draggedItem = item;
+  originalNextSibling = item.nextSibling;
+  droppedInList = false;
+  ev.dataTransfer.effectAllowed = 'move';
+  ev.dataTransfer.setData('text/plain', item.firstChild.textContent);
+  item.classList.add('dragging');
+});
+
+list.addEventListener('dragover', function(ev) {
+  if (!draggedItem) return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+  var items = list.querySelectorAll('li');
+  var before = null;
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    if (item === draggedItem || item.style.display === 'none') continue;
+    var rect = item.getBoundingClientRect();
+    if (ev.clientY < rect.top + rect.height / 2) {
+      before = item;
+      break;
+    }
+  }
+  if (draggedItem.nextSibling !== before) {
+    list.insertBefore(draggedItem, before);
+  }
+});
+
+list.addEventListener('drop', function(ev) {
+  if (!draggedItem) return;
+  ev.preventDefault();
+  droppedInList = true;
+  saveList();
+});
+
+list.addEventListener('dragend', function() {
+  if (!draggedItem) return;
+  if (!droppedInList) {
+    list.insertBefore(draggedItem, originalNextSibling);
+  }
+  draggedItem.classList.remove('dragging');
+  draggedItem = null;
+  originalNextSibling = null;
+});
+
+// Add a "checked" symbol when clicking on a list item
 list.addEventListener('click', function(ev) {
   if (ev.target.tagName === 'LI') {
     ev.target.classList.toggle('checked');
@@ -263,6 +332,7 @@ list.addEventListener('click', function(ev) {
 // Create a new list item when clicking on the "Add" button
 function newElement() {
   var li = document.createElement("li");
+  li.draggable = true;
   var inputValue = document.getElementById("myInput").value;
   var t = document.createTextNode(inputValue);
   li.appendChild(t);
