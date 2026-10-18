@@ -33,7 +33,7 @@ li, p {
 ul li {
   cursor: grab;
   position: relative;
-  padding: 12px 8px 12px 40px;
+  padding: 12px 48px 12px 40px;
   list-style-type: none;
   background: #eee;
   font-size: 22px;
@@ -47,8 +47,8 @@ ul li {
   user-select: none;
 }
 
-/* Set all odd list items to a different color (zebra-stripes) */
-ul li:nth-child(odd) {
+/* Alternate shading across visible rows, including after removal or reordering. */
+ul li:nth-child(odd of :not([hidden])) {
   background: #f9f9f9;
 }
 
@@ -61,6 +61,53 @@ ul li.dragging {
   opacity: 0.4;
   outline: 2px dashed #3498DB;
   outline-offset: -2px;
+}
+
+.item-text {
+  overflow-wrap: anywhere;
+  touch-action: pan-y pinch-zoom;
+  -webkit-touch-callout: none;
+}
+
+.drag-handle {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #999;
+  font-size: 24px;
+  cursor: grab;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+body.reordering, body.reordering * {
+  cursor: grabbing;
+}
+
+ul li.edit-ready {
+  outline: 2px solid #3498DB;
+  outline-offset: -2px;
+}
+
+ul li.editing {
+  text-decoration: none;
+  cursor: text;
+}
+
+#myUL input.item-edit {
+  float: none;
+  padding: 2px 6px;
+  border: 1px solid #3498DB;
+  font: inherit;
+  color: #111;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* When clicked on, add a background color and strike out text */
@@ -81,6 +128,21 @@ ul li.checked::before {
   transform: rotate(45deg);
   height: 25px;
   width: 10px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  ul li {
+    cursor: pointer;
+    padding-left: 72px;
+  }
+
+  .drag-handle {
+    display: block;
+  }
+
+  ul li.checked::before {
+    left: 48px;
+  }
 }
 
 /* Style the close button */
@@ -116,18 +178,69 @@ ul li.checked::before {
 .footer {
   /* Keep the controls visible while reserving their space below the list. */
   position: sticky;
+  z-index: 1;
   left: 0;
   bottom: 0;
   width: 100%;
   margin-top: auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
   background-color: #3498DB;
   padding: 32px 20px;
   color: white;
   text-align: center;
 }
 
-/* Style the input */
-input {
+.clear-control {
+  grid-column: 3;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 18px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.clear-control input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.undo-notice {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 24px);
+  padding: 10px 16px;
+  border-radius: 4px;
+  background: #222;
+  color: white;
+  box-shadow: 0 2px 8px #0003;
+  font-size: 14px;
+}
+
+.undo-notice[hidden] {
+  display: none;
+}
+
+.undo-notice button {
+  border: 0;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Style the text input */
+input[type="text"] {
   margin: 0;
   border: none;
   border-radius: 0;
@@ -140,12 +253,12 @@ input {
 /* Style the "Add" button */
 .addBtn {
   padding: 10px;
-  width: 50%;
+  grid-column: 2;
   background: #D5D8DC;
   color: #000;
-  float: center;
   text-align: center;
   font-size: 24px;
+  line-height: 1.25;
   cursor: pointer;
   transition: 0.3s;
   border-radius: 3px;
@@ -173,24 +286,81 @@ input {
 </ul>
 
 <div id="myDIV2" class="footer">
+  <div id="undoNotice" class="undo-notice" role="status" hidden>
+    <span id="undoMessage"></span>
+    <button type="button" id="undoButton" onclick="undoRemoval()">Undo</button>
+  </div>
   <span onclick="pickRandom()" class="addBtn">&nbsp;Random&nbsp;</span>
+  <label class="clear-control" title="Clear checks and random selection">
+    <input type="checkbox" id="clearCheckbox" onchange="toggleClear(this.checked);"> clear
+  </label>
 </div>
 
 <script>
 
 // Get the input field
 var input = document.getElementById("myInput");
+var list = document.getElementById("myUL");
+var editingItem = null;
+var lastClick = null;
+var pendingRemovals = [];
+var undoTimer = null;
+var clearedState = null;
+var pointerDrag = null;
+var desktopDrag = null;
+var phoneControls = window.matchMedia('(hover: none) and (pointer: coarse)');
+var longPress = null;
+var suppressedClick = null;
+var lastTouchAt = 0;
+
+function createItem(text, checked, hidden) {
+  var li = document.createElement('li');
+  li.draggable = !phoneControls.matches;
+  li.hidden = !!hidden;
+  li.classList.toggle('checked', !!checked);
+  var handle = document.createElement('button');
+  handle.type = 'button';
+  handle.className = 'drag-handle';
+  handle.setAttribute('aria-label', 'Reorder item');
+  handle.title = 'Drag to reorder; arrow keys also work';
+  handle.textContent = '\u283f';
+  li.appendChild(handle);
+  var label = document.createElement('span');
+  label.className = 'item-text';
+  label.title = 'Double-click or press and hold to edit';
+  label.textContent = text;
+  li.appendChild(label);
+  var close = document.createElement('span');
+  close.className = 'close';
+  close.title = 'Remove item';
+  close.textContent = '\u00D7';
+  li.appendChild(close);
+  if (checked) {
+    li.style.color = '#bbb';
+    li.style.fontWeight = 'normal';
+  }
+  return li;
+}
+
+function updateClearCheckbox() {
+  var checkbox = document.getElementById("clearCheckbox");
+  checkbox.checked =
+    !document.querySelector('#myUL li.checked:not([hidden]), #myUL li.picked:not([hidden])');
+  checkbox.parentElement.title = checkbox.checked && clearedState ?
+    'Uncheck to restore cleared selections' : 'Clear checks and random selection';
+}
 
 // Save list state to localStorage
 function saveList() {
+  updateClearCheckbox();
   var ul = document.getElementById("myUL");
   var items = ul.getElementsByTagName("li");
   var data = [];
   for (var i = 0; i < items.length; i++) {
     data.push({
-      text: items[i].textContent.replace("\u00D7", ""), // remove the close '×'
+      text: items[i].querySelector('.item-text').textContent,
       checked: items[i].classList.contains("checked"),
-      display: items[i].style.display || ""
+      display: items[i].hidden ? "none" : ""
     });
   }
   try {
@@ -202,24 +372,13 @@ function saveList() {
 
 // Load list state from localStorage
 function loadList() {
-  var saved = localStorage.getItem("todoPickerList");
-  if (!saved) return;
   try {
+    var saved = localStorage.getItem("todoPickerList");
+    if (!saved) return;
     var items = JSON.parse(saved);
     var ul = document.getElementById("myUL");
     for (var i = 0; i < items.length; i++) {
-      var li = document.createElement("li");
-      li.draggable = true;
-      li.textContent = items[i].text;
-      if (items[i].checked) {
-        li.classList.add("checked");
-        li.style.color = "#bbb";
-        li.style.fontWeight = "normal";
-      }
-      if (items[i].display === "none") {
-        li.style.display = "none";
-      }
-      ul.appendChild(li);
+      ul.appendChild(createItem(items[i].text, items[i].checked, items[i].display === "none"));
     }
   } catch (e) {
     console.log("Could not load list:", e);
@@ -228,11 +387,12 @@ function loadList() {
 
 // Load existing items on startup
 loadList();
+updateClearCheckbox();
 
 // Execute a function when the user releases a key on the keyboard
 input.addEventListener("keyup", function(event) {
   // Number 13 is the "Enter" key on the keyboard
-  if (event.keyCode === 13) {
+  if (event.keyCode === 13 && !event.isComposing) {
     // Cancel the default action, if needed
     event.preventDefault();
     // Trigger the button element with a click
@@ -240,123 +400,398 @@ input.addEventListener("keyup", function(event) {
   }
 });
 
-// Create a "close" button and append it to each list item
-var myNodelist = document.getElementsByTagName("LI");
-var i;
-for (i = 0; i < myNodelist.length; i++) {
-  var span = document.createElement("SPAN");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  myNodelist[i].appendChild(span);
-}
-
-// Click on a close button to hide the current list item
-var close = document.getElementsByClassName("close");
-var i;
-for (i = 0; i < close.length; i++) {
-  close[i].onclick = function() {
-    var div = this.parentElement;
-    div.style.display = "none";
-    saveList();
-  }
-}
-
-var list = document.querySelector('ul');
-var draggedItem = null;
-var originalNextSibling = null;
-var droppedInList = false;
-
-// Move the actual list item so its checked state and close button stay with it.
-list.addEventListener('dragstart', function(ev) {
-  var item = ev.target.closest('li');
-  if (!item || ev.target.closest('.close')) {
-    ev.preventDefault();
-    return;
-  }
-  draggedItem = item;
-  originalNextSibling = item.nextSibling;
-  droppedInList = false;
-  ev.dataTransfer.effectAllowed = 'move';
-  ev.dataTransfer.setData('text/plain', item.firstChild.textContent);
-  item.classList.add('dragging');
-});
-
-list.addEventListener('dragover', function(ev) {
-  if (!draggedItem) return;
-  ev.preventDefault();
-  ev.dataTransfer.dropEffect = 'move';
+function moveItemAt(item, y) {
   var items = list.querySelectorAll('li');
   var before = null;
   for (var i = 0; i < items.length; i++) {
-    var item = items[i];
-    if (item === draggedItem || item.style.display === 'none') continue;
-    var rect = item.getBoundingClientRect();
-    if (ev.clientY < rect.top + rect.height / 2) {
-      before = item;
+    if (items[i] === item || items[i].hidden) continue;
+    var rect = items[i].getBoundingClientRect();
+    if (y < rect.top + rect.height / 2) {
+      before = items[i];
       break;
     }
   }
-  if (draggedItem.nextSibling !== before) {
-    list.insertBefore(draggedItem, before);
-  }
-});
+  if (item.nextSibling !== before) list.insertBefore(item, before);
+}
 
-list.addEventListener('drop', function(ev) {
-  if (!draggedItem) return;
+// Preserve native whole-row dragging for desktop mouse users.
+list.addEventListener('dragstart', function(ev) {
+  var item = ev.target.closest('li');
+  if (phoneControls.matches || !item || item.classList.contains('editing') ||
+      ev.target.closest('.close, input, .drag-handle')) {
+    ev.preventDefault();
+    return;
+  }
+  finishEdit(false);
+  desktopDrag = { item: item, originalNextSibling: item.nextSibling, dropped: false };
+  ev.dataTransfer.effectAllowed = 'move';
+  ev.dataTransfer.setData('text/plain', item.querySelector('.item-text').textContent);
+  item.classList.add('dragging');
+  document.body.classList.add('reordering');
+});
+list.addEventListener('dragover', function(ev) {
+  if (!desktopDrag) return;
   ev.preventDefault();
-  droppedInList = true;
+  ev.dataTransfer.dropEffect = 'move';
+  moveItemAt(desktopDrag.item, ev.clientY);
+});
+list.addEventListener('drop', function(ev) {
+  if (!desktopDrag) return;
+  ev.preventDefault();
+  desktopDrag.dropped = true;
   saveList();
 });
-
+function finishDesktopDrag(cancel) {
+  if (!desktopDrag) return;
+  var drag = desktopDrag;
+  desktopDrag = null;
+  if (cancel) list.insertBefore(drag.item, drag.originalNextSibling);
+  drag.item.classList.remove('dragging');
+  document.body.classList.remove('reordering');
+  suppressedClick = { item: drag.item, until: Date.now() + 700 };
+}
 list.addEventListener('dragend', function() {
-  if (!draggedItem) return;
-  if (!droppedInList) {
-    list.insertBefore(draggedItem, originalNextSibling);
-  }
-  draggedItem.classList.remove('dragging');
-  draggedItem = null;
-  originalNextSibling = null;
+  if (desktopDrag) finishDesktopDrag(!desktopDrag.dropped);
+});
+phoneControls.addEventListener('change', function() {
+  finishDrag(true);
+  finishDesktopDrag(true);
+  cancelLongPress();
+  Array.from(list.children).forEach(function(item) {
+    item.draggable = !phoneControls.matches && !item.classList.contains('editing');
+  });
 });
 
-// Add a "checked" symbol when clicking on a list item
-list.addEventListener('click', function(ev) {
-  if (ev.target.tagName === 'LI') {
-    ev.target.classList.toggle('checked');
-    ev.target.style.color = "#bbb";
-    ev.target.style.fontWeight = "normal";
-    saveList();
+function dragScroll() {
+  if (!pointerDrag || !pointerDrag.active) return;
+  var bottom = Math.min(window.innerHeight,
+    document.getElementById('myDIV2').getBoundingClientRect().top) - 48;
+  var speed = pointerDrag.y < 48 ? -Math.min(18, (48 - pointerDrag.y) / 2) :
+    pointerDrag.y > bottom ? Math.min(18, (pointerDrag.y - bottom) / 2) : 0;
+  if (speed) {
+    window.scrollBy(0, speed);
+    moveItemAt(pointerDrag.item, pointerDrag.y);
   }
+  pointerDrag.frame = requestAnimationFrame(dragScroll);
+}
+
+function finishDrag(cancel) {
+  if (!pointerDrag) return;
+  var drag = pointerDrag;
+  pointerDrag = null;
+  cancelAnimationFrame(drag.frame);
+  if (cancel) list.insertBefore(drag.item, drag.originalNextSibling);
+  drag.item.classList.remove('dragging');
+  document.body.classList.remove('reordering');
+  if (list.hasPointerCapture(drag.id)) list.releasePointerCapture(drag.id);
+  suppressedClick = { item: drag.item, until: Date.now() + 700 };
+  if (drag.active) saveList();
+}
+
+function cancelLongPress() {
+  if (!longPress) return;
+  clearTimeout(longPress.timer);
+  longPress.item.classList.remove('edit-ready');
+  longPress = null;
+}
+
+list.addEventListener('pointerdown', function(ev) {
+  // A new press is intentional; only suppress the click generated by a gesture.
+  suppressedClick = null;
+  if (ev.pointerType !== 'mouse') lastTouchAt = Date.now();
+  if (!ev.isPrimary || ev.button !== 0) {
+    cancelLongPress();
+    return;
+  }
+  var handle = ev.target.closest('.drag-handle');
+  if (handle) {
+    ev.preventDefault();
+    cancelLongPress();
+    finishEdit(false);
+    pointerDrag = {
+      id: ev.pointerId, item: handle.closest('li'),
+      startX: ev.clientX, startY: ev.clientY, y: ev.clientY,
+      active: false, frame: null,
+      originalNextSibling: handle.closest('li').nextSibling
+    };
+    list.setPointerCapture(ev.pointerId);
+    return;
+  }
+  if (ev.pointerType === 'mouse' || !ev.target.closest('.item-text')) return;
+  var item = ev.target.closest('li');
+  if (item.classList.contains('editing')) return;
+  cancelLongPress();
+  longPress = {
+    id: ev.pointerId, item: item, x: ev.clientX, y: ev.clientY, ready: false
+  };
+  var press = longPress;
+  press.timer = setTimeout(function() {
+    if (longPress === press) {
+      press.ready = true;
+      item.classList.add('edit-ready');
+    }
+  }, 550);
+});
+
+list.addEventListener('pointermove', function(ev) {
+  if (longPress && ev.pointerId === longPress.id &&
+      Math.hypot(ev.clientX - longPress.x, ev.clientY - longPress.y) > 8) {
+    cancelLongPress();
+  }
+  if (!pointerDrag || ev.pointerId !== pointerDrag.id) return;
+  pointerDrag.y = ev.clientY;
+  if (!pointerDrag.active &&
+      Math.hypot(ev.clientX - pointerDrag.startX, ev.clientY - pointerDrag.startY) > 5) {
+    pointerDrag.active = true;
+    pointerDrag.item.classList.add('dragging');
+    document.body.classList.add('reordering');
+    dragScroll();
+  }
+  if (pointerDrag.active) {
+    ev.preventDefault();
+    moveItemAt(pointerDrag.item, ev.clientY);
+  }
+});
+
+list.addEventListener('pointerup', function(ev) {
+  if (pointerDrag && ev.pointerId === pointerDrag.id) finishDrag(false);
+  if (!longPress || ev.pointerId !== longPress.id) return;
+  var press = longPress;
+  cancelLongPress();
+  if (press.ready) {
+    ev.preventDefault();
+    suppressedClick = { item: press.item, until: Date.now() + 700 };
+    lastClick = null;
+    // Focus on release, within the user gesture, so phone keyboards can open.
+    startEdit(press.item);
+  }
+});
+
+list.addEventListener('pointercancel', function(ev) {
+  if (pointerDrag && ev.pointerId === pointerDrag.id) finishDrag(true);
+  if (longPress && ev.pointerId === longPress.id) cancelLongPress();
+});
+list.addEventListener('lostpointercapture', function(ev) {
+  if (pointerDrag && ev.pointerId === pointerDrag.id) finishDrag(true);
+});
+list.addEventListener('contextmenu', function(ev) {
+  if (ev.target.closest('.drag-handle') ||
+      (ev.target.closest('.item-text') && Date.now() - lastTouchAt < 1500)) {
+    ev.preventDefault();
+  }
+});
+window.addEventListener('blur', function() {
+  finishDrag(true);
+  finishDesktopDrag(true);
+  cancelLongPress();
+});
+document.addEventListener('keydown', function(ev) {
+  if (ev.key === 'Escape' && pointerDrag) {
+    ev.preventDefault();
+    finishDrag(true);
+  }
+});
+list.addEventListener('keydown', function(ev) {
+  var handle = ev.target.closest('.drag-handle');
+  if (!handle || (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown')) return;
+  ev.preventDefault();
+  var item = handle.closest('li');
+  var items = Array.from(list.children).filter(function(row) { return !row.hidden; });
+  var neighbor = items[items.indexOf(item) + (ev.key === 'ArrowUp' ? -1 : 1)];
+  if (neighbor) {
+    list.insertBefore(item, ev.key === 'ArrowUp' ? neighbor : neighbor.nextSibling);
+    handle.focus();
+    saveList();
+    revealItem(item);
+  }
+});
+
+// Keep single-click checking and double-click editing separate.
+list.addEventListener('click', function(ev) {
+  var item = ev.target.closest('li');
+  if (!item || ev.detail > 1) return;
+  if (ev.target.closest('.drag-handle')) return;
+  if (suppressedClick && suppressedClick.item === item &&
+      Date.now() < suppressedClick.until && !ev.target.closest('input')) {
+    suppressedClick = null;
+    ev.preventDefault();
+    return;
+  }
+  if (ev.target.closest('.close')) {
+    removeItem(item);
+    return;
+  }
+  if (item.classList.contains('editing')) return;
+  lastClick = {
+    item: item,
+    checked: item.classList.contains('checked'),
+    picked: item.classList.contains('picked'),
+    color: item.style.color,
+    fontWeight: item.style.fontWeight,
+    clearedState: clearedState
+  };
+  clearedState = null;
+  item.classList.toggle('checked');
+  item.classList.remove('picked');
+  item.style.color = "#bbb";
+  item.style.fontWeight = "normal";
+  saveList();
 }, false);
+
+list.addEventListener('dblclick', function(ev) {
+  var item = ev.target.closest('li');
+  if (!item || ev.target.closest('.close, input, .drag-handle')) return;
+  // A browser dispatches clicks before dblclick; restore the state before them.
+  if (lastClick && lastClick.item === item) {
+    item.classList.toggle('checked', lastClick.checked);
+    item.classList.toggle('picked', lastClick.picked);
+    item.style.color = lastClick.color;
+    item.style.fontWeight = lastClick.fontWeight;
+    clearedState = lastClick.clearedState;
+  }
+  lastClick = null;
+  startEdit(item);
+});
+
+function startEdit(item) {
+  if (editingItem && editingItem.item === item) return;
+  finishEdit(false);
+  var text = item.querySelector('.item-text');
+  var editor = document.createElement('input');
+  editor.type = 'text';
+  editor.className = 'item-edit';
+  editor.value = text.textContent;
+  editor.setAttribute('aria-label', 'Edit item');
+  editor.title = 'Enter to save; Escape to cancel';
+  editingItem = { item: item, text: text, input: editor };
+  text.hidden = true;
+  item.draggable = false;
+  item.classList.add('editing');
+  item.insertBefore(editor, text);
+  editor.addEventListener('keydown', function(ev) {
+    if (ev.isComposing) return;
+    if (ev.key === 'Enter' || ev.key === 'Escape') {
+      ev.preventDefault();
+      ev.stopPropagation();
+      finishEdit(ev.key === 'Escape');
+    }
+  });
+  editor.addEventListener('blur', function() { finishEdit(false); });
+  editor.focus();
+  editor.select();
+  saveList();
+}
+
+function finishEdit(cancel) {
+  if (!editingItem) return;
+  var edit = editingItem;
+  editingItem = null;
+  var value = edit.input.value.trim();
+  if (!cancel && value) edit.text.textContent = value;
+  edit.text.hidden = false;
+  edit.input.remove();
+  edit.item.classList.remove('editing');
+  edit.item.draggable = !phoneControls.matches;
+  saveList();
+}
+
+function showUndo() {
+  clearTimeout(undoTimer);
+  document.getElementById('undoNotice').hidden = pendingRemovals.length === 0;
+  document.getElementById('undoMessage').textContent = pendingRemovals.length === 1 ?
+    'Item removed.' : pendingRemovals.length + ' items removed.';
+  if (pendingRemovals.length) {
+    undoTimer = setTimeout(function() {
+      pendingRemovals = [];
+      document.getElementById('undoNotice').hidden = true;
+    }, 8000);
+  }
+}
+
+function removeItem(item) {
+  finishEdit(false);
+  pendingRemovals.push({ item: item, picked: item.classList.contains('picked') });
+  item.hidden = true;
+  item.classList.remove('picked');
+  item.style.color = '#bbb';
+  item.style.fontWeight = 'normal';
+  saveList();
+  showUndo();
+}
+
+function undoRemoval() {
+  var removed = pendingRemovals.pop();
+  if (!removed) return;
+  removed.item.hidden = false;
+  if (removed.picked && !list.querySelector('li.picked:not([hidden])')) {
+    removed.item.classList.add('picked');
+    removed.item.style.color = '#000';
+    removed.item.style.fontWeight = 'bold';
+  }
+  saveList();
+  showUndo();
+  revealItem(removed.item);
+}
+
+function revealItem(item) {
+  var rect = item.getBoundingClientRect();
+  var bottom = window.innerHeight - document.getElementById('myDIV2').offsetHeight - 8;
+  if (rect.top >= 8 && rect.bottom <= bottom) return;
+  window.scrollTo({
+    top: window.scrollY + rect.top - 8 - Math.max(0, (bottom - 8 - rect.height) / 2),
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+  });
+}
+
+function clearChecks() {
+  finishEdit(false);
+  var snapshot = Array.from(list.children).map(function(item) {
+    return { item: item, checked: item.classList.contains('checked'),
+      picked: item.classList.contains('picked') };
+  });
+  if (snapshot.some(function(state) { return state.checked || state.picked; })) {
+    clearedState = snapshot;
+  }
+  pendingRemovals.forEach(function(removed) { removed.picked = false; });
+  var items = list.querySelectorAll('li');
+  for (var i = 0; i < items.length; i++) {
+    items[i].classList.remove('checked', 'picked');
+    items[i].style.color = "#bbb";
+    items[i].style.fontWeight = "normal";
+  }
+  saveList();
+}
+
+function toggleClear(checked) {
+  if (checked) {
+    clearChecks();
+    return;
+  }
+  finishEdit(false);
+  if (clearedState) {
+    var snapshot = clearedState;
+    clearedState = null;
+    snapshot.forEach(function(state) {
+      if (!list.contains(state.item)) return;
+      state.item.classList.toggle('checked', state.checked);
+      var picked = state.picked && !state.item.hidden;
+      state.item.classList.toggle('picked', picked);
+      state.item.style.color = picked ? '#000' : '#bbb';
+      state.item.style.fontWeight = picked ? 'bold' : 'normal';
+    });
+  }
+  saveList();
+}
 
 // Create a new list item when clicking on the "Add" button
 function newElement() {
-  var li = document.createElement("li");
-  li.draggable = true;
   var inputValue = document.getElementById("myInput").value;
-  var t = document.createTextNode(inputValue);
-  li.appendChild(t);
   if (inputValue === '') {
     alert("You must write something!");
-  } else {
-    document.getElementById("myUL").appendChild(li);
+    return;
   }
+  list.prepend(createItem(inputValue, false, false));
   document.getElementById("myInput").value = "";
-
-  var span = document.createElement("SPAN");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  li.appendChild(span);
-
-  for (i = 0; i < close.length; i++) {
-    close[i].onclick = function() {
-      var div = this.parentElement;
-      div.style.display = "none";
-      saveList();
-    }
-  }
-
   saveList();
 }
 
@@ -365,25 +800,24 @@ function getRndInteger(min, max) {
 }
 
 function pickRandom() {
+  finishEdit(false);
+  clearedState = null;
   var ul = document.getElementById("myUL");
   var items = ul.getElementsByTagName("li");
-  var r;
-  var success=0;
-  while (!success && items.length > 0) {
-    r = getRndInteger(0, items.length-1);
-    for (var i = 0; i < items.length; ++i) {
-      var legit = (items[i].classList.item(0) !== "checked") && 
-                  (items[i].style.display !== "none");
-      if (i === r && legit) {
-        items[i].style.color = "#000";
-        items[i].style.fontWeight = "bold";
-        success=1;
-      } else if (legit) {
-        items[i].style.color = "#bbb";
-        items[i].style.fontWeight = "normal";
-      }
-    }
+  var candidates = ul.querySelectorAll('li:not(.checked):not([hidden])');
+  for (var i = 0; i < items.length; ++i) {
+    items[i].classList.remove('picked');
+    items[i].style.color = "#bbb";
+    items[i].style.fontWeight = "normal";
   }
+  if (candidates.length > 0) {
+    var item = candidates[getRndInteger(0, candidates.length - 1)];
+    item.classList.add('picked');
+    item.style.color = "#000";
+    item.style.fontWeight = "bold";
+    revealItem(item);
+  }
+  updateClearCheckbox();
 }
 
 </script>
